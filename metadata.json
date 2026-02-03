@@ -1,0 +1,8 @@
+{
+  "name": "POMNHS Portal",
+  "description": "Port Moresby National High School (POMNHS) Institutional Portal - A professional, role-based school management system featuring advanced dashboards, social feeds, and administrative tools.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
