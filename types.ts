@@ -6,7 +6,9 @@ export enum UserRole {
   PRINCIPAL = 'PRINCIPAL',
   BURSAR = 'BURSAR',
   ADMISSIONS = 'ADMISSIONS',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
+  SUPER_USER = 'SUPER_USER',
+  VENDOR = 'VENDOR'
 }
 
 export interface User {

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, UserRole, ViewState } from './types';
 import PublicHome from './pages/PublicHome';
 import PublicAbout from './pages/PublicAbout';
@@ -19,31 +19,46 @@ import Performance from './pages/dashboards/Performance';
 import AssignmentHub from './pages/dashboards/AssignmentHub';
 import AttendanceRecord from './pages/dashboards/AttendanceRecord';
 import Connections from './pages/dashboards/Connections';
-import { Menu, X, LogIn } from 'lucide-react';
+import { Menu, X, LogIn, Loader2 } from 'lucide-react';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('HOME');
   const [user, setUser] = useState<User | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [dashboardTab, setDashboardTab] = useState('overview');
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulated system initialization
+    const timer = setTimeout(() => {
+      setIsAuthLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleLoginSuccess = (userData: User) => {
+    setUser(userData);
+    setView('DASHBOARD');
+  };
 
   const handleLogin = (role: UserRole) => {
-    const mockUser: User = {
-      id: '1',
-      name: `Demo ${role}`,
-      email: `${role.toLowerCase()}@pomnhs.edu.pg`,
-      role: role,
-      avatar: `https://i.pravatar.cc/150?u=${role}`,
-      isVerified: true
-    };
-    setUser(mockUser);
-    setView('DASHBOARD');
+    setView('LOGIN');
   };
 
   const logout = () => {
     setUser(null);
     setView('HOME');
   };
+
+  if (isAuthLoading) {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-black">
+        <Loader2 className="animate-spin text-gold mb-4" size={48} />
+        <p className="text-gold font-bold uppercase tracking-widest text-[10px]">Portal Initializing...</p>
+      </div>
+    );
+  }
 
   const renderPublicView = () => {
     switch (view) {
@@ -52,9 +67,9 @@ const App: React.FC = () => {
       case 'ACADEMICS': return <PublicAcademics />;
       case 'STUDENTS': return <PublicStudents setView={setView} handleLogin={handleLogin} />;
       case 'CONTACT': return <PublicContact />;
-      case 'LOGIN': return <Login onLogin={handleLogin} setView={setView} />;
-      case 'REGISTER': return <Register setView={setView} />;
-      case 'VERIFY': return <VerifyEmail setView={setView} />;
+      case 'LOGIN': return <Login onLoginSuccess={handleLoginSuccess} setView={setView} />;
+      case 'REGISTER': return <Register setView={setView} setRegisteredEmail={setRegisteredEmail} />;
+      case 'VERIFY': return <VerifyEmail setView={setView} email={registeredEmail} />;
       default: return <PublicHome setView={setView} handleLogin={handleLogin} />;
     }
   };

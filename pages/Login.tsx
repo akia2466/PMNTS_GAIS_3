@@ -1,15 +1,57 @@
 
 import React, { useState } from 'react';
-import { UserRole, ViewState } from '../types';
-import { LogIn, Github, Mail, ShieldCheck } from 'lucide-react';
+import { User, UserRole, ViewState } from '../types';
+import { 
+  ShieldCheck, 
+  Loader2, 
+  User as UserIcon, 
+  GraduationCap, 
+  Briefcase, 
+  Building2, 
+  Wallet, 
+  UserPlus,
+  Users,
+  Zap,
+  ShoppingBag
+} from 'lucide-react';
 
 interface Props {
-  onLogin: (role: UserRole) => void;
+  onLoginSuccess: (user: User) => void;
   setView: (v: ViewState) => void;
 }
 
-const Login: React.FC<Props> = ({ onLogin, setView }) => {
-  const [selectedRole, setSelectedRole] = useState<UserRole>(UserRole.STUDENT);
+const Login: React.FC<Props> = ({ onLoginSuccess, setView }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+
+  const demoAccounts = [
+    { role: UserRole.STUDENT, label: 'Student', icon: <UserIcon size={24} />, color: 'bg-blue-50 text-blue-600 border-blue-100', name: 'James Kari', email: 'james.k@pomnhs.edu.pg' },
+    { role: UserRole.TEACHER, label: 'Teacher', icon: <GraduationCap size={24} />, color: 'bg-purple-50 text-purple-600 border-purple-100', name: 'Dr. Anna Vele', email: 'a.vele@pomnhs.edu.pg' },
+    { role: UserRole.PRINCIPAL, label: 'Principal', icon: <Building2 size={24} />, color: 'bg-gold/10 text-gold border-gold/20', name: 'Dr. James Gere', email: 'principal@pomnhs.edu.pg' },
+    { role: UserRole.HOD, label: 'Dept Head', icon: <Briefcase size={24} />, color: 'bg-green-50 text-green-600 border-green-100', name: 'Ms. Sarah Smith', email: 's.smith@pomnhs.edu.pg' },
+    { role: UserRole.BURSAR, label: 'Bursar', icon: <Wallet size={24} />, color: 'bg-orange-50 text-orange-600 border-orange-100', name: 'Bursar Office', email: 'accounts@pomnhs.edu.pg' },
+    { role: UserRole.ADMISSIONS, label: 'Admissions', icon: <Users size={24} />, color: 'bg-cyan-50 text-cyan-600 border-cyan-100', name: 'Registrar', email: 'admissions@pomnhs.edu.pg' },
+    { role: UserRole.ADMIN, label: 'IT Admin', icon: <ShieldCheck size={24} />, color: 'bg-zinc-100 text-zinc-900 border-zinc-200', name: 'Systems Admin', email: 'admin@pomnhs.edu.pg' },
+    { role: UserRole.SUPER_USER, label: 'Super User', icon: <Zap size={24} />, color: 'bg-red-50 text-red-600 border-red-100', name: 'Chief Overseer', email: 'root@pomnhs.edu.pg' },
+    { role: UserRole.VENDOR, label: 'Vendor', icon: <ShoppingBag size={24} />, color: 'bg-indigo-50 text-indigo-600 border-indigo-100', name: 'Campus Shop', email: 'vendor@pomnhs.edu.pg' },
+  ];
+
+  const handleQuickLogin = (role: UserRole, name: string, email: string) => {
+    setIsLoading(true);
+    setSelectedRole(role);
+    
+    setTimeout(() => {
+      onLoginSuccess({
+        id: Math.floor(Math.random() * 10000).toString(),
+        name,
+        email,
+        role,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&bold=true`,
+        isVerified: true
+      });
+      setIsLoading(false);
+    }, 800);
+  };
 
   return (
     <div className="min-h-[90vh] flex flex-col lg:flex-row bg-[#F8F8F8]">
@@ -29,92 +71,52 @@ const Login: React.FC<Props> = ({ onLogin, setView }) => {
         <div className="relative z-10 flex items-center space-x-6">
           <ShieldCheck size={48} className="text-gold" />
           <div>
-            <p className="text-lg font-bold">Secure Access Guaranteed</p>
-            <p className="text-sm text-gray-500 font-bold uppercase tracking-widest">Enterprise Encrypted Sessions</p>
+            <p className="text-lg font-bold">Institutional Access Point</p>
+            <p className="text-sm text-gray-500 font-bold uppercase tracking-widest">Select your role to continue</p>
           </div>
         </div>
       </div>
 
-      {/* Form Side */}
-      <div className="lg:w-1/2 flex items-center justify-center p-8 lg:p-24">
-        <div className="w-full max-w-lg bg-white p-12 rounded-[3rem] shadow-xl border border-gray-100">
-          <h3 className="text-3xl font-black text-black uppercase tracking-tight mb-2">Welcome Back</h3>
-          <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-8">Please select your role and sign in</p>
+      {/* Role Selection Side */}
+      <div className="lg:w-1/2 flex items-center justify-center p-8 lg:p-24 overflow-y-auto max-h-screen">
+        <div className="w-full max-w-2xl bg-white p-12 rounded-[3rem] shadow-xl border border-gray-100 my-10">
+          <div className="mb-10">
+            <h3 className="text-3xl font-black text-black uppercase tracking-tight mb-2">Portal Sign In</h3>
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Select a demo profile to enter the dashboard</p>
+          </div>
 
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-              {[
-                UserRole.STUDENT, 
-                UserRole.TEACHER, 
-                UserRole.ADMIN, 
-                UserRole.PRINCIPAL
-              ].map((role) => (
-                <button
-                  key={role}
-                  onClick={() => setSelectedRole(role)}
-                  className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                    selectedRole === role ? 'bg-gold text-black shadow-lg shadow-gold/30' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
-                  }`}
-                >
-                  {role}
-                </button>
-              ))}
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {demoAccounts.map((acc) => (
+              <button
+                key={acc.role}
+                onClick={() => handleQuickLogin(acc.role, acc.name, acc.email)}
+                disabled={isLoading}
+                className={`p-8 rounded-3xl border transition-all text-center flex flex-col items-center group relative overflow-hidden ${acc.color} ${isLoading && selectedRole === acc.role ? 'ring-4 ring-gold' : 'hover:scale-105 active:scale-95'}`}
+              >
+                <div className="mb-4 transform group-hover:scale-110 transition-transform">
+                  {isLoading && selectedRole === acc.role ? <Loader2 className="animate-spin" size={24} /> : acc.icon}
+                </div>
+                <h4 className="font-black text-xs uppercase tracking-[0.2em] mb-1 leading-tight">{acc.label}</h4>
+                <p className="text-[9px] opacity-60 font-bold uppercase truncate w-full">{acc.name}</p>
+                
+                {isLoading && selectedRole === acc.role && (
+                  <div className="absolute inset-0 bg-white/40 flex items-center justify-center">
+                    <Loader2 className="animate-spin text-black" size={24} />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Institutional Email</label>
-                <input 
-                  type="email" 
-                  className="w-full bg-gray-50 border-0 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-gold outline-none transition-all" 
-                  placeholder="ID@pomnhs.edu.pg" 
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Password</label>
-                <input 
-                  type="password" 
-                  className="w-full bg-gray-50 border-0 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-gold outline-none transition-all" 
-                  placeholder="••••••••" 
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest px-4">
-              <label className="flex items-center space-x-2 cursor-pointer group">
-                <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-gold focus:ring-gold" />
-                <span className="text-gray-400 group-hover:text-black">Keep me signed in</span>
-              </label>
-              <button className="text-gold hover:underline">Forgot password?</button>
-            </div>
-
+          <div className="mt-12 pt-8 border-t border-gray-100 text-center">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">First time accessing the new portal?</p>
             <button 
-              onClick={() => onLogin(selectedRole)}
-              className="w-full bg-black text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] flex items-center justify-center space-x-3 hover:bg-gold hover:text-black transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+              onClick={() => setView('REGISTER')}
+              className="bg-zinc-100 text-black px-10 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-gold transition-all shadow-sm flex items-center mx-auto space-x-3"
             >
-              <LogIn size={20} />
-              <span>Login to Dashboard</span>
+              <UserPlus size={16} />
+              <span>Register Institutional ID</span>
             </button>
-
-            <div className="relative py-4">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100"></div></div>
-              <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest"><span className="bg-white px-4 text-gray-400">Or continue with</span></div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <button className="flex items-center justify-center space-x-3 p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-gray-200 transition-all font-bold text-sm">
-                <Github size={18} />
-                <span>Google</span>
-              </button>
-              <button className="flex items-center justify-center space-x-3 p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-gray-200 transition-all font-bold text-sm">
-                <Mail size={18} />
-                <span>Outlook</span>
-              </button>
-            </div>
-
-            <p className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-8">
-              Don't have an account? <button onClick={() => setView('REGISTER')} className="text-gold hover:underline">Register Institutional ID</button>
-            </p>
           </div>
         </div>
       </div>

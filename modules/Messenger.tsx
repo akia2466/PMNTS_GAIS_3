@@ -17,6 +17,10 @@ const Messenger: React.FC<Props> = ({ user }) => {
   ]);
   const [inputText, setInputText] = useState('');
 
+  const getAvatarUrl = (name: string) => {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&bold=true&format=svg`;
+  };
+
   const handleSend = () => {
     if (!inputText.trim()) return;
     const newMessage: Message = {
@@ -30,36 +34,35 @@ const Messenger: React.FC<Props> = ({ user }) => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Messenger Metrics Header */}
+    <div className="space-y-6 animate-in fade-in duration-500 pb-12">
+      <div>
+        <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Peer-to-Peer Transmission</h2>
+        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Secure encrypted messaging between POMNHS nodes.</p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
         {[
-          { label: 'Unread Messages', value: '12', icon: <MessageSquare /> },
-          { label: 'Online Peers', value: '45', icon: <UserCheck /> },
-          { label: 'Active Groups', value: '8', icon: <Users /> },
+          { label: 'Unread Transmission', value: '12', icon: <MessageSquare />, bg: 'bg-blue-50' },
+          { label: 'Active Peers', value: '45', icon: <UserCheck />, bg: 'bg-green-50' },
+          { label: 'Nodes Active', value: '8', icon: <Users />, bg: 'bg-purple-50' },
         ].map((m, i) => (
-          <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center space-x-4">
-            <div className="p-3 bg-gray-50 rounded-2xl text-gold">{m.icon}</div>
+          <div key={i} className={`${m.bg} p-6 rounded-3xl border border-transparent shadow-sm flex items-center space-x-4`}>
+            <div className="p-3 bg-white rounded-2xl text-gold shadow-sm">{m.icon}</div>
             <div>
-              <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">{m.label}</p>
+              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">{m.label}</p>
               <h3 className="text-xl font-black text-black uppercase">{m.value}</h3>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="h-[calc(100vh-16rem)] bg-white rounded-[2.5rem] shadow-sm border border-gray-100 flex overflow-hidden">
-        {/* Sidebar */}
-        <div className="w-80 border-r border-gray-100 flex flex-col">
+      <div className="h-[calc(100vh-22rem)] bg-slate-100 p-2 rounded-[3rem] shadow-lg border border-transparent flex overflow-hidden">
+        <div className="w-80 bg-white border-r border-gray-100 flex flex-col rounded-l-[2.5rem]">
           <div className="p-6 border-b border-gray-100">
-            <h2 className="text-xl font-black text-black uppercase tracking-tight mb-4">Messages</h2>
+            <h2 className="text-xl font-black text-black uppercase tracking-tight mb-4">Contacts</h2>
             <div className="relative">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Search contacts..." 
-                className="w-full bg-gray-50 border-0 rounded-xl py-2 pl-10 pr-4 text-xs font-bold outline-none focus:ring-1 focus:ring-gold"
-              />
+              <input type="text" placeholder="Filter nodes..." className="w-full bg-gray-50 border-0 rounded-xl py-2 pl-10 text-xs font-bold focus:ring-1 focus:ring-gold shadow-inner" />
             </div>
           </div>
           <div className="flex-grow overflow-y-auto custom-scrollbar">
@@ -67,97 +70,55 @@ const Messenger: React.FC<Props> = ({ user }) => {
               <div 
                 key={contact.id}
                 onClick={() => setSelectedContact(contact)}
-                className={`p-4 flex items-center space-x-4 cursor-pointer transition-colors ${selectedContact?.id === contact.id ? 'bg-gold/5 border-r-4 border-gold' : 'hover:bg-gray-50'}`}
+                className={`p-4 flex items-center space-x-4 cursor-pointer transition-all ${selectedContact?.id === contact.id ? 'bg-gold/10 border-r-4 border-gold' : 'hover:bg-gray-50'}`}
               >
-                <div className="relative">
-                  <img src={`https://i.pravatar.cc/150?u=${contact.id}`} className="w-12 h-12 rounded-xl shadow-sm" alt="" />
-                  {contact.online && <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>}
-                </div>
+                <img src={getAvatarUrl(contact.name)} className="w-12 h-12 rounded-xl border-2 border-white shadow-sm" alt="" />
                 <div className="flex-grow overflow-hidden">
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-bold text-sm truncate">{contact.name}</h4>
-                    <span className="text-[10px] text-gray-400 font-bold">10:30 AM</span>
-                  </div>
-                  <p className="text-xs text-gray-400 truncate mt-0.5">{contact.lastMessage}</p>
+                  <h4 className="font-black text-[11px] uppercase tracking-tight truncate text-black">{contact.name}</h4>
+                  <p className="text-[10px] text-gray-400 truncate mt-0.5 font-bold italic">{contact.lastMessage}</p>
                 </div>
-                {contact.unread > 0 && (
-                  <div className="w-5 h-5 bg-gold rounded-full flex items-center justify-center text-[10px] font-black">
-                    {contact.unread}
-                  </div>
-                )}
               </div>
             ))}
           </div>
         </div>
 
-        {/* Chat Area */}
-        <div className="flex-grow flex flex-col bg-gray-50/30">
+        <div className="flex-grow flex flex-col bg-white rounded-r-[2.5rem]">
           {selectedContact ? (
             <>
-              <div className="p-6 bg-white border-b border-gray-100 flex items-center justify-between">
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <img src={`https://i.pravatar.cc/150?u=${selectedContact.id}`} className="w-12 h-12 rounded-xl shadow-sm" alt="" />
+                  <img src={getAvatarUrl(selectedContact.name)} className="w-12 h-12 rounded-xl shadow-sm" alt="" />
                   <div>
-                    <h3 className="font-black text-black uppercase tracking-tight">{selectedContact.name}</h3>
-                    <p className="text-[10px] text-green-500 font-bold uppercase tracking-widest">{selectedContact.online ? 'Online Now' : 'Last seen 2h ago'}</p>
+                    <h3 className="font-black text-black uppercase tracking-tight text-sm">{selectedContact.name}</h3>
+                    <span className="text-[10px] text-green-500 font-black uppercase flex items-center"><span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2 animate-pulse" />Active</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4 text-gray-400">
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><Phone size={20} /></button>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><Video size={20} /></button>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><MoreVertical size={20} /></button>
-                </div>
               </div>
-
-              <div className="flex-grow p-8 overflow-y-auto custom-scrollbar flex flex-col space-y-6">
+              <div className="flex-grow p-8 overflow-y-auto custom-scrollbar flex flex-col space-y-6 bg-slate-50/20">
                 {messages.map((msg) => (
                   <div key={msg.id} className={`flex ${msg.senderId === 'me' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-md ${msg.senderId === 'me' ? 'order-1' : 'order-2'}`}>
-                      <div className={`p-4 rounded-3xl shadow-sm text-sm ${
-                        msg.senderId === 'me' 
-                          ? 'bg-black text-white rounded-tr-none' 
-                          : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'
-                      }`}>
-                        {msg.text}
-                      </div>
-                      <p className={`text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2 ${msg.senderId === 'me' ? 'text-right' : 'text-left'}`}>
-                        {msg.timestamp}
-                      </p>
+                    <div className={`p-4 rounded-3xl shadow-sm text-[13px] font-bold ${msg.senderId === 'me' ? 'bg-black text-white rounded-tr-none' : 'bg-white text-gray-800 border border-gray-100 rounded-tl-none'}`}>
+                      {msg.text}
                     </div>
                   </div>
                 ))}
               </div>
-
-              <div className="p-6 bg-white border-t border-gray-100">
-                <div className="flex items-center space-x-4 bg-gray-50 p-2 rounded-2xl">
-                  <button className="p-3 text-gray-400 hover:text-gold transition-colors">
-                    <Paperclip size={20} />
-                  </button>
+              <div className="p-6 border-t border-gray-100">
+                <div className="flex items-center space-x-4 bg-gray-50 p-2 rounded-2xl border border-gray-100">
                   <input 
                     type="text" 
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder="Type a message..." 
-                    className="flex-grow bg-transparent border-0 focus:ring-0 text-sm font-semibold"
+                    placeholder="Type encrypted message..." 
+                    className="flex-grow bg-transparent border-0 focus:ring-0 text-xs font-black uppercase"
                   />
-                  <button 
-                    onClick={handleSend}
-                    className="bg-gold text-black p-3 rounded-xl hover:scale-105 transition-all shadow-lg shadow-gold/20"
-                  >
-                    <Send size={20} />
-                  </button>
+                  <button onClick={handleSend} className="bg-gold text-black p-3 rounded-xl shadow-lg hover:scale-105 transition-all"><Send size={20} /></button>
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex-grow flex flex-col items-center justify-center text-center p-12">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                <MessageSquare size={32} className="text-gray-300" />
-              </div>
-              <h3 className="text-xl font-black text-black uppercase mb-2">Select a Contact</h3>
-              <p className="text-gray-400 text-sm max-w-xs">Connect with peers, staff, or administration through the school messaging hub.</p>
-            </div>
+            <div className="flex-grow flex items-center justify-center bg-white"><p className="text-gray-300 font-black uppercase tracking-widest text-xs">Select Node to Transmit</p></div>
           )}
         </div>
       </div>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Mail, Phone, MapPin, Send, Facebook, Twitter, Instagram, Clock, Bus, Car, Info, Linkedin } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Facebook, Twitter, Instagram, Clock, Bus, Car, Info } from 'lucide-react';
 
 const PublicContact: React.FC = () => {
   return (
@@ -9,7 +9,7 @@ const PublicContact: React.FC = () => {
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-24 items-stretch">
-            {/* Inquiry Form - Noticeable Border & noticeable edges */}
+            {/* Inquiry Form */}
             <div className="lg:w-1/2 flex flex-col">
               <div className="bg-white border-4 border-gray-50 rounded-[3.5rem] p-12 shadow-2xl flex-grow flex flex-col">
                 <p className="text-gold font-bold uppercase tracking-widest mb-4">Official Admissions</p>
@@ -18,16 +18,16 @@ const PublicContact: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Full Name</label>
-                      <input type="text" className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-gold focus:border-gold outline-none shadow-sm transition-all" placeholder="John Doe" />
+                      <input type="text" className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-gold outline-none transition-all" placeholder="John Doe" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Email Address</label>
-                      <input type="email" className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-gold focus:border-gold outline-none shadow-sm transition-all" placeholder="john@example.com" />
+                      <input type="email" className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-gold outline-none transition-all" placeholder="john@example.com" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Subject</label>
-                    <select className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-gold focus:border-gold outline-none appearance-none shadow-sm transition-all">
+                    <select className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-gold outline-none appearance-none transition-all">
                       <option>Admissions Inquiry</option>
                       <option>Academic Transcripts</option>
                       <option>Staff Recruitment</option>
@@ -36,9 +36,9 @@ const PublicContact: React.FC = () => {
                   </div>
                   <div className="space-y-2 flex-grow">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-4">Your Message</label>
-                    <textarea className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-gold focus:border-gold outline-none h-48 resize-none shadow-sm transition-all" placeholder="How can our administration assist you?"></textarea>
+                    <textarea className="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-gold outline-none h-48 resize-none transition-all" placeholder="How can our administration assist you?"></textarea>
                   </div>
-                  <button type="button" className="bg-black text-white w-full py-6 rounded-2xl font-black uppercase tracking-[0.2em] flex items-center justify-center space-x-3 hover:bg-gold hover:text-black transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98] mt-4">
+                  <button type="button" className="bg-black text-white w-full py-6 rounded-2xl font-black uppercase tracking-[0.2em] flex items-center justify-center space-x-3 hover:bg-gold hover:text-black transition-all shadow-xl mt-4">
                     <Send size={20} />
                     <span>Submit to Registry</span>
                   </button>
@@ -83,11 +83,11 @@ const PublicContact: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   {[
                     { icon: <Facebook />, label: 'Facebook', handle: '@PMNHS.Official' },
-                    { icon: <Twitter />, label: '𝕏 (Twitter)', handle: '@PMNHS_Official' },
+                    { icon: <Twitter />, label: '𝕏', handle: '@PMNHS_Official' },
                     { icon: <Instagram />, label: 'Instagram', handle: '@pmnhs_official' }
                   ].map((s, i) => (
                     <div key={i} className="bg-white border border-gray-100 p-8 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:border-gold transition-all cursor-pointer group">
-                      <div className="w-12 h-12 bg-black text-gold rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg">
+                      <div className="w-12 h-12 bg-black text-gold rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                         {s.icon}
                       </div>
                       <h4 className="font-black text-black uppercase text-xs mb-1 tracking-tight">{s.label}</h4>
@@ -101,43 +101,41 @@ const PublicContact: React.FC = () => {
         </div>
       </section>
 
-      {/* Map Section - Fixed display for location */}
-      <section className="py-24 bg-[#F8F8F8] border-y border-gray-100">
-        <div className="container mx-auto px-4 text-center mb-12">
-          <h2 className="text-4xl font-black uppercase tracking-tighter text-black mb-4">Institutional Presence</h2>
-          <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Strategically located in Waigani, NCD</p>
-        </div>
+      {/* Campus Map Section */}
+      <section className="py-24 bg-[#F8F8F8]">
         <div className="container mx-auto px-4">
-          <div className="h-[600px] w-full bg-white rounded-[4rem] overflow-hidden relative shadow-2xl group border-8 border-white">
-            {/* Visual Fix: Using a seed that looks more like an urban map or aerial campus view */}
-            <div className="absolute inset-0 bg-cover bg-center transition-all duration-1000 group-hover:scale-105" 
-                 style={{ backgroundImage: "url('https://picsum.photos/seed/waigani-port-moresby-aerial/1600/1200')" }}></div>
-            <div className="absolute inset-0 bg-black/10 transition-opacity group-hover:bg-black/0" />
+          <div className="relative h-[600px] w-full rounded-[3.5rem] overflow-hidden shadow-2xl border-4 border-white">
+            {/* Google Maps Embed - Styled for PMNHS */}
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15873.344445354972!2d147.185202!3d-9.426034!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x697042898737389%3A0x697042898737389!2sPort%20Moresby%20National%20High%20School!5e0!3m2!1sen!2spg!4v1700000000000!5m2!1sen!2spg" 
+              className="absolute inset-0 w-full h-full grayscale-[0.2] contrast-[1.1]"
+              style={{ border: 0 }} 
+              allowFullScreen={true} 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              title="POMNHS Campus Map"
+            ></iframe>
             
-            {/* Map Pin Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="relative flex flex-col items-center animate-pulse">
-                <div className="bg-black text-white px-8 py-3 rounded-2xl shadow-2xl border-2 border-gold font-black uppercase text-xs mb-3">
-                  POMNHS CAMPUS
+            {/* Overlay Map Card */}
+            <div className="absolute bottom-10 left-10 z-10 hidden md:block">
+              <div className="bg-black text-white p-8 rounded-[2.5rem] shadow-2xl border border-[#B8860B] max-w-xs">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black">
+                    <MapPin size={20} />
+                  </div>
+                  <h4 className="text-xl font-black uppercase tracking-tight">Visit Campus</h4>
                 </div>
-                <div className="w-12 h-12 bg-gold rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,215,0,0.6)] border-4 border-black">
-                   <MapPin size={32} className="text-black" />
-                </div>
-                <div className="w-4 h-4 bg-gold rounded-full blur-[2px] mt-1" />
+                <p className="text-gray-400 text-sm leading-relaxed mb-6">Located in the heart of Waigani, accessible via all major Port Moresby transit routes.</p>
+                <button className="w-full bg-gold text-black py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-white transition-all shadow-lg">
+                  Get Directions
+                </button>
               </div>
-            </div>
-
-            <div className="absolute bottom-12 right-12 z-20">
-              <button className="bg-black text-white px-10 py-5 rounded-full font-black uppercase tracking-[0.2em] text-[10px] flex items-center space-x-4 shadow-2xl border border-[#B8860B] hover:bg-gold hover:text-black transition-all">
-                <MapPin size={20} />
-                <span>Get Driving Directions</span>
-              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Getting Here Section - White Container, Black text for title/subtitle */}
+      {/* Getting Here Section */}
       <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">

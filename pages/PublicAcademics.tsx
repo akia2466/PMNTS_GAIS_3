@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Mail, Phone, BookOpen, FlaskConical, Monitor, Users, Calendar, CheckCircle, ArrowRight, Laptop } from 'lucide-react';
+import { Mail, Phone, BookOpen, FlaskConical, Monitor, Calendar, CheckCircle, ArrowRight } from 'lucide-react';
 
 const PublicAcademics: React.FC = () => {
   const departments = [
@@ -54,19 +54,23 @@ const PublicAcademics: React.FC = () => {
     },
   ];
 
+  const getAvatarUrl = (name: string) => {
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&bold=true&format=svg`;
+  };
+
   const faculty = [
-    { init: 'EV', name: 'Dr. Eleanor Vance', dept: 'Computer Science', email: 'e.vance@university.edu', avatar: 'https://i.pravatar.cc/150?u=ev' },
-    { init: 'MC', name: 'Dr. Michael Chen', dept: 'Mathematics', email: 'm.chen@university.edu', avatar: 'https://i.pravatar.cc/150?u=mc' },
-    { init: 'ST', name: 'Dr. Sarah Thompson', dept: 'Natural Sciences', email: 's.thompson@university.edu', avatar: 'https://i.pravatar.cc/150?u=st' },
-    { init: 'JW', name: 'Dr. James Wilson', dept: 'English & Literature', email: 'j.wilson@university.edu', avatar: 'https://i.pravatar.cc/150?u=jw' },
-    { init: 'PG', name: 'Dr. Patricia Garcia', dept: 'Social Studies', email: 'p.garcia@university.edu', avatar: 'https://i.pravatar.cc/150?u=pg' },
-    { init: 'RM', name: 'Dr. Robert Martinez', dept: 'Fine Arts', email: 'r.martinez@university.edu', avatar: 'https://i.pravatar.cc/150?u=rm' },
-    { init: 'LA', name: 'Dr. Linda Anderson', dept: 'Natural Sciences', email: 'l.anderson@university.edu', avatar: 'https://i.pravatar.cc/150?u=la' },
-    { init: 'DL', name: 'Dr. David Lee', dept: 'Social Studies', email: 'd.lee@university.edu', avatar: 'https://i.pravatar.cc/150?u=dl' },
-    { init: 'JB', name: 'Dr. Jennifer Brown', dept: 'Fine Arts', email: 'j.brown@university.edu', avatar: 'https://i.pravatar.cc/150?u=jb' },
-    { init: 'TW', name: 'Dr. Thomas White', dept: 'Computer Science', email: 't.white@university.edu', avatar: 'https://i.pravatar.cc/150?u=tw' },
-    { init: 'MR', name: 'Dr. Maria Rodriguez', dept: 'Natural Sciences', email: 'm.rodriguez@university.edu', avatar: 'https://i.pravatar.cc/150?u=mr' },
-    { init: 'CT', name: 'Dr. Christopher Taylor', dept: 'English & Literature', email: 'c.taylor@university.edu', avatar: 'https://i.pravatar.cc/150?u=ct' },
+    { init: 'EV', name: 'Dr. Eleanor Vance', dept: 'Computer Science', email: 'e.vance@university.edu' },
+    { init: 'MC', name: 'Dr. Michael Chen', dept: 'Mathematics', email: 'm.chen@university.edu' },
+    { init: 'ST', name: 'Dr. Sarah Thompson', dept: 'Natural Sciences', email: 's.thompson@university.edu' },
+    { init: 'JW', name: 'Dr. James Wilson', dept: 'English & Literature', email: 'j.wilson@university.edu' },
+    { init: 'PG', name: 'Dr. Patricia Garcia', dept: 'Social Studies', email: 'p.garcia@university.edu' },
+    { init: 'RM', name: 'Dr. Robert Martinez', dept: 'Fine Arts', email: 'r.martinez@university.edu' },
+    { init: 'LA', name: 'Dr. Linda Anderson', dept: 'Natural Sciences', email: 'l.anderson@university.edu' },
+    { init: 'DL', name: 'Dr. David Lee', dept: 'Social Studies', email: 'd.lee@university.edu' },
+    { init: 'JB', name: 'Dr. Jennifer Brown', dept: 'Fine Arts', email: 'j.brown@university.edu' },
+    { init: 'TW', name: 'Dr. Thomas White', dept: 'Computer Science', email: 't.white@university.edu' },
+    { init: 'MR', name: 'Dr. Maria Rodriguez', dept: 'Natural Sciences', email: 'm.rodriguez@university.edu' },
+    { init: 'CT', name: 'Dr. Christopher Taylor', dept: 'English & Literature', email: 'c.taylor@university.edu' },
   ];
 
   const resources = [
@@ -117,7 +121,7 @@ const PublicAcademics: React.FC = () => {
                     <span className="text-[10px] font-black uppercase tracking-widest">Ext. {dept.ext}</span>
                   </div>
                 </div>
-                {/* Department Image below contacts as requested */}
+                {/* Department Image below contacts */}
                 <div className="h-48 rounded-2xl overflow-hidden border border-gray-50">
                   <img src={dept.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={dept.name} />
                 </div>
@@ -242,7 +246,7 @@ const PublicAcademics: React.FC = () => {
         </div>
       </section>
 
-      {/* Faculty & Staff Directory - Reordered Section with images at top */}
+      {/* Faculty & Staff Directory */}
       <section className="py-24 bg-white border-t border-gray-100">
         <div className="container mx-auto px-4 text-center mb-16">
           <h2 className="text-5xl font-black text-black uppercase tracking-tighter mb-4">Faculty & Staff</h2>
@@ -251,9 +255,8 @@ const PublicAcademics: React.FC = () => {
         <div className="container mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {faculty.map((f, i) => (
             <div key={i} className="bg-[#F8F8F8] rounded-[2rem] border border-gray-100 hover:border-gold transition-all group text-center overflow-hidden flex flex-col shadow-sm">
-              {/* Faculty Image at the top as requested */}
               <div className="h-64 w-full overflow-hidden bg-gray-200">
-                <img src={f.avatar} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={f.name} />
+                <img src={getAvatarUrl(f.name)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={f.name} />
               </div>
               <div className="p-8">
                 <h4 className="text-base font-black uppercase mb-1 truncate">{f.name}</h4>

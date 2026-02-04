@@ -5,9 +5,10 @@ import { Mail, CheckCircle, ArrowRight, RefreshCcw } from 'lucide-react';
 
 interface Props {
   setView: (v: ViewState) => void;
+  email: string;
 }
 
-const VerifyEmail: React.FC<Props> = ({ setView }) => {
+const VerifyEmail: React.FC<Props> = ({ setView, email }) => {
   return (
     <div className="min-h-[90vh] flex items-center justify-center bg-[#F8F8F8] p-8">
       <div className="w-full max-w-lg bg-white p-16 rounded-[3rem] shadow-2xl border border-gray-100 text-center">
@@ -17,7 +18,7 @@ const VerifyEmail: React.FC<Props> = ({ setView }) => {
         
         <h3 className="text-4xl font-black text-black uppercase tracking-tighter mb-4">Check Your Inbox</h3>
         <p className="text-gray-500 font-semibold mb-12">
-          We've sent a verification link to <span className="text-black font-black">student@pomnhs.edu.pg</span>. 
+          We've sent a verification link to <span className="text-black font-black">{email || 'your email'}</span>. 
           Please verify your email to access the institutional dashboard.
         </p>
 
