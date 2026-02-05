@@ -33,13 +33,13 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
   const terms = ['Term 1', 'Term 2', 'Term 3', 'Term 4'];
   const years = ['2026', '2025', '2024'];
 
-  const students = [
-    { id: 'S101', name: 'Joshua Kila', status: 'present' },
-    { id: 'S102', name: 'Anna Vele', status: 'late' },
-    { id: 'S103', name: 'Peter Gere', status: 'present' },
-    { id: 'S104', name: 'Sarah Gima', status: 'absent' },
-    { id: 'S105', name: 'Samuel Kapu', status: 'present' },
-  ];
+  const [attendanceState, setAttendanceState] = useState([
+    { id: 'S101', name: 'Joshua Kila', status: 'present', lateMinutes: 0 },
+    { id: 'S102', name: 'Anna Vele', status: 'late', lateMinutes: 25 },
+    { id: 'S103', name: 'Peter Gere', status: 'present', lateMinutes: 0 },
+    { id: 'S104', name: 'Sarah Gima', status: 'absent', lateMinutes: 0 },
+    { id: 'S105', name: 'Samuel Kapu', status: 'present', lateMinutes: 0 },
+  ]);
 
   const recentAttendance = [
     { date: 'Jan 23, 2026', subject: 'Mathematics', status: 'Present', timeIn: '7:55 AM', timeOut: '3:10 PM', remarks: '' },
@@ -62,6 +62,18 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
     { name: 'Grade 11C', rate: 97, tardy: 3, absents: 1, session: 'Review Session' },
     { name: 'Grade 11D', rate: 91, tardy: 9, absents: 3, session: 'Tutorial' },
   ];
+
+  const handleStatusChange = (studentId: string, newStatus: string) => {
+    setAttendanceState(prev => prev.map(s => 
+      s.id === studentId ? { ...s, status: newStatus, lateMinutes: newStatus === 'late' ? s.lateMinutes || 5 : 0 } : s
+    ));
+  };
+
+  const handleLateMinutesChange = (studentId: string, minutes: number) => {
+    setAttendanceState(prev => prev.map(s => 
+      s.id === studentId ? { ...s, lateMinutes: minutes } : s
+    ));
+  };
 
   const renderAttendanceData = (data: any[]) => (
     <div className="space-y-10 animate-in fade-in duration-500 pb-20">
@@ -166,7 +178,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
                                   </tr>
                                </thead>
                                <tbody className="divide-y divide-gray-100">
-                                  {students.map((s, i) => (
+                                  {attendanceState.map((s, i) => (
                                     <tr key={i} className="hover:bg-white transition-all group">
                                        <td className="px-10 py-6">
                                           <div className="flex items-center space-x-4">
@@ -178,10 +190,11 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
                                           </div>
                                        </td>
                                        <td className="px-10 py-6">
-                                          <div className="flex space-x-2">
+                                          <div className="flex items-center space-x-3">
                                              {['present', 'absent', 'late'].map((status) => (
                                                <button 
                                                  key={status} 
+                                                 onClick={() => handleStatusChange(s.id, status)}
                                                  className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
                                                    s.status === status 
                                                      ? (status === 'present' ? 'bg-green-500 text-white shadow-lg' : status === 'absent' ? 'bg-red-500 text-white shadow-lg' : 'bg-orange-500 text-white shadow-lg') 
@@ -191,11 +204,35 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
                                                  {status}
                                                </button>
                                              ))}
+                                             {s.status === 'late' && (
+                                               <div className="flex items-center bg-white border border-orange-200 rounded-lg px-2 animate-in fade-in zoom-in-95 duration-200">
+                                                 <input 
+                                                   type="number"
+                                                   value={s.lateMinutes}
+                                                   onChange={(e) => handleLateMinutesChange(s.id, parseInt(e.target.value) || 0)}
+                                                   className="w-12 text-[10px] font-black text-orange-600 outline-none p-1"
+                                                   placeholder="Min"
+                                                 />
+                                                 <span className="text-[8px] font-black text-orange-400 uppercase">Min</span>
+                                               </div>
+                                             )}
                                           </div>
                                        </td>
                                        <td className="px-10 py-6">
                                           <span className="text-[10px] font-black uppercase text-gray-400 flex items-center">
-                                             <CheckCircle size={12} className="mr-2 text-green-500" /> On Time
+                                             {s.status === 'present' ? (
+                                               <>
+                                                 <CheckCircle size={12} className="mr-2 text-green-500" /> On Time
+                                               </>
+                                             ) : s.status === 'late' ? (
+                                               <>
+                                                 <Clock size={12} className="mr-2 text-orange-500" /> {s.lateMinutes}mins L
+                                               </>
+                                             ) : (
+                                               <>
+                                                 <UserX size={12} className="mr-2 text-red-500" /> --
+                                               </>
+                                             )}
                                           </span>
                                        </td>
                                        <td className="px-10 py-6 text-right">
