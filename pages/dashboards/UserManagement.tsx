@@ -12,25 +12,75 @@ import {
   Filter,
   CheckCircle,
   XCircle,
-  UserCheck
+  UserCheck,
+  Save,
+  X
 } from 'lucide-react';
 
 interface Props {
   user: User;
 }
 
+interface ManagedUser {
+  id: string;
+  name: string;
+  role: UserRole;
+  dept?: string;
+  class?: string;
+  status: string;
+  email: string;
+}
+
 const UserManagement: React.FC<Props> = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('All Roles');
+  const [isAddingUser, setIsAddingUser] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
 
-  const users = [
+  const [users, setUsers] = useState<ManagedUser[]>([
     { id: '101', name: 'Dr. Anna Vele', role: UserRole.TEACHER, dept: 'Mathematics', status: 'Active', email: 'a.vele@pomnhs.edu.pg' },
     { id: '102', name: 'James Kari', role: UserRole.STUDENT, class: '12A', status: 'Active', email: 'j.kari@pomnhs.edu.pg' },
     { id: '103', name: 'Ms. Sarah Smith', role: UserRole.HOD, dept: 'Mathematics', status: 'Active', email: 's.smith@pomnhs.edu.pg' },
     { id: '104', name: 'Peter Nambui', role: UserRole.BURSAR, dept: 'Finance', status: 'Active', email: 'accounts@pomnhs.edu.pg' },
-  ];
+  ]);
+
+  const [newUser, setNewUser] = useState<ManagedUser>({
+    id: '',
+    name: '',
+    role: UserRole.STUDENT,
+    email: '',
+    status: 'Active',
+    class: ''
+  });
 
   const roles = ['All Roles', ...Object.values(UserRole)];
+
+  const handleAddUser = () => {
+    const id = (Math.floor(Math.random() * 900) + 100).toString();
+    setUsers([...users, { ...newUser, id }]);
+    setIsAddingUser(false);
+    setNewUser({ id: '', name: '', role: UserRole.STUDENT, email: '', status: 'Active', class: '' });
+  };
+
+  const handleDeleteUser = (id: string) => {
+    if (confirm('Are you sure you want to remove this user from the institutional registry?')) {
+      setUsers(users.filter(u => u.id !== id));
+    }
+  };
+
+  const handleSaveEdit = (id: string) => {
+    setEditingUserId(null);
+  };
+
+  const handleUpdateUser = (id: string, field: keyof ManagedUser, value: string) => {
+    setUsers(users.map(u => u.id === id ? { ...u, [field]: value } : u));
+  };
+
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = selectedRole === 'All Roles' || u.role === selectedRole;
+    return matchesSearch && matchesRole;
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -42,16 +92,50 @@ const UserManagement: React.FC<Props> = ({ user }) => {
             Institutional Identity Control Registry
           </p>
         </div>
-        <button className="bg-black text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-gold hover:text-black transition-all flex items-center">
+        <button 
+          onClick={() => setIsAddingUser(true)}
+          className="bg-black text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-gold hover:text-black transition-all flex items-center"
+        >
           <Plus size={18} className="mr-2" /> Add Institutional User
         </button>
       </div>
 
+      {isAddingUser && (
+        <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-xl animate-in slide-in-from-top duration-300">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-xl font-black uppercase">Create New Profile</h3>
+            <button onClick={() => setIsAddingUser(false)} className="p-2 hover:bg-gray-100 rounded-full"><X size={20}/></button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <input 
+              type="text" placeholder="Full Name" 
+              className="bg-gray-50 border border-gray-100 p-4 rounded-xl text-sm font-bold focus:ring-1 focus:ring-gold outline-none"
+              value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})}
+            />
+            <input 
+              type="email" placeholder="Email Address" 
+              className="bg-gray-50 border border-gray-100 p-4 rounded-xl text-sm font-bold focus:ring-1 focus:ring-gold outline-none"
+              value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})}
+            />
+            <select 
+              className="bg-gray-50 border border-gray-100 p-4 rounded-xl text-sm font-bold focus:ring-1 focus:ring-gold outline-none uppercase"
+              value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value as UserRole})}
+            >
+              {Object.values(UserRole).map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          <div className="flex justify-end space-x-3">
+             <button onClick={() => setIsAddingUser(false)} className="px-8 py-3 bg-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest">Cancel</button>
+             <button onClick={handleAddUser} className="px-8 py-3 bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold hover:text-black">Save Registry Node</button>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { label: 'Total Users', value: '1,322', icon: <Users />, color: 'bg-blue-50' },
-          { label: 'Faculty Nodes', value: '82', icon: <UserCheck />, color: 'bg-purple-50' },
-          { label: 'Admin Nodes', value: '12', icon: <Shield />, color: 'bg-gold/10' },
+          { label: 'Total Users', value: users.length.toString(), icon: <Users />, color: 'bg-blue-50' },
+          { label: 'Faculty Nodes', value: users.filter(u => u.role === UserRole.TEACHER || u.role === UserRole.HOD).length.toString(), icon: <UserCheck />, color: 'bg-purple-50' },
+          { label: 'Admin Nodes', value: users.filter(u => u.role === UserRole.ADMIN || u.role === UserRole.PRINCIPAL).length.toString(), icon: <Shield />, color: 'bg-gold/10' },
           { label: 'System Health', value: 'Secure', icon: <CheckCircle />, color: 'bg-green-50' },
         ].map((m, i) => (
           <div key={i} className={`${m.color} p-8 rounded-[2.5rem] border border-transparent shadow-sm flex flex-col items-center text-center group`}>
@@ -85,7 +169,6 @@ const UserManagement: React.FC<Props> = ({ user }) => {
               </select>
               <Filter size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
-            <button className="p-3 bg-white border border-gray-200 rounded-xl text-gray-400 hover:text-black transition-colors shadow-sm"><MoreVertical size={16}/></button>
           </div>
         </div>
 
@@ -101,39 +184,71 @@ const UserManagement: React.FC<Props> = ({ user }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {users.map((u) => (
-                <tr key={u.id} className="hover:bg-gray-50/50 transition-all group">
-                  <td className="px-10 py-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-black text-gold rounded-xl flex items-center justify-center font-black text-xs">{u.name.charAt(0)}</div>
-                      <div>
-                        <p className="font-black text-sm uppercase text-black">{u.name}</p>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{u.email}</p>
+              {filteredUsers.map((u) => {
+                const isEditing = editingUserId === u.id;
+                return (
+                  <tr key={u.id} className={`hover:bg-gray-50/50 transition-all group ${isEditing ? 'bg-gold/5' : ''}`}>
+                    <td className="px-10 py-6">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-black text-gold rounded-xl flex items-center justify-center font-black text-xs">{u.name.charAt(0)}</div>
+                        <div>
+                          {isEditing ? (
+                            <input 
+                              type="text" value={u.name} 
+                              onChange={e => handleUpdateUser(u.id, 'name', e.target.value)}
+                              className="bg-white border p-1 rounded font-black text-sm uppercase outline-none focus:border-gold"
+                            />
+                          ) : (
+                            <p className="font-black text-sm uppercase text-black">{u.name}</p>
+                          )}
+                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{u.email}</p>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-10 py-6">
-                    <span className="bg-gold/10 text-gold px-3 py-1 rounded-lg text-[9px] font-black uppercase border border-gold/20">
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="px-10 py-6 text-xs font-bold text-gray-600 uppercase">
-                    {u.dept || u.class || '--'}
-                  </td>
-                  <td className="px-10 py-6">
-                    <div className="flex items-center text-green-600 space-x-2">
-                      <CheckCircle size={14} />
-                      <span className="text-[10px] font-black uppercase">{u.status}</span>
-                    </div>
-                  </td>
-                  <td className="px-10 py-6 text-right">
-                    <div className="flex items-center justify-end space-x-2">
-                      <button className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-gold transition-colors"><Edit2 size={14}/></button>
-                      <button className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-10 py-6">
+                      {isEditing ? (
+                        <select 
+                          className="bg-white border p-1 rounded text-[9px] font-black uppercase outline-none"
+                          value={u.role} onChange={e => handleUpdateUser(u.id, 'role', e.target.value)}
+                        >
+                          {Object.values(UserRole).map(r => <option key={r} value={r}>{r}</option>)}
+                        </select>
+                      ) : (
+                        <span className="bg-gold/10 text-gold px-3 py-1 rounded-lg text-[9px] font-black uppercase border border-gold/20">
+                          {u.role}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-10 py-6 text-xs font-bold text-gray-600 uppercase">
+                      {isEditing ? (
+                        <input 
+                          type="text" value={u.dept || u.class || ''} 
+                          onChange={e => handleUpdateUser(u.id, u.role === UserRole.STUDENT ? 'class' : 'dept', e.target.value)}
+                          className="bg-white border p-1 rounded text-xs outline-none"
+                        />
+                      ) : (
+                        u.dept || u.class || '--'
+                      )}
+                    </td>
+                    <td className="px-10 py-6">
+                      <div className="flex items-center text-green-600 space-x-2">
+                        <CheckCircle size={14} />
+                        <span className="text-[10px] font-black uppercase">{u.status}</span>
+                      </div>
+                    </td>
+                    <td className="px-10 py-6 text-right">
+                      <div className="flex items-center justify-end space-x-2">
+                        {isEditing ? (
+                          <button onClick={() => handleSaveEdit(u.id)} className="p-2 bg-black text-gold rounded-lg shadow-sm hover:scale-105 transition-all"><Save size={14}/></button>
+                        ) : (
+                          <button onClick={() => setEditingUserId(u.id)} className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-gold transition-colors"><Edit2 size={14}/></button>
+                        )}
+                        <button onClick={() => handleDeleteUser(u.id)} className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

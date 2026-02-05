@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { User, UserRole } from '../../types';
 import { 
   TrendingUp, 
@@ -11,7 +11,6 @@ import {
   AlertCircle,
   Trophy,
   ChevronRight,
-  Calendar,
   History,
   Building2,
   Briefcase,
@@ -23,7 +22,9 @@ import {
   UserX,
   UserCheck,
   Target,
-  BarChart3
+  BarChart3,
+  Users2,
+  GraduationCap
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -34,9 +35,7 @@ import {
   Tooltip, 
   ResponsiveContainer,
   LineChart,
-  Line,
-  AreaChart,
-  Area
+  Line
 } from 'recharts';
 
 interface Props {
@@ -44,6 +43,9 @@ interface Props {
 }
 
 const MainDashboard: React.FC<Props> = ({ user }) => {
+  const [viewMode, setViewMode] = useState<'STUDENTS' | 'TEACHERS' | 'HOD'>('STUDENTS');
+  const isPrincipal = user.role === UserRole.PRINCIPAL;
+
   const financialData = [
     { month: 'Jan', revenue: 450000, expenses: 320000 },
     { month: 'Feb', revenue: 520000, expenses: 340000 },
@@ -89,6 +91,105 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
         </div>
       </div>
     </section>
+  );
+
+  const renderPrincipalDashboard = () => (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* View Toggle */}
+      <div className="flex bg-white p-2 rounded-2xl shadow-sm border border-gray-100 w-fit">
+        {(['STUDENTS', 'TEACHERS', 'HOD'] as const).map(target => (
+          <button 
+            key={target}
+            onClick={() => setViewMode(target)}
+            className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === target ? 'bg-black text-gold shadow-lg shadow-black/20' : 'text-gray-400 hover:text-black'}`}
+          >
+            {target}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {viewMode === 'STUDENTS' ? [
+          { label: 'Total Enrolled', value: '1,240', icon: <Users2 size={16} />, bg: 'bg-blue-50' },
+          { label: 'Avg Attendance', value: '94.2%', icon: <Clock size={16} />, bg: 'bg-green-50' },
+          { label: 'Academic Standing', value: '89%', icon: <Trophy size={16} />, bg: 'bg-gold/10' },
+          { label: 'Registry Alerts', value: '5', icon: <AlertCircle size={16} />, bg: 'bg-red-50' },
+        ].map((stat, i) => (
+          <div key={i} className={`${stat.bg} p-6 rounded-[2.5rem] border border-transparent shadow-sm hover:border-gold transition-colors text-center flex flex-col items-center group`}>
+            <div className="p-3 bg-white rounded-2xl text-gold mb-3 group-hover:scale-110 transition-transform shadow-sm">{stat.icon}</div>
+            <h3 className="text-2xl font-black text-black tracking-tight">{stat.value}</h3>
+            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest leading-tight">{stat.label}</p>
+          </div>
+        )) : viewMode === 'TEACHERS' ? [
+          { label: 'Faculty Count', value: '82', icon: <GraduationCap size={16} />, bg: 'bg-purple-50' },
+          { label: 'Avg Efficiency', value: '91%', icon: <Activity size={16} />, bg: 'bg-indigo-50' },
+          { label: 'Lesson Coverage', value: '88%', icon: <BookOpen size={16} />, bg: 'bg-cyan-50' },
+          { label: 'Staff On Leave', value: '3', icon: <UserX size={16} />, bg: 'bg-orange-50' },
+        ].map((stat, i) => (
+          <div key={i} className={`${stat.bg} p-6 rounded-[2.5rem] border border-transparent shadow-sm hover:border-gold transition-colors text-center flex flex-col items-center group`}>
+            <div className="p-3 bg-white rounded-2xl text-gold mb-3 group-hover:scale-110 transition-transform shadow-sm">{stat.icon}</div>
+            <h3 className="text-2xl font-black text-black tracking-tight">{stat.value}</h3>
+            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest leading-tight">{stat.label}</p>
+          </div>
+        )) : [
+          { label: 'Dept Oversight', value: '4/4', icon: <Briefcase size={16} />, bg: 'bg-slate-100' },
+          { label: 'Strategic KPIs', value: '92%', icon: <Target size={16} />, bg: 'bg-emerald-50' },
+          { label: 'Budget Utilization', value: '74%', icon: <Wallet size={16} />, bg: 'bg-orange-50' },
+          { label: 'Compliance Rate', value: '99%', icon: <ShieldCheck size={16} />, bg: 'bg-gold/10' },
+        ].map((stat, i) => (
+          <div key={i} className={`${stat.bg} p-6 rounded-[2.5rem] border border-transparent shadow-sm hover:border-gold transition-colors text-center flex flex-col items-center group`}>
+            <div className="p-3 bg-white rounded-2xl text-gold mb-3 group-hover:scale-110 transition-transform shadow-sm">{stat.icon}</div>
+            <h3 className="text-2xl font-black text-black tracking-tight">{stat.value}</h3>
+            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest leading-tight">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-indigo-50 p-10 rounded-[3.5rem] border border-transparent shadow-sm">
+          <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
+            <TrendingUp size={24} className="mr-3 text-gold" /> Institutional Growth Index
+          </h3>
+          <div className="h-[300px] bg-white rounded-[2.5rem] p-8 shadow-sm">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={financialData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f5" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 'bold'}} />
+                <YAxis hide />
+                <Tooltip contentStyle={{borderRadius: '16px', border: 'none'}} />
+                <Line type="monotone" dataKey="revenue" stroke="#FFD700" strokeWidth={4} dot={{r: 6, fill:'#FFD700', strokeWidth: 2, stroke: '#fff'}} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-rose-50 p-10 rounded-[3.5rem] border border-transparent shadow-sm">
+          <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
+            <ShieldCheck size={24} className="mr-3 text-gold" /> Critical Milestone Audit
+          </h3>
+          <div className="space-y-6">
+            {[
+              { label: 'National Exam Registration', val: 100, color: 'bg-black' },
+              { label: 'Faculty Quality Audit', val: 82, color: 'bg-gold' },
+              { label: 'Infrastructure Grant Review', val: 45, color: 'bg-blue-500' },
+              { label: 'Registry Compliance', val: 94, color: 'bg-purple-500' },
+            ].map((kpi, i) => (
+              <div key={i} className="space-y-3">
+                 <div className="flex justify-between items-center text-[10px] font-black uppercase">
+                    <span className="text-gray-600">{kpi.label}</span>
+                    <span className="text-black">{kpi.val}%</span>
+                 </div>
+                 <div className="h-3 w-full bg-white rounded-full overflow-hidden shadow-inner">
+                    <div className={`h-full ${kpi.color} transition-all duration-1000`} style={{ width: `${kpi.val}%` }} />
+                 </div>
+              </div>
+            ))}
+          </div>
+          <button className="w-full mt-10 py-5 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl hover:bg-gold hover:text-black transition-all">Generate Executive Report</button>
+        </div>
+      </div>
+      {renderRecentActivity('bg-slate-50')}
+    </div>
   );
 
   const renderStudentDashboard = () => (
@@ -327,157 +428,23 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
     </div>
   );
 
-  const renderInstitutionalDashboard = () => (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {[
-          { label: 'Total Enrollment', value: '1,240', icon: <Users size={24} />, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Academic Standing', value: '#1', icon: <Trophy size={24} />, color: 'text-gold', bg: 'bg-gold/10' },
-          { label: 'Staff Count', value: '82', icon: <Briefcase size={24} />, color: 'text-purple-600', bg: 'bg-purple-50' },
-          { label: 'Operational Health', value: '99.9%', icon: <Activity size={24} />, color: 'text-green-600', bg: 'bg-green-50' },
-        ].map((stat, i) => (
-          <div key={i} className={`${stat.bg} p-8 rounded-[2.5rem] border border-transparent shadow-sm flex items-center space-x-6 group hover:border-gold transition-all`}>
-            <div className={`p-4 bg-white rounded-2xl ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>{stat.icon}</div>
-            <div>
-              <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">{stat.label}</p>
-              <h3 className="text-3xl font-black text-black tracking-tight">{stat.value}</h3>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-emerald-50 p-10 rounded-[3.5rem] border border-transparent shadow-sm">
-           <h3 className="text-xl font-black text-black uppercase mb-8 flex items-center">
-              <TrendingUp size={24} className="mr-3 text-gold" /> Enrollment Growth Index
-           </h3>
-           <div className="h-[350px] bg-white rounded-[2.5rem] p-8 shadow-sm">
-              <ResponsiveContainer width="100%" height="100%">
-                 <BarChart data={[{y:'2021',v:1000},{y:'2022',v:1150},{y:'2023',v:1240}, {y:'2024',v:1310}]}>
-                    <Bar dataKey="v" fill="#000" radius={[10, 10, 0, 0]} />
-                    <XAxis dataKey="y" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 'bold'}} />
-                    <YAxis hide />
-                    <Tooltip cursor={{fill: '#F8F8F8'}} contentStyle={{borderRadius: '16px', border: 'none'}} />
-                 </BarChart>
-              </ResponsiveContainer>
-           </div>
-        </div>
-
-        <div className="bg-rose-50 p-10 rounded-[3.5rem] border border-transparent shadow-sm">
-           <h3 className="text-xl font-black text-black uppercase mb-8 flex items-center">
-              <ShieldCheck size={24} className="mr-3 text-gold" /> Institutional KPI Status
-           </h3>
-           <div className="space-y-6">
-              {[
-                { label: 'National Exam Prep', val: 94, color: 'bg-black' },
-                { label: 'Staff Attendance', val: 98, color: 'bg-gold' },
-                { label: 'Digital Hub Usage', val: 76, color: 'bg-blue-500' },
-                { label: 'Maintenance Audit', val: 88, color: 'bg-purple-500' },
-              ].map((kpi, i) => (
-                <div key={i} className="space-y-3">
-                   <div className="flex justify-between items-center text-[10px] font-black uppercase">
-                      <span className="text-gray-600">{kpi.label}</span>
-                      <span className="text-black">{kpi.val}%</span>
-                   </div>
-                   <div className="h-3 w-full bg-white rounded-full overflow-hidden shadow-inner">
-                      <div className={`h-full ${kpi.color} transition-all duration-1000`} style={{ width: `${kpi.val}%` }} />
-                   </div>
-                </div>
-              ))}
-           </div>
-           <button className="w-full mt-10 py-5 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl hover:bg-gold hover:text-black transition-all">Generate Executive Report</button>
-        </div>
-      </div>
-      {renderRecentActivity('bg-slate-100')}
-    </div>
-  );
-
-  const renderBursarDashboard = () => (
-    <div className="space-y-8 animate-in fade-in duration-500">
-       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-blue-50 p-10 rounded-[3rem] border border-transparent shadow-sm group hover:border-gold transition-all">
-             <div className="flex items-center space-x-4 mb-6">
-                <div className="p-3 bg-white rounded-xl text-blue-600 shadow-sm"><Wallet size={20} /></div>
-                <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Total Fee Revenue</p>
-             </div>
-             <p className="text-5xl font-black text-black tracking-tighter">K3.2M</p>
-             <p className="text-[10px] text-green-500 font-bold uppercase mt-2 tracking-widest">+12% Surplus</p>
-          </div>
-          <div className="bg-gold/10 p-10 rounded-[3rem] border border-transparent shadow-sm group hover:border-gold transition-all">
-             <div className="flex items-center space-x-4 mb-6">
-                <div className="p-3 bg-white rounded-xl text-gold shadow-sm"><CheckCircle size={20} /></div>
-                <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Collection Rate</p>
-             </div>
-             <p className="text-5xl font-black text-gold tracking-tighter">92%</p>
-             <p className="text-[10px] text-gray-400 font-bold uppercase mt-2 tracking-widest">42 Arrears Flagged</p>
-          </div>
-          <div className="bg-orange-50 p-10 rounded-[3rem] border border-transparent shadow-sm group hover:border-gold transition-all">
-             <div className="flex items-center space-x-4 mb-6">
-                <div className="p-3 bg-white rounded-xl text-orange-500 shadow-sm"><Zap size={20} /></div>
-                <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Budget Status</p>
-             </div>
-             <p className="text-5xl font-black text-black tracking-tighter">74%</p>
-             <p className="text-[10px] text-orange-500 font-bold uppercase mt-2 tracking-widest">Utilization Rate</p>
-          </div>
-       </div>
-
-       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 bg-indigo-50 p-10 rounded-[3.5rem] shadow-sm border border-transparent">
-             <h3 className="text-xl font-black text-black uppercase mb-8 flex items-center">
-               <Activity size={24} className="mr-3 text-gold" /> Institutional Cash Flow
-             </h3>
-             <div className="h-[350px] bg-white rounded-[2.5rem] p-8 shadow-sm">
-                <ResponsiveContainer width="100%" height="100%">
-                   <LineChart data={financialData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f5" />
-                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 'bold'}} />
-                      <YAxis hide />
-                      <Tooltip contentStyle={{borderRadius: '16px', border: 'none'}} />
-                      <Line type="monotone" dataKey="revenue" stroke="#FFD700" strokeWidth={5} dot={{r: 6, fill:'#FFD700', strokeWidth: 2, stroke: '#fff'}} />
-                      <Line type="monotone" dataKey="expenses" stroke="#000" strokeWidth={5} dot={{r: 6, fill:'#000', strokeWidth: 2, stroke: '#fff'}} />
-                   </LineChart>
-                </ResponsiveContainer>
-             </div>
-          </div>
-
-          <div className="bg-slate-50 p-10 rounded-[3.5rem] border border-transparent shadow-sm flex flex-col">
-             <h3 className="text-xl font-black text-black uppercase mb-8">Financial Registry</h3>
-             <div className="space-y-4 flex-grow">
-                {[
-                  { label: 'Payroll Processing', status: 'In Progress', color: 'text-orange-500' },
-                  { label: 'Vendor Settlements', status: 'Completed', color: 'text-green-500' },
-                  { label: 'Infrastructure Grant', status: 'Pending', color: 'text-blue-500' },
-                  { label: 'Audit Compliance', status: 'Verified', color: 'text-black' },
-                ].map((item, i) => (
-                  <div key={i} className="flex justify-between items-center p-5 bg-white rounded-2xl shadow-sm border border-gray-50">
-                     <span className="text-[10px] font-black uppercase text-gray-500">{item.label}</span>
-                     <span className={`text-[9px] font-black uppercase ${item.color}`}>{item.status}</span>
-                  </div>
-                ))}
-             </div>
-             <button className="w-full mt-8 py-5 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-gold hover:text-black transition-all">Access General Ledger</button>
-          </div>
-       </div>
-       {renderRecentActivity('bg-slate-100')}
-    </div>
-  );
-
   const renderDashboardByRole = () => {
     switch (user.role) {
       case UserRole.STUDENT:
         return renderStudentDashboard();
       case UserRole.HOD:
         return renderHODDashboard();
-      case UserRole.TEACHER:
       case UserRole.PRINCIPAL:
+        return renderPrincipalDashboard();
+      case UserRole.TEACHER:
       case UserRole.ADMIN:
       case UserRole.SUPER_USER:
       case UserRole.VENDOR:
         return renderTeacherDashboard();
       case UserRole.ADMISSIONS:
-        return renderInstitutionalDashboard();
+        return renderPrincipalDashboard(); // Using Principal's for Admissions/Admins
       case UserRole.BURSAR:
-        return renderBursarDashboard();
+        return renderPrincipalDashboard(); // Using Principal's for BURSAR
       default:
         return renderStudentDashboard();
     }
