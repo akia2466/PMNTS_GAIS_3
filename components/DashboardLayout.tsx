@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User } from '../types';
+import { User, UserRole } from '../types';
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -14,7 +14,8 @@ import {
   BarChart3,
   Briefcase,
   ClipboardCheck,
-  UserPlus
+  UserPlus,
+  Users2
 } from 'lucide-react';
 
 interface Props {
@@ -26,7 +27,9 @@ interface Props {
 }
 
 const DashboardLayout: React.FC<Props> = ({ user, activeTab, setActiveTab, logout, children }) => {
-  const menuItems = [
+  const isPrincipal = user.role === UserRole.PRINCIPAL;
+
+  const baseMenuItems = [
     { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { id: 'performance', label: 'Performance', icon: <BarChart3 size={20} /> },
     { id: 'attendance', label: 'Attendance', icon: <ClipboardCheck size={20} /> },
@@ -37,6 +40,13 @@ const DashboardLayout: React.FC<Props> = ({ user, activeTab, setActiveTab, logou
     { id: 'community', label: 'Community', icon: <Rss size={20} /> },
     { id: 'connections', label: 'Connections', icon: <UserPlus size={20} /> },
   ];
+
+  // Filtering logic for Principal
+  let menuItems = baseMenuItems;
+  if (isPrincipal) {
+    menuItems = baseMenuItems.filter(item => item.id !== 'assignments');
+    menuItems.splice(1, 0, { id: 'users', label: 'User Management', icon: <Users2 size={20} /> });
+  }
 
   return (
     <div className="flex h-screen bg-[#F8F8F8] overflow-hidden font-sans">

@@ -19,6 +19,7 @@ import Performance from './pages/dashboards/Performance';
 import AssignmentHub from './pages/dashboards/AssignmentHub';
 import AttendanceRecord from './pages/dashboards/AttendanceRecord';
 import Connections from './pages/dashboards/Connections';
+import UserManagement from './pages/dashboards/UserManagement';
 import { Menu, X, LogIn, Loader2 } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -86,11 +87,12 @@ const App: React.FC = () => {
         {dashboardTab === 'performance' && <Performance user={user} />}
         {dashboardTab === 'attendance' && <AttendanceRecord user={user} />}
         {dashboardTab === 'schedule' && <ScheduleModule user={user} />}
-        {dashboardTab === 'assignments' && <AssignmentHub user={user} />}
+        {dashboardTab === 'assignments' && user.role !== UserRole.PRINCIPAL && <AssignmentHub user={user} />}
         {dashboardTab === 'files' && <Vault user={user} />}
         {dashboardTab === 'messenger' && <Messenger user={user} />}
         {dashboardTab === 'community' && <CommunityFeed user={user} />}
         {dashboardTab === 'connections' && <Connections user={user} />}
+        {dashboardTab === 'users' && user.role === UserRole.PRINCIPAL && <UserManagement user={user} />}
       </DashboardLayout>
     );
   }
@@ -98,6 +100,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col font-sans">
       <header className="sticky top-0 z-50 bg-black text-white shadow-xl border-b border-[#B8860B]">
+        {/* Header content unchanged for public view */}
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setView('HOME')}>
             <div className="w-10 h-10 bg-gold rounded-lg flex items-center justify-center font-bold text-black text-xl group-hover:scale-110 transition-transform shadow-lg shadow-gold/20">P</div>
@@ -160,6 +163,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className="bg-black text-white pt-20 pb-10 border-t border-[#B8860B]">
+        {/* Footer content unchanged */}
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="col-span-1 md:col-span-2">
