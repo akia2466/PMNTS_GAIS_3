@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
-import { MapPin, User as UserIcon, Clock, ChevronLeft, ChevronRight, BookOpen, Edit2, Save, Plus, Activity, ChevronDown, Users } from 'lucide-react';
+import { MapPin, User as UserIcon, Clock, ChevronLeft, ChevronRight, BookOpen, Edit2, Save, Plus, Activity, ChevronDown, Users, Briefcase } from 'lucide-react';
 
 interface Props {
   user: User;
@@ -23,7 +23,6 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
   const years = ['2026', '2025', '2024'];
   const terms = ['Term 1', 'Term 2', 'Term 3', 'Term 4'];
 
-  // Teacher functionality roles
   const isTeacher = [
     UserRole.TEACHER, 
     UserRole.HOD, 
@@ -33,7 +32,50 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
     UserRole.VENDOR
   ].includes(user.role);
 
-  // Schedule for a Teacher (Specific Subject: e.g. Mathematics)
+  const isHOD = user.role === UserRole.HOD;
+
+  // Schedule for Mathematics HOD
+  const hodSchedule = [
+    {
+      day: 'Monday',
+      classes: [
+        { time: '08:00 - 09:30', start: '08:00', end: '09:30', subject: 'Mathematics 12A', location: 'Room 101', type: 'lecture' },
+        { time: '10:00 - 11:30', start: '10:00', end: '11:30', subject: 'Mathematics 12B', location: 'Room 102', type: 'lecture' },
+        { time: '13:00 - 14:30', start: '13:00', end: '14:30', subject: 'Department Staff Review', location: 'HOD Office', type: 'meeting' },
+      ]
+    },
+    {
+      day: 'Tuesday',
+      classes: [
+        { time: '08:00 - 09:30', start: '08:00', end: '09:30', subject: 'Curriculum Planning', location: 'Meeting Room A', type: 'meeting' },
+        { time: '10:00 - 11:30', start: '10:00', end: '11:30', subject: 'Mathematics 12A', location: 'Room 101', type: 'lecture' },
+        { time: '14:00 - 15:30', start: '14:00', end: '15:30', subject: 'Class Observations', location: 'Grade 11 Wings', type: 'oversight' },
+      ]
+    },
+    { 
+      day: 'Wednesday', 
+      classes: [
+        { time: '08:00 - 09:30', start: '08:00', end: '09:30', subject: 'Mathematics 12B', location: 'Room 102', type: 'lecture' },
+        { time: '10:00 - 11:30', start: '10:00', end: '11:30', subject: 'Admin Oversight', location: 'Registry Office', type: 'admin' },
+      ] 
+    },
+    { 
+      day: 'Thursday', 
+      classes: [
+        { time: '09:00 - 10:30', start: '09:00', end: '10:30', subject: 'Math Lab Coordination', location: 'Lab 1', type: 'oversight' },
+        { time: '11:00 - 12:30', start: '11:00', end: '12:30', subject: 'Assessment Sync', location: 'HOD Office', type: 'admin' },
+      ] 
+    },
+    { 
+      day: 'Friday', 
+      classes: [
+        { time: '08:00 - 09:30', start: '08:00', end: '09:30', subject: 'Mathematics 12A', location: 'Room 101', type: 'lecture' },
+        { time: '13:00 - 14:30', start: '13:00', end: '14:30', subject: 'Weekly Dept Debrief', location: 'Staff Lounge', type: 'meeting' },
+      ] 
+    }
+  ];
+
+  // Schedule for a Teacher
   const teacherSchedule = [
     {
       day: 'Monday',
@@ -77,16 +119,25 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
     { day: 'Friday', classes: [{ time: '08:00 - 09:30', start: '08:00', end: '09:30', subject: 'Physical Education', teacher: 'Coach Miller', location: 'Gym' }] }
   ];
 
-  const weeklySchedule = isTeacher ? teacherSchedule : studentSchedule;
+  const weeklySchedule = isHOD ? hodSchedule : isTeacher ? teacherSchedule : studentSchedule;
 
   const subjectColors: {[key: string]: string} = {
     'Mathematics': 'bg-blue-50 border-blue-200 text-blue-900',
+    'Mathematics 12A': 'bg-blue-50 border-blue-200 text-blue-900',
+    'Mathematics 12B': 'bg-indigo-50 border-indigo-200 text-indigo-900',
     'Advanced Math': 'bg-indigo-50 border-indigo-200 text-indigo-900',
     'English Literature': 'bg-purple-50 border-purple-200 text-purple-900',
     'Chemistry': 'bg-green-50 border-green-200 text-green-900',
     'Social Science': 'bg-orange-50 border-orange-200 text-orange-900',
     'Physics': 'bg-cyan-50 border-cyan-200 text-cyan-900',
-    'Physical Education': 'bg-red-50 border-red-200 text-red-900'
+    'Physical Education': 'bg-red-50 border-red-200 text-red-900',
+    'Department Staff Review': 'bg-gold/10 border-gold/30 text-black',
+    'Curriculum Planning': 'bg-zinc-100 border-zinc-200 text-black',
+    'Class Observations': 'bg-emerald-50 border-emerald-100 text-emerald-900',
+    'Admin Oversight': 'bg-slate-100 border-slate-200 text-slate-800',
+    'Math Lab Coordination': 'bg-blue-50 border-blue-100 text-blue-800',
+    'Assessment Sync': 'bg-orange-50 border-orange-100 text-orange-800',
+    'Weekly Dept Debrief': 'bg-gold/10 border-gold/30 text-black',
   };
 
   const getSessionProgress = (startStr: string, endStr: string) => {
@@ -112,11 +163,11 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
       <div className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
         <div>
           <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">
-            {isTeacher ? "Subject Timetable" : "Academic Timetable"}
+            {isHOD ? "Departmental Timetable" : isTeacher ? "Subject Timetable" : "Academic Timetable"}
           </h2>
           <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2 flex items-center">
             <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
-            Current Time: {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            {isHOD ? 'Mathematics Head of Department' : 'Institutional Registry Log'} &bull; {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
 
@@ -136,7 +187,7 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
             <select 
               value={selectedTerm}
               onChange={(e) => setSelectedTerm(e.target.value)}
-              className="appearance-none bg-gray-50 border border-gray-200 rounded-xl px-6 py-2 pr-10 text-[10px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm"
+              className="appearance-none bg-white border border-gray-200 rounded-xl px-6 py-2 pr-10 text-[10px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm"
             >
               {terms.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
@@ -150,16 +201,16 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
            <div className="flex items-center space-x-8">
               <div className="w-20 h-20 bg-black text-gold rounded-[2rem] flex items-center justify-center shadow-xl animate-pulse">
-                 <Activity size={32} />
+                 {isHOD ? <Briefcase size={32} /> : <Activity size={32} />}
               </div>
               <div>
-                 <p className="text-black/50 font-black uppercase tracking-widest text-[10px] mb-1">Current Session</p>
+                 <p className="text-black/50 font-black uppercase tracking-widest text-[10px] mb-1">Current Active Slot</p>
                  <h3 className="text-4xl font-black uppercase tracking-tighter text-black leading-none">
-                    {currentSession ? currentSession.subject : 'No Active Lectures'}
+                    {currentSession ? currentSession.subject : 'No Active Transmissions'}
                  </h3>
                  {currentSession && (
                    <p className="text-black/60 font-bold uppercase tracking-widest text-[10px] mt-2">
-                      {isTeacher ? (currentSession as any).class : (currentSession as any).teacher} • {currentSession.location} • Ends at {currentSession.end}
+                      {isTeacher ? (currentSession as any).class || (currentSession as any).type : (currentSession as any).teacher} &bull; {currentSession.location} &bull; Finalizing at {currentSession.end}
                    </p>
                  )}
               </div>
@@ -189,7 +240,7 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
               <div className={`p-6 rounded-[2.5rem] text-center shadow-xl border-b-8 transition-all ${isToday ? 'bg-black text-white border-gold shadow-gold/10' : 'bg-white text-black border-gray-100 shadow-sm'}`}>
                 <h3 className="font-black uppercase tracking-[0.2em] text-[13px]">{dayData.day}</h3>
                 <p className={`text-[9px] font-black uppercase tracking-widest mt-2 ${isToday ? 'text-gold' : 'text-gray-400'}`}>
-                  {isToday ? 'Live Sessions' : `${dayData.classes.length} Lectures`}
+                  {isToday ? 'Live Registry' : `${dayData.classes.length} Sessions`}
                 </p>
               </div>
               
@@ -210,7 +261,7 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
                       <div className="pt-6 border-t border-black/5 space-y-3">
                          <p className="text-[9px] font-black uppercase tracking-widest opacity-60 flex items-center">
                             {isTeacher ? <Users size={14} className="mr-3 opacity-40" /> : <UserIcon size={14} className="mr-3 opacity-40" />}
-                            {isTeacher ? item.class : item.teacher}
+                            {isTeacher ? item.class || item.type : item.teacher}
                          </p>
                          <p className="text-[9px] font-black uppercase tracking-widest opacity-60 flex items-center"><MapPin size={14} className="mr-3 opacity-40" /> {item.location}</p>
                       </div>

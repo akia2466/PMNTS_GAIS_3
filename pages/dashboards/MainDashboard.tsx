@@ -21,7 +21,9 @@ import {
   Zap,
   ShieldCheck,
   UserX,
-  UserCheck
+  UserCheck,
+  Target,
+  BarChart3
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -159,6 +161,87 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+      {renderRecentActivity('bg-slate-50')}
+    </div>
+  );
+
+  const renderHODDashboard = () => (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Dept Avg GPA', value: '3.6', icon: <BarChart3 size={16} />, bg: 'bg-blue-50' },
+          { label: 'Dept Attendance', value: '94%', icon: <Clock size={16} />, bg: 'bg-green-50' },
+          { label: 'Dept Rank', value: '#1', icon: <Trophy size={16} />, bg: 'bg-gold/10' },
+          { label: 'Staff Count', value: '4', icon: <Users size={16} />, bg: 'bg-purple-50' },
+          { label: 'Pending Reviews', value: '8', icon: <FileText size={16} />, bg: 'bg-orange-50' },
+          { label: 'Active Curricula', value: '2', icon: <BookOpen size={16} />, bg: 'bg-cyan-50' },
+          { label: 'Dept Inquiries', value: '15', icon: <MessageSquare size={16} />, bg: 'bg-pink-50' },
+          { label: 'Registry Alerts', value: '2', icon: <AlertCircle size={16} />, bg: 'bg-red-50' },
+        ].map((stat, i) => (
+          <div key={i} className={`${stat.bg} p-6 rounded-[2.5rem] border border-transparent shadow-sm hover:border-gold transition-colors text-center flex flex-col items-center group`}>
+            <div className="p-3 bg-white rounded-2xl text-gold mb-3 group-hover:scale-110 transition-transform shadow-sm">{stat.icon}</div>
+            <h3 className="text-2xl font-black text-black tracking-tight">{stat.value}</h3>
+            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest leading-tight">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-indigo-50 p-10 rounded-[3.5rem] border border-transparent shadow-sm">
+          <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
+            <Target size={24} className="mr-3 text-gold" /> Mathematics Teacher Overview
+          </h3>
+          <div className="space-y-4">
+            {[
+              { name: 'Mr. A. Kila', grades: '11 & 12', load: '18 hrs/wk', performance: '92%', color: 'bg-blue-500' },
+              { name: 'Ms. B. Vele', grades: '11 & 12', load: '16 hrs/wk', performance: '88%', color: 'bg-green-500' },
+              { name: 'Mr. C. Gere', grades: '11 & 12', load: '17 hrs/wk', performance: '94%', color: 'bg-purple-500' },
+              { name: 'Ms. D. Gima', grades: '11 & 12', load: '16 hrs/wk', performance: '85%', color: 'bg-orange-500' },
+            ].map((t, i) => (
+              <div key={i} className="flex items-center justify-between p-5 bg-white rounded-3xl shadow-sm border border-transparent hover:border-gold transition-all">
+                <div className="flex items-center space-x-4">
+                  <div className={`w-12 h-12 ${t.color} text-white rounded-2xl flex items-center justify-center font-black text-xs shadow-lg`}>{t.name.split(' ')[1][0]}</div>
+                  <div>
+                    <span className="font-black text-sm uppercase text-black block">{t.name}</span>
+                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Load: {t.load} &bull; Grades: {t.grades}</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-black text-black leading-none">{t.performance}</p>
+                  <p className="text-[8px] font-bold text-gray-400 uppercase mt-1">Efficiency</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-gold/10 p-10 rounded-[3.5rem] border border-transparent shadow-sm">
+           <h3 className="text-xl font-black text-black uppercase mb-8 flex items-center">
+              <TrendingUp size={24} className="mr-3 text-gold" /> Mathematics Dept Performance
+           </h3>
+           <div className="h-[300px] bg-white rounded-[2.5rem] p-8 shadow-sm">
+              <ResponsiveContainer width="100%" height="100%">
+                 <BarChart data={[{g:'G11',a:84},{g:'G12',a:89}]}>
+                    <Bar dataKey="a" fill="#000" radius={[10, 10, 0, 0]} />
+                    <XAxis dataKey="g" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 'bold'}} />
+                    <YAxis hide />
+                    <Tooltip cursor={{fill: '#F8F8F8'}} contentStyle={{borderRadius: '16px', border: 'none'}} />
+                 </BarChart>
+              </ResponsiveContainer>
+           </div>
+           <div className="mt-8 flex justify-around">
+             <div className="text-center">
+               <p className="text-3xl font-black text-black">86.5%</p>
+               <p className="text-[9px] font-bold text-gray-400 uppercase">Average Mastery</p>
+             </div>
+             <div className="w-[1px] bg-gray-200" />
+             <div className="text-center">
+               <p className="text-3xl font-black text-gold">420</p>
+               <p className="text-[9px] font-bold text-gray-400 uppercase">Enrolled Students</p>
+             </div>
+           </div>
         </div>
       </div>
       {renderRecentActivity('bg-slate-50')}
@@ -383,8 +466,9 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
     switch (user.role) {
       case UserRole.STUDENT:
         return renderStudentDashboard();
-      case UserRole.TEACHER:
       case UserRole.HOD:
+        return renderHODDashboard();
+      case UserRole.TEACHER:
       case UserRole.PRINCIPAL:
       case UserRole.ADMIN:
       case UserRole.SUPER_USER:

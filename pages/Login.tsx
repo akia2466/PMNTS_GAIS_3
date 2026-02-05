@@ -28,7 +28,7 @@ const Login: React.FC<Props> = ({ onLoginSuccess, setView }) => {
     { role: UserRole.STUDENT, label: 'Student', icon: <UserIcon size={24} />, color: 'bg-blue-50 text-blue-600 border-blue-100', name: 'James Kari', email: 'james.k@pomnhs.edu.pg' },
     { role: UserRole.TEACHER, label: 'Teacher', icon: <GraduationCap size={24} />, color: 'bg-purple-50 text-purple-600 border-purple-100', name: 'Dr. Anna Vele', email: 'a.vele@pomnhs.edu.pg' },
     { role: UserRole.PRINCIPAL, label: 'Principal', icon: <Building2 size={24} />, color: 'bg-gold/10 text-gold border-gold/20', name: 'Dr. James Gere', email: 'principal@pomnhs.edu.pg' },
-    { role: UserRole.HOD, label: 'Dept Head', icon: <Briefcase size={24} />, color: 'bg-green-50 text-green-600 border-green-100', name: 'Ms. Sarah Smith', email: 's.smith@pomnhs.edu.pg' },
+    { role: UserRole.HOD, label: 'HOD (Mathematics)', icon: <Briefcase size={24} />, color: 'bg-green-50 text-green-600 border-green-100', name: 'Ms. Sarah Smith', email: 's.smith@pomnhs.edu.pg' },
     { role: UserRole.BURSAR, label: 'Bursar', icon: <Wallet size={24} />, color: 'bg-orange-50 text-orange-600 border-orange-100', name: 'Bursar Office', email: 'accounts@pomnhs.edu.pg' },
     { role: UserRole.ADMISSIONS, label: 'Admissions', icon: <Users size={24} />, color: 'bg-cyan-50 text-cyan-600 border-cyan-100', name: 'Registrar', email: 'admissions@pomnhs.edu.pg' },
     { role: UserRole.ADMIN, label: 'IT Admin', icon: <ShieldCheck size={24} />, color: 'bg-zinc-100 text-zinc-900 border-zinc-200', name: 'Systems Admin', email: 'admin@pomnhs.edu.pg' },
