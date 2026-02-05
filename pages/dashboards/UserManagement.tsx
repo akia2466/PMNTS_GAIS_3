@@ -8,13 +8,13 @@ import {
   Edit2, 
   Trash2, 
   Shield, 
-  MoreVertical, 
   Filter,
   CheckCircle,
-  XCircle,
   UserCheck,
   Save,
-  X
+  X,
+  GraduationCap,
+  Briefcase
 } from 'lucide-react';
 
 interface Props {
@@ -50,16 +50,18 @@ const UserManagement: React.FC<Props> = ({ user }) => {
     role: UserRole.STUDENT,
     email: '',
     status: 'Active',
-    class: ''
+    class: '',
+    dept: ''
   });
 
   const roles = ['All Roles', ...Object.values(UserRole)];
 
   const handleAddUser = () => {
+    if (!newUser.name || !newUser.email) return;
     const id = (Math.floor(Math.random() * 900) + 100).toString();
     setUsers([...users, { ...newUser, id }]);
     setIsAddingUser(false);
-    setNewUser({ id: '', name: '', role: UserRole.STUDENT, email: '', status: 'Active', class: '' });
+    setNewUser({ id: '', name: '', role: UserRole.STUDENT, email: '', status: 'Active', class: '', dept: '' });
   };
 
   const handleDeleteUser = (id: string) => {
@@ -106,23 +108,41 @@ const UserManagement: React.FC<Props> = ({ user }) => {
             <h3 className="text-xl font-black uppercase">Create New Profile</h3>
             <button onClick={() => setIsAddingUser(false)} className="p-2 hover:bg-gray-100 rounded-full"><X size={20}/></button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <input 
-              type="text" placeholder="Full Name" 
-              className="bg-gray-50 border border-gray-100 p-4 rounded-xl text-sm font-bold focus:ring-1 focus:ring-gold outline-none"
-              value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})}
-            />
-            <input 
-              type="email" placeholder="Email Address" 
-              className="bg-gray-50 border border-gray-100 p-4 rounded-xl text-sm font-bold focus:ring-1 focus:ring-gold outline-none"
-              value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})}
-            />
-            <select 
-              className="bg-gray-50 border border-gray-100 p-4 rounded-xl text-sm font-bold focus:ring-1 focus:ring-gold outline-none uppercase"
-              value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value as UserRole})}
-            >
-              {Object.values(UserRole).map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="space-y-2">
+              <label className="text-[9px] font-black uppercase text-gray-400 ml-4">Full Name</label>
+              <input 
+                type="text" placeholder="Official Name" 
+                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-xl text-sm font-bold focus:ring-1 focus:ring-gold outline-none"
+                value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[9px] font-black uppercase text-gray-400 ml-4">Email Address</label>
+              <input 
+                type="email" placeholder="id@pomnhs.edu.pg" 
+                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-xl text-sm font-bold focus:ring-1 focus:ring-gold outline-none"
+                value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[9px] font-black uppercase text-gray-400 ml-4">Institutional Role</label>
+              <select 
+                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-xl text-sm font-bold focus:ring-1 focus:ring-gold outline-none uppercase"
+                value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value as UserRole})}
+              >
+                {Object.values(UserRole).map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[9px] font-black uppercase text-gray-400 ml-4">Assignment (Class or Dept)</label>
+              <input 
+                type="text" placeholder="e.g. 12A or Math" 
+                className="w-full bg-gray-50 border border-gray-100 p-4 rounded-xl text-sm font-bold focus:ring-1 focus:ring-gold outline-none"
+                value={newUser.role === UserRole.STUDENT ? newUser.class : newUser.dept} 
+                onChange={e => newUser.role === UserRole.STUDENT ? setNewUser({...newUser, class: e.target.value}) : setNewUser({...newUser, dept: e.target.value})}
+              />
+            </div>
           </div>
           <div className="flex justify-end space-x-3">
              <button onClick={() => setIsAddingUser(false)} className="px-8 py-3 bg-gray-100 rounded-xl text-[10px] font-black uppercase tracking-widest">Cancel</button>
@@ -133,10 +153,10 @@ const UserManagement: React.FC<Props> = ({ user }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { label: 'Total Users', value: users.length.toString(), icon: <Users />, color: 'bg-blue-50' },
-          { label: 'Faculty Nodes', value: users.filter(u => u.role === UserRole.TEACHER || u.role === UserRole.HOD).length.toString(), icon: <UserCheck />, color: 'bg-purple-50' },
-          { label: 'Admin Nodes', value: users.filter(u => u.role === UserRole.ADMIN || u.role === UserRole.PRINCIPAL).length.toString(), icon: <Shield />, color: 'bg-gold/10' },
-          { label: 'System Health', value: 'Secure', icon: <CheckCircle />, color: 'bg-green-50' },
+          { label: 'Total Users', value: users.length.toString(), icon: <Users size={20} />, color: 'bg-blue-50' },
+          { label: 'Student Users', value: users.filter(u => u.role === UserRole.STUDENT).length.toString(), icon: <GraduationCap size={20} />, color: 'bg-green-50' },
+          { label: 'Faculty Users', value: users.filter(u => u.role === UserRole.TEACHER || u.role === UserRole.HOD).length.toString(), icon: <Briefcase size={20} />, color: 'bg-purple-50' },
+          { label: 'Staff Users', value: users.filter(u => ![UserRole.STUDENT, UserRole.TEACHER, UserRole.HOD].includes(u.role)).length.toString(), icon: <Shield size={20} />, color: 'bg-gold/10' },
         ].map((m, i) => (
           <div key={i} className={`${m.color} p-8 rounded-[2.5rem] border border-transparent shadow-sm flex flex-col items-center text-center group`}>
             <div className="p-3 bg-white rounded-xl mb-4 shadow-sm">{m.icon}</div>
@@ -209,7 +229,7 @@ const UserManagement: React.FC<Props> = ({ user }) => {
                       {isEditing ? (
                         <select 
                           className="bg-white border p-1 rounded text-[9px] font-black uppercase outline-none"
-                          value={u.role} onChange={e => handleUpdateUser(u.id, 'role', e.target.value)}
+                          value={u.role} onChange={e => handleUpdateUser(u.id, 'role', e.target.value as UserRole)}
                         >
                           {Object.values(UserRole).map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
@@ -243,6 +263,7 @@ const UserManagement: React.FC<Props> = ({ user }) => {
                         ) : (
                           <button onClick={() => setEditingUserId(u.id)} className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-gold transition-colors"><Edit2 size={14}/></button>
                         )}
+                        {/* Fixed error: changed handleDeleteUser(id) to handleDeleteUser(u.id) */}
                         <button onClick={() => handleDeleteUser(u.id)} className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
                       </div>
                     </td>
