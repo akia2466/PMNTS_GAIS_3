@@ -102,6 +102,7 @@ const Performance: React.FC<Props> = ({ user }) => {
       name: 'Mathematics', 
       grade: 'A-', 
       avg: '91%', 
+      studentCount: 43,
       color: 'bg-blue-500', 
       sectionBg: 'bg-blue-50/50',
       icon: 'M',
@@ -114,12 +115,39 @@ const Performance: React.FC<Props> = ({ user }) => {
       name: 'Science', 
       grade: 'B+', 
       avg: '85%', 
+      studentCount: 39,
       color: 'bg-green-500', 
       sectionBg: 'bg-green-50/50',
       icon: 'S',
       assessments: [
         { type: 'Lab Practical', date: 'Jan 18', score: '85/100', percentage: '85%', grade: 'B+' },
         { type: 'Quiz 2', date: 'Jan 12', score: '17/20', percentage: '85%', grade: 'B+' }
+      ]
+    },
+    { 
+      name: 'English Literature', 
+      grade: 'A', 
+      avg: '94%', 
+      studentCount: 45,
+      color: 'bg-purple-500', 
+      sectionBg: 'bg-purple-50/50',
+      icon: 'L',
+      assessments: [
+        { type: 'Essay #2', date: 'Jan 14', score: '95/100', percentage: '95%', grade: 'A' },
+        { type: 'Oral Presentation', date: 'Jan 11', score: '19/20', percentage: '95%', grade: 'A' }
+      ]
+    },
+    { 
+      name: 'Social Science', 
+      grade: 'B', 
+      avg: '82%', 
+      studentCount: 41,
+      color: 'bg-orange-500', 
+      sectionBg: 'bg-orange-50/50',
+      icon: 'H',
+      assessments: [
+        { type: 'Research Project', date: 'Jan 16', score: '80/100', percentage: '80%', grade: 'B' },
+        { type: 'Weekly Quiz', date: 'Jan 09', score: '17/20', percentage: '85%', grade: 'B' }
       ]
     },
   ];
@@ -234,23 +262,25 @@ const Performance: React.FC<Props> = ({ user }) => {
           <div className="absolute top-0 right-0 w-64 h-64 bg-black/5 rounded-bl-[10rem] group-hover:scale-110 transition-transform duration-700" />
           <div className="relative z-10 text-center md:text-left mb-8 md:mb-0">
             <h3 className="text-[11px] font-black uppercase tracking-[0.3em] mb-4 opacity-70">{mainStatLabel}</h3>
-            <div className="flex items-baseline space-x-2">
+            <div className="flex items-baseline justify-center md:justify-start space-x-2">
               <span className="text-8xl font-black tracking-tighter">{mainStatValue}</span>
               <div className="bg-black/10 px-3 py-1 rounded-full flex items-center space-x-1 mb-4">
                 <TrendingUp size={12} />
                 <span className="text-[10px] font-black uppercase">+1.2%</span>
               </div>
             </div>
-            {user.role === UserRole.TEACHER && gpaValue && (
-              <div className="mt-2">
-                <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Teaching Average GPA</p>
-                <p className="text-2xl font-black tracking-tight">{gpaValue}</p>
+            {gpaValue && (
+              <div className="mt-2 inline-block md:block">
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-60">
+                  {user.role === UserRole.TEACHER ? 'Teaching Average GPA' : 'Your Overall GPA'}
+                </p>
+                <p className="text-4xl font-black tracking-tight mt-1">{gpaValue}</p>
               </div>
             )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full md:w-auto relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full md:w-auto relative z-10">
             {data.map((s, i) => (
-              <div key={i} className="bg-white/30 backdrop-blur-md p-6 rounded-2xl border border-white/20 flex items-center space-x-4 shadow-sm">
+              <div key={i} className="bg-white/30 backdrop-blur-md p-6 rounded-2xl border border-white/20 flex items-center space-x-4 shadow-sm hover:scale-105 transition-all cursor-default">
                 <div className={`w-10 h-10 ${s.color} rounded-lg flex items-center justify-center text-white font-black text-[9px] shadow-md shrink-0`}>{s.icon}</div>
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-widest opacity-60 truncate w-24">{s.name}</p>
@@ -299,16 +329,18 @@ const Performance: React.FC<Props> = ({ user }) => {
                       <h4 className="text-2xl font-black text-black uppercase tracking-tighter">{s.name}</h4>
                       <div className="flex items-center space-x-3 mt-1">
                         <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                          Class Avg: <span className="text-gold font-black">{s.avg}</span>
+                          {user.role === UserRole.TEACHER ? 'Class Avg:' : 'Current Avg:'} <span className="text-gold font-black">{s.avg}</span>
                         </p>
                         <span className="w-1 h-1 bg-gray-300 rounded-full" />
                         <p className="text-[11px] font-black text-gold uppercase tracking-widest">
                           {s.studentCount} Students
                         </p>
                       </div>
-                      <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-1">
-                        &bull; Click on an assessment to grade
-                      </p>
+                      {user.role === UserRole.TEACHER && (
+                        <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-1">
+                          &bull; Click on an assessment to grade
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -319,7 +351,7 @@ const Performance: React.FC<Props> = ({ user }) => {
                       <tr className="bg-gray-50">
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Unit / Assignment</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Date Issued</th>
-                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Class Mean</th>
+                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">{user.role === UserRole.TEACHER ? 'Class Mean' : 'Your Score'}</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Success Rate</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Mean Grade</th>
                       </tr>
@@ -381,7 +413,7 @@ const Performance: React.FC<Props> = ({ user }) => {
       )}
       {user.role === UserRole.TEACHER 
         ? renderPerformanceHub(teacherClasses, "Class Performance Register", "Manage your classes' results", "Teaching Average %", "89%", "3.4") 
-        : renderPerformanceHub(studentSubjects, "Academic Transcript", "View your semester grades", "Your Overall Average", "87%")}
+        : renderPerformanceHub(studentSubjects, "Academic Transcript", "View your semester grades", "Your Overall Average %", "89%", "3.4")}
     </div>
   );
 };

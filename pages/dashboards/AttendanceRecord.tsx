@@ -18,7 +18,8 @@ import {
   ChevronDown,
   ChevronUp,
   MoreVertical,
-  Activity
+  Activity,
+  ArrowUpRight
 } from 'lucide-react';
 
 interface Props {
@@ -50,10 +51,10 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
   ];
 
   const subjectAttendance = [
-    { name: 'Mathematics', rate: 98, tardy: 2 },
-    { name: 'Science', rate: 95, tardy: 5 },
-    { name: 'Literature', rate: 96, tardy: 1 },
-    { name: 'Social Science', rate: 94, tardy: 4 },
+    { name: 'Mathematics', rate: 98, tardy: 2, color: 'bg-blue-500', bg: 'bg-blue-50' },
+    { name: 'Science', rate: 95, tardy: 5, color: 'bg-green-500', bg: 'bg-green-50' },
+    { name: 'Literature', rate: 96, tardy: 1, color: 'bg-purple-500', bg: 'bg-purple-50' },
+    { name: 'Social Science', rate: 94, tardy: 4, color: 'bg-orange-500', bg: 'bg-orange-50' },
   ];
 
   const classAttendance = [
@@ -251,10 +252,39 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
            </div>
         </section>
       ) : (
-        <section className="bg-emerald-50 p-2 rounded-[4rem] shadow-xl">
-          <div className="bg-white rounded-[3.5rem] border-2 border-gray-100 overflow-hidden">
+        <section className="space-y-12">
+          {/* Student Subject Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {subjectAttendance.map((subject, idx) => (
+              <div key={idx} className={`${subject.bg} p-8 rounded-[3rem] border border-transparent shadow-sm hover:border-gold transition-all group flex flex-col justify-between overflow-hidden relative`}>
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white/50 rounded-bl-full group-hover:scale-110 transition-transform" />
+                <div className="flex justify-between items-start relative z-10">
+                  <div className={`p-3 ${subject.color} text-white rounded-2xl shadow-lg`}>
+                    <Activity size={18} />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[18px] font-black text-black leading-none">{subject.rate}%</p>
+                    <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Presence</p>
+                  </div>
+                </div>
+                <div className="mt-8 relative z-10">
+                  <h4 className="font-black text-[13px] uppercase tracking-tight text-black">{subject.name}</h4>
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-black/5">
+                    <div className="flex items-center space-x-2">
+                       <Clock size={12} className="text-orange-500" />
+                       <span className="text-[10px] font-black text-gray-600">{subject.tardy} Lates</span>
+                    </div>
+                    <ArrowUpRight size={14} className="text-gray-300 group-hover:text-gold transition-colors" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-[4rem] border border-gray-100 shadow-sm overflow-hidden">
             <div className="p-10 border-b border-gray-50 flex items-center justify-between bg-gray-50/20">
               <h3 className="text-2xl font-black text-black uppercase tracking-tighter">Individual Log Registry</h3>
+              <div className="p-3 bg-white border border-gray-100 rounded-xl text-gold shadow-sm"><FileText size={18}/></div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left">
@@ -301,7 +331,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
           <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Attendance Registry</h2>
           <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2 flex items-center">
             <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
-            Institutional Presence Monitoring &bull; Academic Year 2024
+            Institutional Presence Monitoring & bull; Academic Year 2024
           </p>
         </div>
         <div className="flex space-x-4">
@@ -312,6 +342,16 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
               className="appearance-none bg-white border border-gray-200 rounded-xl px-6 py-2 pr-10 text-[10px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm"
             >
               {years.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          </div>
+          <div className="relative inline-block">
+            <select 
+              value={selectedTerm}
+              onChange={(e) => setSelectedTerm(e.target.value)}
+              className="appearance-none bg-white border border-gray-200 rounded-xl px-6 py-2 pr-10 text-[10px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm"
+            >
+              {terms.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
             <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
