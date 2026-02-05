@@ -244,7 +244,7 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
     </div>
   );
 
-  const renderPrincipalDashboard = () => (
+  const renderInstitutionalDashboard = () => (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
@@ -381,15 +381,21 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
 
   const renderDashboardByRole = () => {
     switch (user.role) {
-      case UserRole.STUDENT: return renderStudentDashboard();
-      case UserRole.TEACHER: return renderTeacherDashboard();
+      case UserRole.STUDENT:
+        return renderStudentDashboard();
+      case UserRole.TEACHER:
+      case UserRole.HOD:
       case UserRole.PRINCIPAL:
       case UserRole.ADMIN:
       case UserRole.SUPER_USER:
+      case UserRole.VENDOR:
+        return renderTeacherDashboard();
       case UserRole.ADMISSIONS:
-      case UserRole.HOD: return renderPrincipalDashboard();
-      case UserRole.BURSAR: return renderBursarDashboard();
-      default: return renderStudentDashboard();
+        return renderInstitutionalDashboard();
+      case UserRole.BURSAR:
+        return renderBursarDashboard();
+      default:
+        return renderStudentDashboard();
     }
   };
 

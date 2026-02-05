@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
-// Added Users to the lucide-react import list
 import { MapPin, User as UserIcon, Clock, ChevronLeft, ChevronRight, BookOpen, Edit2, Save, Plus, Activity, ChevronDown, Users } from 'lucide-react';
 
 interface Props {
@@ -23,7 +23,15 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
   const years = ['2026', '2025', '2024'];
   const terms = ['Term 1', 'Term 2', 'Term 3', 'Term 4'];
 
-  const isTeacher = user.role === UserRole.TEACHER;
+  // Teacher functionality roles
+  const isTeacher = [
+    UserRole.TEACHER, 
+    UserRole.HOD, 
+    UserRole.PRINCIPAL, 
+    UserRole.ADMIN, 
+    UserRole.SUPER_USER, 
+    UserRole.VENDOR
+  ].includes(user.role);
 
   // Schedule for a Teacher (Specific Subject: e.g. Mathematics)
   const teacherSchedule = [
@@ -145,7 +153,7 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
                  <Activity size={32} />
               </div>
               <div>
-                 <p className="text-black/50 font-black uppercase tracking-widest text-[10px] mb-1">Current Class in Session</p>
+                 <p className="text-black/50 font-black uppercase tracking-widest text-[10px] mb-1">Current Session</p>
                  <h3 className="text-4xl font-black uppercase tracking-tighter text-black leading-none">
                     {currentSession ? currentSession.subject : 'No Active Lectures'}
                  </h3>
@@ -201,7 +209,6 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
                       
                       <div className="pt-6 border-t border-black/5 space-y-3">
                          <p className="text-[9px] font-black uppercase tracking-widest opacity-60 flex items-center">
-                            {/* Fixed missing icon import here by adding 'Users' to the lucide-react import */}
                             {isTeacher ? <Users size={14} className="mr-3 opacity-40" /> : <UserIcon size={14} className="mr-3 opacity-40" />}
                             {isTeacher ? item.class : item.teacher}
                          </p>

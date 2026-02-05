@@ -35,6 +35,16 @@ const Performance: React.FC<Props> = ({ user }) => {
   const [selectedTerm, setSelectedTerm] = useState('Term 1');
   const [selectedYear, setSelectedYear] = useState('2026');
   
+  // Helper to determine if the user has staff-level access
+  const isStaff = [
+    UserRole.TEACHER, 
+    UserRole.HOD, 
+    UserRole.PRINCIPAL, 
+    UserRole.ADMIN, 
+    UserRole.SUPER_USER, 
+    UserRole.VENDOR
+  ].includes(user.role);
+
   // Drill-down State
   const [viewingAssessment, setViewingAssessment] = useState<{
     className: string;
@@ -272,7 +282,7 @@ const Performance: React.FC<Props> = ({ user }) => {
             {gpaValue && (
               <div className="mt-2 inline-block md:block">
                 <p className="text-[10px] font-black uppercase tracking-widest opacity-60">
-                  {user.role === UserRole.TEACHER ? 'Teaching Average GPA' : 'Your Overall GPA'}
+                  {isStaff ? 'Institutional Teaching Average GPA' : 'Your Overall GPA'}
                 </p>
                 <p className="text-4xl font-black tracking-tight mt-1">{gpaValue}</p>
               </div>
@@ -329,14 +339,14 @@ const Performance: React.FC<Props> = ({ user }) => {
                       <h4 className="text-2xl font-black text-black uppercase tracking-tighter">{s.name}</h4>
                       <div className="flex items-center space-x-3 mt-1">
                         <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                          {user.role === UserRole.TEACHER ? 'Class Avg:' : 'Current Avg:'} <span className="text-gold font-black">{s.avg}</span>
+                          {isStaff ? 'Class Avg:' : 'Current Avg:'} <span className="text-gold font-black">{s.avg}</span>
                         </p>
                         <span className="w-1 h-1 bg-gray-300 rounded-full" />
                         <p className="text-[11px] font-black text-gold uppercase tracking-widest">
                           {s.studentCount} Students
                         </p>
                       </div>
-                      {user.role === UserRole.TEACHER && (
+                      {isStaff && (
                         <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-1">
                           &bull; Click on an assessment to grade
                         </p>
@@ -351,7 +361,7 @@ const Performance: React.FC<Props> = ({ user }) => {
                       <tr className="bg-gray-50">
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Unit / Assignment</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Date Issued</th>
-                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">{user.role === UserRole.TEACHER ? 'Class Mean' : 'Your Score'}</th>
+                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">{isStaff ? 'Class Mean' : 'Your Score'}</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Success Rate</th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Mean Grade</th>
                       </tr>
@@ -361,7 +371,7 @@ const Performance: React.FC<Props> = ({ user }) => {
                         <tr 
                           key={idx} 
                           onClick={() => {
-                            if (user.role === UserRole.TEACHER) {
+                            if (isStaff) {
                               setViewingAssessment({
                                 className: s.name,
                                 assessmentType: a.type,
@@ -370,12 +380,12 @@ const Performance: React.FC<Props> = ({ user }) => {
                               });
                             }
                           }}
-                          className={`group/row transition-colors ${user.role === UserRole.TEACHER ? 'cursor-pointer hover:bg-gold/5' : ''}`}
+                          className={`group/row transition-colors ${isStaff ? 'cursor-pointer hover:bg-gold/5' : ''}`}
                         >
                           <td className="px-6 py-4">
                             <div className="flex items-center space-x-2">
                               <span className="text-sm font-black text-black uppercase group-hover/row:text-gold transition-colors">{a.type}</span>
-                              {user.role === UserRole.TEACHER && <Edit3 size={12} className="opacity-0 group-hover/row:opacity-100 transition-opacity text-gold" />}
+                              {isStaff && <Edit3 size={12} className="opacity-0 group-hover/row:opacity-100 transition-opacity text-gold" />}
                             </div>
                           </td>
                           <td className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">{a.date}</td>
@@ -405,14 +415,14 @@ const Performance: React.FC<Props> = ({ user }) => {
             <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Performance Hub</h2>
             <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2 flex items-center">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
-              {user.role === UserRole.TEACHER ? 'Class Performance Oversight' : 'Individual Performance Analytics'} &bull; {selectedTerm} {selectedYear}
+              {isStaff ? 'Institutional Performance Oversight' : 'Individual Performance Analytics'} &bull; {selectedTerm} {selectedYear}
             </p>
           </div>
           <button className="bg-white text-black px-6 py-3 rounded-xl border border-gray-200 font-black text-[10px] uppercase tracking-widest shadow-sm hover:border-gold transition-colors">Export Institutional Report</button>
         </div>
       )}
-      {user.role === UserRole.TEACHER 
-        ? renderPerformanceHub(teacherClasses, "Class Performance Register", "Manage your classes' results", "Teaching Average %", "89%", "3.4") 
+      {isStaff 
+        ? renderPerformanceHub(teacherClasses, "Class Performance Register", "Manage institutional results", "Institutional Average %", "89%", "3.4") 
         : renderPerformanceHub(studentSubjects, "Academic Transcript", "View your semester grades", "Your Overall Average %", "89%", "3.4")}
     </div>
   );

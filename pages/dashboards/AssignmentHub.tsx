@@ -52,7 +52,15 @@ const AssignmentHub: React.FC<Props> = ({ user }) => {
     class: string;
   } | null>(null);
 
-  const isTeacher = user.role === UserRole.TEACHER;
+  // Expanded teacher access roles
+  const isTeacher = [
+    UserRole.TEACHER, 
+    UserRole.HOD, 
+    UserRole.PRINCIPAL, 
+    UserRole.ADMIN, 
+    UserRole.SUPER_USER, 
+    UserRole.VENDOR
+  ].includes(user.role);
 
   // Mock Data
   const subjectStats = [

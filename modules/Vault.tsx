@@ -29,7 +29,15 @@ const Vault: React.FC<Props> = ({ user }) => {
   const [selectedFolder, setSelectedFolder] = useState('General');
   const [recipientType, setRecipientType] = useState('Individual');
 
-  const isTeacher = user.role === UserRole.TEACHER;
+  // Teacher functionality roles
+  const isTeacher = [
+    UserRole.TEACHER, 
+    UserRole.HOD, 
+    UserRole.PRINCIPAL, 
+    UserRole.ADMIN, 
+    UserRole.SUPER_USER, 
+    UserRole.VENDOR
+  ].includes(user.role);
 
   const metrics = [
     { label: 'Total Files', value: isTeacher ? '42' : '11', icon: <FileText />, bg: 'bg-blue-50' },

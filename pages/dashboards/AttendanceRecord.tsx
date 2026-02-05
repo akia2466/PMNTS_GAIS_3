@@ -31,6 +31,16 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
   const [selectedYear, setSelectedYear] = useState('2026');
   const [expandedClass, setExpandedClass] = useState<string | null>('Grade 12A');
 
+  // Staff roles that see the teacher view
+  const isStaff = [
+    UserRole.TEACHER, 
+    UserRole.HOD, 
+    UserRole.PRINCIPAL, 
+    UserRole.ADMIN, 
+    UserRole.SUPER_USER, 
+    UserRole.VENDOR
+  ].includes(user.role);
+
   const terms = ['Term 1', 'Term 2', 'Term 3', 'Term 4'];
   const years = ['2026', '2025', '2024'];
 
@@ -83,17 +93,17 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
         <div className="bg-black text-white p-10 rounded-[3rem] shadow-2xl border border-[#B8860B] flex flex-col justify-between group overflow-hidden relative">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-bl-full" />
           <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 group-hover:text-gold transition-colors relative z-10">
-            {user.role === UserRole.TEACHER ? 'Global Teaching Presence' : 'Overall Presence'}
+            {isStaff ? 'Global Teaching Presence' : 'Overall Presence'}
           </h3>
           <div className="mt-8 flex items-end justify-between relative z-10">
-            <span className="text-7xl font-black tracking-tighter">{user.role === UserRole.TEACHER ? '92%' : '96%'}</span>
+            <span className="text-7xl font-black tracking-tighter">{isStaff ? '92%' : '96%'}</span>
             <CheckCircle className="text-gold mb-2" size={40} />
           </div>
         </div>
         {[
-          { label: user.role === UserRole.TEACHER ? 'Total Absences' : 'Days Absent', value: user.role === UserRole.TEACHER ? '12' : '2', icon: <UserX />, color: 'text-red-500', bg: 'bg-red-50' },
-          { label: user.role === UserRole.TEACHER ? 'Total Late' : 'Times Late', value: user.role === UserRole.TEACHER ? '18' : '3', icon: <Clock />, color: 'text-orange-500', bg: 'bg-orange-50' },
-          { label: 'Unchecked Registers', value: user.role === UserRole.TEACHER ? '1' : '0', icon: <Activity />, color: 'text-gold', bg: 'bg-gold/10' },
+          { label: isStaff ? 'Total Absences' : 'Days Absent', value: isStaff ? '12' : '2', icon: <UserX />, color: 'text-red-500', bg: 'bg-red-50' },
+          { label: isStaff ? 'Total Late' : 'Times Late', value: isStaff ? '18' : '3', icon: <Clock />, color: 'text-orange-500', bg: 'bg-orange-50' },
+          { label: 'Unchecked Registers', value: isStaff ? '1' : '0', icon: <Activity />, color: 'text-gold', bg: 'bg-gold/10' },
         ].map((m, i) => (
           <div key={i} className={`${m.bg} p-10 rounded-[3rem] border-2 border-transparent shadow-sm flex flex-col justify-between group hover:border-gold transition-all hover:shadow-xl`}>
             <div className={`p-4 bg-white rounded-2xl w-fit mb-6 ${m.color} group-hover:scale-110 transition-transform shadow-sm`}>{m.icon}</div>
@@ -105,7 +115,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
         ))}
       </div>
 
-      {user.role === UserRole.TEACHER ? (
+      {isStaff ? (
         <section className="space-y-12">
            <div className="flex items-center justify-between">
               <h3 className="text-2xl font-black text-black uppercase tracking-tighter flex items-center">
@@ -198,7 +208,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
                                                  onClick={() => handleStatusChange(s.id, status)}
                                                  className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
                                                    s.status === status 
-                                                     ? (status === 'present' ? 'bg-green-500 text-white shadow-lg' : status === 'absent' ? 'bg-red-500 text-white shadow-lg' : 'bg-orange-500 text-white shadow-lg') 
+                                                     ? (status === 'present' ? 'bg-green-50 text-green-600' : status === 'absent' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white') 
                                                      : 'bg-white border border-gray-100 text-gray-400 hover:border-gold hover:text-black'
                                                  }`}
                                                >
@@ -358,7 +368,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
           <button className="bg-white text-black px-6 py-3 rounded-xl border border-gray-200 font-black text-[10px] uppercase tracking-widest shadow-sm hover:border-gold transition-colors">Audit Export</button>
         </div>
       </div>
-      {user.role === UserRole.TEACHER 
+      {isStaff 
         ? renderAttendanceData(classAttendance) 
         : renderAttendanceData(subjectAttendance)}
     </div>
