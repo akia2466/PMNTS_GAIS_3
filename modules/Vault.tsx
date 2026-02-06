@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { User, UserRole } from '../types';
 import { 
@@ -19,7 +18,9 @@ import {
   Filter,
   Activity,
   ChevronDown,
-  Users
+  Users,
+  Layout,
+  Trophy
 } from 'lucide-react';
 
 interface Props { user: User; }
@@ -28,8 +29,8 @@ const Vault: React.FC<Props> = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFolder, setSelectedFolder] = useState('General');
   const [recipientType, setRecipientType] = useState('Individual');
+  const [viewMode, setViewMode] = useState<'ASSETS' | 'ME'>('ME');
 
-  // Teacher and patron functionality roles
   const isTeacher = [
     UserRole.TEACHER, 
     UserRole.PATRON,
@@ -39,12 +40,82 @@ const Vault: React.FC<Props> = ({ user }) => {
     UserRole.SUPER_USER, 
     UserRole.VENDOR
   ].includes(user.role);
+  const isStudent = user.role === UserRole.STUDENT;
 
-  const metrics = [
-    { label: 'Total Files', value: isTeacher ? '42' : '11', icon: <FileText />, bg: 'bg-blue-50' },
-    { label: 'Storage Used', value: isTeacher ? '450.2 MB' : '20.9 MB', icon: <HardDrive />, bg: 'bg-purple-50' },
-    { label: 'Storage Available', value: '4.9 GB', icon: <Activity />, bg: 'bg-green-50' },
-  ];
+  const getStatsForHero = () => {
+    return [
+      { label: 'TOTAL FILES', value: isStudent ? '11' : '42', icon: <FileText size={14} className="text-blue-400" /> },
+      { label: 'USED SPACE', value: isStudent ? '20.9 MB' : '450.2 MB', icon: <HardDrive size={14} className="text-green-400" /> },
+      { label: 'AVAILABLE', value: '4.9 GB', icon: <Activity size={14} className="text-gold" /> },
+      { label: 'SYNC RATE', value: '100%', icon: <Trophy size={14} className="text-purple-400" /> },
+    ];
+  };
+
+  const renderInstitutionalHero = () => (
+    <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10 mb-10">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
+      
+      {/* Left Content */}
+      <div className="relative z-10 flex flex-col items-start mb-8 md:mb-0">
+        <div className="flex items-center space-x-3 mb-5">
+           <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
+              <Layout size={20} />
+           </div>
+           <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">
+             {isStudent ? 'Individual Repository Audit' : 'Institutional Repository oversight'}
+           </p>
+        </div>
+        
+        <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
+          Repository<br/>
+          <span className="text-gold">{isStudent ? 'Hub' : 'Registry'}</span>
+        </h2>
+
+        {isStudent && (
+           <div className="flex flex-wrap items-center gap-3 mb-8">
+              <div className="relative inline-block group">
+                <select className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all">
+                  <option className="bg-black">All Folders</option>
+                  <option className="bg-black">Academic</option>
+                  <option className="bg-black">Shared</option>
+                </select>
+                <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
+              </div>
+              <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
+                Cleanup Assets
+              </button>
+           </div>
+        )}
+        
+        <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+          {(isStudent ? ['FILES', 'ME'] : ['ASSETS', 'ME'] as const).map(target => (
+            <button 
+              key={target}
+              onClick={() => setViewMode(target as any)}
+              className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                viewMode === target 
+                  ? 'bg-gold text-black shadow-lg shadow-gold/20' 
+                  : 'text-zinc-500 hover:text-white'
+              }`}
+            >
+              {target}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Right Content - Stat Grid */}
+      <div className="relative z-10 grid grid-cols-2 gap-3">
+        {getStatsForHero().map((stat, i) => (
+          <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] w-36 flex flex-col items-start hover:bg-white/10 transition-colors group">
+             <div className="mb-4 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
+             <h4 className="text-2xl font-black text-white tracking-tighter leading-none mb-1.5">{stat.value}</h4>
+             <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   const folders = [
     { name: 'Mathematics', count: 12, icon: <Folder />, bg: 'bg-blue-100/50' },
@@ -60,24 +131,7 @@ const Vault: React.FC<Props> = ({ user }) => {
 
   return (
     <div className="space-y-8 pb-20 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
-        <div>
-          <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Institutional Repository</h2>
-          <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Manage encrypted {user.role.toLowerCase()} assets.</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {metrics.map((m, i) => (
-          <div key={i} className={`${m.bg} p-10 rounded-[3rem] border border-transparent shadow-sm flex items-center space-x-6 group`}>
-            <div className="p-4 bg-white rounded-2xl text-gold shadow-sm">{m.icon}</div>
-            <div>
-              <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">{m.label}</p>
-              <h3 className="text-3xl font-black text-black uppercase tracking-tighter">{m.value}</h3>
-            </div>
-          </div>
-        ))}
-      </div>
+      {renderInstitutionalHero()}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-indigo-50 p-10 rounded-[3.5rem] border border-transparent shadow-sm">
@@ -115,7 +169,7 @@ const Vault: React.FC<Props> = ({ user }) => {
 
               <div className="space-y-2">
                  <label className="text-[9px] font-black uppercase text-gray-400 ml-4">
-                   {recipientType === 'Individual' ? 'Select Student/User:' : recipientType === 'Single Class' ? 'Select Class:' : 'Select Grade Level:'}
+                   {recipientType === 'Individual' ? 'Select Recipient Node:' : recipientType === 'Single Class' ? 'Select Class:' : 'Select Grade Level:'}
                  </label>
                  <select className="w-full bg-white border border-gray-100 rounded-2xl p-4 text-xs font-black uppercase outline-none focus:ring-2 focus:ring-gold shadow-sm">
                     {recipientType === 'Individual' && (

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { User, UserRole } from '../../types';
 import { 
@@ -9,7 +8,11 @@ import {
   UserCheck,
   Clock,
   Check,
-  ShieldCheck
+  ShieldCheck,
+  Layout,
+  ChevronDown,
+  Activity,
+  Trophy
 } from 'lucide-react';
 
 interface Props {
@@ -18,6 +21,9 @@ interface Props {
 
 const Connections: React.FC<Props> = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'NETWORK' | 'LOG'>('NETWORK');
+
+  const isStudent = user.role === UserRole.STUDENT;
 
   const metrics = [
     { label: 'Total Friends/Peers', value: '24', icon: <Users />, bg: 'bg-blue-50' },
@@ -36,25 +42,90 @@ const Connections: React.FC<Props> = ({ user }) => {
     { name: 'Sarah Gima', grade: 'Grade 12 - Class A', type: 'outgoing' },
   ];
 
-  return (
-    <div className="space-y-10 pb-20 animate-in fade-in duration-500">
-      <div>
-        <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Registry Nodes</h2>
-        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Authorized institutional directory management.</p>
+  const renderStudentHero = () => (
+    <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10 mb-10">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
+      
+      {/* Left Content */}
+      <div className="relative z-10 flex flex-col items-start mb-8 md:mb-0">
+        <div className="flex items-center space-x-3 mb-5">
+           <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
+              <Layout size={20} />
+           </div>
+           <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">Registry Node Registry</p>
+        </div>
+        
+        <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
+          Registry<br/>
+          <span className="text-gold">Nodes</span>
+        </h2>
+
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+            <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
+              Search Directory
+            </button>
+            <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
+              Security Audit
+            </button>
+         </div>
+        
+        {/* Toggle Controls */}
+        <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+          {['NETWORK', 'LOG'].map(target => (
+            <button 
+              key={target}
+              onClick={() => setViewMode(target as any)}
+              className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                viewMode === target 
+                  ? 'bg-gold text-black shadow-lg shadow-gold/20' 
+                  : 'text-zinc-500 hover:text-white'
+              }`}
+            >
+              {target}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {metrics.map((m, i) => (
-          <div key={i} className={`${m.bg} p-8 rounded-[2.5rem] border border-transparent shadow-sm flex flex-col items-center text-center group`}>
-            <h3 className="text-3xl font-black text-black mb-2 tracking-tighter">{m.value}</h3>
-            <p className="text-gray-400 text-[9px] font-black uppercase tracking-widest leading-tight">{m.label}</p>
+      {/* Right Content - Stat Grid */}
+      <div className="relative z-10 grid grid-cols-2 gap-3">
+        {[
+          { label: 'PEER NODES', value: '24', icon: <Users size={14} className="text-blue-400" /> },
+          { label: 'PENDING', value: '3', icon: <Clock size={14} className="text-green-400" /> },
+          { label: 'OUTGOING', value: '2', icon: <UserPlus size={14} className="text-gold" /> },
+          { label: 'SECURITY', value: '100%', icon: <ShieldCheck size={14} className="text-purple-400" /> },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] w-36 flex flex-col items-start hover:bg-white/10 transition-colors group">
+             <div className="mb-4 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
+             <h4 className="text-2xl font-black text-white tracking-tighter leading-none mb-1.5">{stat.value}</h4>
+             <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest">{stat.label}</p>
           </div>
         ))}
       </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-10 pb-20 animate-in fade-in duration-500">
+      {isStudent ? renderStudentHero() : (
+        <div>
+          <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Registry Nodes</h2>
+          <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Authorized institutional directory management.</p>
+        </div>
+      )}
+
+      {!isStudent && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {metrics.map((m, i) => (
+            <div key={i} className={`${m.bg} p-8 rounded-[2.5rem] border border-transparent shadow-sm flex flex-col items-center text-center group`}>
+              <h3 className="text-3xl font-black text-black mb-2 tracking-tighter">{m.value}</h3>
+              <p className="text-gray-400 text-[9px] font-black uppercase tracking-widest leading-tight">{m.label}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* Your Connections */}
         <section className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
           <div className="p-10 border-b border-gray-50 bg-gray-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h3 className="text-xl font-black text-black uppercase tracking-tighter">Your Connections</h3>
@@ -88,7 +159,6 @@ const Connections: React.FC<Props> = ({ user }) => {
           </div>
         </section>
 
-        {/* Requests Section */}
         <section className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
           <div className="p-10 border-b border-gray-50 bg-gray-50/20">
             <h3 className="text-xl font-black text-black uppercase tracking-tighter">Connection Requests</h3>
@@ -126,21 +196,6 @@ const Connections: React.FC<Props> = ({ user }) => {
           </div>
         </section>
       </div>
-
-      {/* Security Footer */}
-      <section className="bg-zinc-900 text-white p-12 rounded-[4rem] border border-gold/30 shadow-2xl relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-bl-[10rem] -z-0" />
-        <div className="flex flex-col lg:flex-row items-center justify-between relative z-10 gap-8">
-           <div className="flex items-center space-x-8">
-             <div className="w-16 h-16 bg-gold rounded-2xl flex items-center justify-center text-black shrink-0 shadow-lg"><ShieldCheck size={32} /></div>
-             <div>
-                <h3 className="text-2xl font-black uppercase tracking-tighter mb-2 leading-none">Institutional Security</h3>
-                <p className="text-gray-400 font-bold uppercase text-[9px] tracking-widest">All connection modifications are logged for audit compliance.</p>
-             </div>
-           </div>
-           <button className="bg-white text-black px-10 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl hover:bg-gold transition-all">Audit Connections</button>
-        </div>
-      </section>
     </div>
   );
 };

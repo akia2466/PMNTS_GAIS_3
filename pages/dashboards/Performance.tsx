@@ -21,7 +21,7 @@ interface Props {
 }
 
 interface Assessment {
-  unit: string;
+  name: string;
   date: string;
   score: string;
   rate: string;
@@ -30,10 +30,11 @@ interface Assessment {
 
 interface SubjectTranscript {
   subject: string;
-  char: string;
+  initial: string;
   color: string;
   avg: string;
   students: number;
+  bg: string;
   assessments: Assessment[];
 }
 
@@ -53,7 +54,7 @@ const Performance: React.FC<Props> = ({ user }) => {
   const [selectedTerm, setSelectedTerm] = useState('Term 1');
   const [selectedYear, setSelectedYear] = useState('2026');
   const [selectedDept, setSelectedDept] = useState('MATHEMATICS');
-  const [viewMode, setViewMode] = useState<'STUDENTS' | 'ME'>('STUDENTS');
+  const [viewMode, setViewMode] = useState<'TERM' | 'CUMULATIVE' | 'ME'>('TERM');
   const [drilldownClassId, setDrilldownClassId] = useState<string | null>(null);
   
   const isPrincipal = user.role === UserRole.PRINCIPAL;
@@ -70,83 +71,111 @@ const Performance: React.FC<Props> = ({ user }) => {
     { id: 'c2', name: 'GRADE 12B', grade: 'B', avg: '82%', studentCount: 39, color: 'bg-indigo-500', sectionBg: 'bg-indigo-50/50', icon: '12B', leadTeacher: 'MS. SARAH SMITH' },
   ]);
 
-  const renderRecentActivity = (bgColor: string = "bg-white") => (
-    <section className="mt-12 w-full">
-      <div className={`${bgColor} p-8 rounded-[2.5rem] border border-gray-100 shadow-sm w-full overflow-hidden`}>
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-black text-black uppercase tracking-tighter flex items-center">
-            <History size={18} className="mr-3 text-gold" /> Recent Activity Feed
-          </h3>
-          <button className="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-gold transition-colors">Audit History</button>
-        </div>
-        <div className="space-y-4">
-          <div className="p-4 bg-white rounded-xl border border-transparent hover:border-gold transition-all group flex items-center justify-between shadow-sm">
-            <div className="flex items-center space-x-6">
-              <div className="p-2.5 bg-gray-50 rounded-lg shadow-sm group-hover:scale-110 transition-transform">
-                <CheckCircle className="text-green-500" size={18} />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-gray-800 leading-snug uppercase tracking-tight">Registry sync completed: Term 1 performance data uploaded.</p>
-                <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-1">12 mins ago</p>
-              </div>
+  const transcriptData: SubjectTranscript[] = [
+    {
+      subject: 'MATHEMATICS',
+      initial: 'M',
+      color: 'bg-blue-500',
+      avg: '91%',
+      students: 43,
+      bg: 'bg-blue-50/30',
+      assessments: [
+        { name: 'MIDTERM EXAM', date: 'JAN 15', score: '92/100', rate: '92%', grade: 'A' },
+        { name: 'PROBLEM SET 5', date: 'JAN 10', score: '18/20', rate: '90%', grade: 'A' },
+      ]
+    },
+    {
+      subject: 'SCIENCE',
+      initial: 'S',
+      color: 'bg-green-500',
+      avg: '85%',
+      students: 39,
+      bg: 'bg-green-50/30',
+      assessments: [
+        { name: 'LAB PRACTICAL', date: 'JAN 18', score: '85/100', rate: '85%', grade: 'B+' },
+        { name: 'QUIZ 2', date: 'JAN 12', score: '17/20', rate: '85%', grade: 'B+' },
+      ]
+    },
+    {
+      subject: 'ENGLISH',
+      initial: 'E',
+      color: 'bg-orange-500',
+      avg: '88%',
+      students: 41,
+      bg: 'bg-orange-50/30',
+      assessments: [
+        { name: 'LITERATURE ESSAY', date: 'JAN 20', score: '88/100', rate: '88%', grade: 'A-' },
+        { name: 'VOCABULARY TEST', date: 'JAN 14', score: '19/20', rate: '95%', grade: 'A' },
+      ]
+    },
+    {
+      subject: 'SOCIAL SCIENCE',
+      initial: 'SS',
+      color: 'bg-purple-500',
+      avg: '92%',
+      students: 40,
+      bg: 'bg-purple-50/30',
+      assessments: [
+        { name: 'HISTORY PROJECT', date: 'JAN 22', score: '94/100', rate: '94%', grade: 'A' },
+        { name: 'GEOGRAPHY QUIZ', date: 'JAN 11', score: '18/20', rate: '90%', grade: 'A' },
+      ]
+    }
+  ];
+
+  const renderDetailedTranscript = () => (
+    <div className="mt-8 space-y-6 animate-in fade-in duration-700">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-2xl font-black text-black uppercase tracking-tighter">Academic Transcript</h3>
+        <div className="h-1 flex-grow mx-8 bg-gray-100 rounded-full" />
+      </div>
+
+      {transcriptData.map((data, idx) => (
+        <div key={idx} className={`${data.bg} p-10 rounded-[3rem] border border-white shadow-sm`}>
+          <div className="flex items-center space-x-6 mb-10">
+            <div className={`w-16 h-16 ${data.color} rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg`}>
+              {data.initial}
             </div>
-            <Activity size={14} className="text-gray-200 group-hover:text-gold transition-colors" />
+            <div>
+              <h4 className="text-3xl font-black text-black uppercase tracking-tight">{data.subject}</h4>
+              <p className="text-[10px] font-black uppercase tracking-widest mt-1">
+                <span className="text-gray-400">Current Avg: </span>
+                <span className="text-gold">{data.avg}</span>
+                <span className="text-gray-300 mx-3">•</span>
+                <span className="text-gold">{data.students} Students</span>
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
-  );
 
-  const renderTranscriptContent = () => (
-    <div className="space-y-10 animate-in fade-in duration-500 mt-10">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-indigo-50 p-6 rounded-[2.5rem] border border-transparent shadow-sm">
-          <h3 className="text-lg font-black text-black uppercase tracking-tight mb-6 flex items-center">
-            <TrendingUp size={18} className="mr-3 text-gold" /> Performance Summary
-          </h3>
-          <div className="space-y-3">
-            {[
-              { subject: 'Mathematics', grade: 'A-', percentage: '91%', color: 'bg-blue-500' },
-              { subject: 'Science', grade: 'B+', percentage: '85%', color: 'bg-green-500' },
-            ].map((course, i) => (
-              <div key={i} className="flex items-center justify-between p-3.5 bg-white rounded-2xl shadow-sm">
-                <div className="flex items-center space-x-4">
-                  <div className={`w-9 h-9 ${course.color} text-white rounded-lg flex items-center justify-center font-black text-[10px]`}>{course.grade}</div>
-                  <span className="font-bold text-xs uppercase tracking-tight">{course.subject}</span>
-                </div>
-                <span className="font-black text-xs tracking-tight">{course.percentage}</span>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-black/5">
+                  <th className="px-6 py-4">Unit / Assignment</th>
+                  <th className="px-6 py-4">Date Issued</th>
+                  <th className="px-6 py-4">Your Score</th>
+                  <th className="px-6 py-4">Success Rate</th>
+                  <th className="px-6 py-4 text-right">Mean Grade</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-black/5">
+                {data.assessments.map((asm, i) => (
+                  <tr key={i} className="group hover:bg-white/40 transition-colors">
+                    <td className="px-6 py-6 font-black text-xs text-black uppercase tracking-tight">{asm.name}</td>
+                    <td className="px-6 py-6 font-bold text-xs text-gray-400 uppercase tracking-widest">{asm.date}</td>
+                    <td className="px-6 py-6 font-black text-sm text-black">{asm.score}</td>
+                    <td className="px-6 py-6 font-black text-sm text-gold">{asm.rate}</td>
+                    <td className="px-6 py-6 text-right">
+                      <span className="inline-flex items-center justify-center w-10 h-8 bg-black text-white text-[10px] font-black rounded-lg shadow-md uppercase">
+                        {asm.grade}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-
-        <div className="bg-emerald-50 p-6 rounded-[2.5rem] border border-transparent shadow-sm">
-          <h3 className="text-lg font-black text-black uppercase tracking-tight mb-6 flex items-center">
-            <UserCheck size={18} className="mr-3 text-gold" /> Attendance Summary
-          </h3>
-          <div className="space-y-3">
-            {[
-              { subject: 'Mathematics', absent: 0, tardy: 1, color: 'text-blue-600' },
-              { subject: 'Science', absent: 1, tardy: 2, color: 'text-green-600' },
-            ].map((stat, i) => (
-              <div key={i} className="flex items-center justify-between p-3.5 bg-white rounded-2xl shadow-sm">
-                <span className={`font-bold text-xs uppercase tracking-tight ${stat.color}`}>{stat.subject}</span>
-                <div className="flex space-x-4">
-                  <div className="text-center">
-                    <p className="text-[7px] font-black text-gray-400 uppercase">Absent</p>
-                    <p className={`text-xs font-black ${stat.absent > 0 ? 'text-red-500' : 'text-gray-900'}`}>{stat.absent}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[7px] font-black text-gray-400 uppercase">Tardy</p>
-                    <p className={`text-xs font-black ${stat.tardy > 0 ? 'text-orange-500' : 'text-gray-900'}`}>{stat.tardy}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      {renderRecentActivity('bg-slate-50')}
+      ))}
     </div>
   );
 
@@ -187,11 +216,9 @@ const Performance: React.FC<Props> = ({ user }) => {
 
     return (
       <div className="space-y-10 animate-in fade-in duration-500">
-        {/* Master Analytics Hero Card - Placed at top of subpage */}
         <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10">
            <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
            
-           {/* Left Content */}
            <div className="relative z-10 flex flex-col items-start mb-8 md:mb-0">
               <div className="flex items-center space-x-3 mb-5">
                  <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
@@ -205,7 +232,6 @@ const Performance: React.FC<Props> = ({ user }) => {
                 <span className="text-gold">Analytics</span>
               </h2>
 
-              {/* Embedded Selectors Area */}
               <div className="flex flex-wrap items-center gap-3 mb-8">
                  <div className="relative inline-block group">
                     <select 
@@ -234,12 +260,11 @@ const Performance: React.FC<Props> = ({ user }) => {
                  </button>
               </div>
               
-              {/* Toggle Controls */}
               <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
                 {(['STUDENTS', 'ME'] as const).map(target => (
                   <button 
                     key={target}
-                    onClick={() => setViewMode(target)}
+                    onClick={() => setViewMode(target as any)}
                     className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                       viewMode === target 
                         ? 'bg-gold text-black shadow-lg shadow-gold/20' 
@@ -252,7 +277,6 @@ const Performance: React.FC<Props> = ({ user }) => {
               </div>
            </div>
 
-           {/* Right Content - Stat Grid */}
            <div className="relative z-10 grid grid-cols-2 gap-3">
               {[
                 { label: 'SYSTEM GPA', value: '3.42', icon: <Target size={14} className="text-blue-400" /> },
@@ -270,7 +294,9 @@ const Performance: React.FC<Props> = ({ user }) => {
         </div>
 
         {viewMode === 'ME' ? (
-          renderTranscriptContent()
+          <div className="space-y-10 mt-10">
+            <p className="text-center text-gray-400 uppercase font-black text-[11px] tracking-widest">Administrative Detailed View Inactive</p>
+          </div>
         ) : (
           <div className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden p-10 mt-10">
             <div className="flex items-center space-x-6 mb-10">
@@ -332,28 +358,104 @@ const Performance: React.FC<Props> = ({ user }) => {
 
   const renderStudentView = () => (
     <div className="space-y-10 animate-in fade-in duration-500 pb-12">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-        <div>
-          <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Performance Hub</h2>
-          <p className="text-gray-500 font-bold uppercase tracking-widest text-[9px] mt-2">Individual Performance Analytics • Term 1 2026</p>
+      <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col xl:flex-row items-center justify-between border border-white/10">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
+        
+        <div className="relative z-10 flex flex-col items-start mb-8 xl:mb-0">
+          <div className="flex items-center space-x-3 mb-5">
+             <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
+                <Layout size={20} />
+             </div>
+             <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">My Academic Performance</p>
+          </div>
+          
+          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
+            STUDENT<br/>
+            <span className="text-gold">ANALYTICS</span>
+          </h2>
+
+          <div className="flex flex-wrap items-center gap-3 mb-8">
+              <div className="relative inline-block group">
+                <select className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all">
+                  <option className="bg-black">2026</option>
+                  <option className="bg-black">2025</option>
+                </select>
+                <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
+              </div>
+              <div className="relative inline-block group">
+                <select className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all">
+                  <option className="bg-black">TERM 1</option>
+                  <option className="bg-black">TERM 2</option>
+                </select>
+                <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
+              </div>
+              <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
+                EXPORT TRANSCRIPT
+              </button>
+           </div>
+          
+          <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+            {['TERM', 'CUMULATIVE'].map(target => (
+              <button 
+                key={target}
+                onClick={() => setViewMode(target as any)}
+                className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                  viewMode === target || (viewMode === 'ME' && target === 'TERM')
+                    ? 'bg-gold text-black shadow-lg shadow-gold/20' 
+                    : 'text-zinc-500 hover:text-white'
+                }`}
+              >
+                {target}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative z-10 flex flex-col items-center justify-center px-4">
+           <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] w-full min-w-[276px] shadow-2xl transform hover:scale-105 transition-transform border border-white/10">
+              <p className="text-white/80 font-black text-[10px] uppercase tracking-widest mb-4">Your Overall Average %</p>
+              <div className="flex items-end space-x-3 mb-8">
+                 <h3 className="text-7xl font-black text-white tracking-tighter leading-none">89%</h3>
+                 <div className="bg-gold/20 px-3 py-1.5 rounded-xl flex items-center space-x-1 mb-1 border border-gold/30">
+                    <TrendingUp size={14} className="text-gold" />
+                    <span className="text-gold font-black text-xs">+1.2%</span>
+                 </div>
+              </div>
+              <div className="pt-6 border-t border-white/10">
+                 <p className="text-white/60 font-black text-[10px] uppercase tracking-widest mb-2">Your Overall GPA</p>
+                 <h4 className="text-4xl font-black text-gold">3.4</h4>
+              </div>
+           </div>
+        </div>
+
+        <div className="relative z-10 grid grid-cols-2 gap-4">
+          {[
+            { label: 'MATHEMATICS', value: '91%', subLabel: '43 STUDENTS', char: 'M', color: 'bg-blue-500' },
+            { label: 'SCIENCE', value: '85%', subLabel: '39 STUDENTS', char: 'S', color: 'bg-green-500' },
+            { label: 'ENGLISH', value: '88%', subLabel: '41 STUDENTS', char: 'E', color: 'bg-orange-500' },
+            { label: 'SOCIAL SCIENCE', value: '92%', subLabel: '40 STUDENTS', char: 'SS', color: 'bg-purple-500' },
+          ].map((stat, i) => (
+            <div 
+              key={i} 
+              className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-start hover:bg-white/10 transition-colors group"
+            >
+              <p className="text-gray-400 text-[7px] font-black uppercase tracking-widest leading-tight mb-3 truncate w-full text-center">{stat.label}</p>
+              
+              <div className="flex items-center space-x-3 w-full">
+                <div className={`w-10 h-10 ${stat.color} rounded-xl flex items-center justify-center text-white font-black text-xs shadow-lg shrink-0 group-hover:scale-110 transition-transform`}>
+                  {stat.char}
+                </div>
+                <div className="flex flex-col items-start overflow-hidden">
+                  <h4 className="text-xl font-black text-white tracking-tighter leading-none mb-0.5">{stat.value}</h4>
+                  <p className="text-[7px] text-gray-500 font-bold uppercase tracking-tight truncate w-full">{stat.subLabel}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="bg-gold p-10 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-10">
-        <div className="flex-shrink-0">
-          <p className="text-black/50 font-black uppercase tracking-widest text-[9px] mb-4">Your Overall Average %</p>
-          <div className="flex items-baseline space-x-4">
-            <h2 className="text-7xl font-black tracking-tighter leading-none text-black">89%</h2>
-            <div className="bg-black/10 px-2.5 py-1 rounded-full flex items-center space-x-1">
-              <TrendingUp size={10} className="text-black" />
-              <span className="text-[9px] font-black">+1.2%</span>
-            </div>
-          </div>
-          <p className="text-black/50 font-black uppercase tracking-widest text-[9px] mt-8 mb-2">Your Overall GPA</p>
-          <h3 className="text-4xl font-black text-black leading-none">3.4</h3>
-        </div>
-      </div>
-      {renderTranscriptContent()}
+      {renderDetailedTranscript()}
     </div>
   );
 

@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
-import { User, ChatContact, Message } from '../types';
+import { User, ChatContact, Message, UserRole } from '../types';
 import { CHAT_CONTACTS } from '../constants';
-import { Send, Paperclip, MoreVertical, Search, Phone, Video, MessageSquare, Users, UserCheck } from 'lucide-react';
+import { Send, Paperclip, MoreVertical, Search, Phone, Video, MessageSquare, Users, UserCheck, Layout, ChevronDown, Activity, ShieldCheck } from 'lucide-react';
 
 interface Props {
   user: User;
@@ -16,6 +15,9 @@ const Messenger: React.FC<Props> = ({ user }) => {
     { id: '3', senderId: 'c1', text: 'Awesome, thanks a lot! See you at the library later?', timestamp: '10:36 AM' },
   ]);
   const [inputText, setInputText] = useState('');
+  const [viewMode, setViewMode] = useState<'PEERS' | 'ARCHIVE'>('PEERS');
+
+  const isStudent = user.role === UserRole.STUDENT;
 
   const getAvatarUrl = (name: string) => {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&bold=true&format=svg`;
@@ -33,30 +35,99 @@ const Messenger: React.FC<Props> = ({ user }) => {
     setInputText('');
   };
 
-  return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-12">
-      <div>
-        <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Peer-to-Peer Transmission</h2>
-        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Secure encrypted messaging between POMNHS nodes.</p>
+  const renderStudentHero = () => (
+    <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10 mb-10">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
+      
+      {/* Left Content */}
+      <div className="relative z-10 flex flex-col items-start mb-8 md:mb-0">
+        <div className="flex items-center space-x-3 mb-5">
+           <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
+              <Layout size={20} />
+           </div>
+           <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">Secure Transmission Hub</p>
+        </div>
+        
+        <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
+          Messenger<br/>
+          <span className="text-gold">Hub</span>
+        </h2>
+
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+            <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
+              New Message
+            </button>
+            <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
+              Privacy Audit
+            </button>
+         </div>
+        
+        {/* Toggle Controls */}
+        <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+          {['PEERS', 'ARCHIVE'].map(target => (
+            <button 
+              key={target}
+              onClick={() => setViewMode(target as any)}
+              className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                viewMode === target 
+                  ? 'bg-gold text-black shadow-lg shadow-gold/20' 
+                  : 'text-zinc-500 hover:text-white'
+              }`}
+            >
+              {target}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
+      {/* Right Content - Stat Grid */}
+      <div className="relative z-10 grid grid-cols-2 gap-3">
         {[
-          { label: 'Unread Transmission', value: '12', icon: <MessageSquare />, bg: 'bg-blue-50' },
-          { label: 'Active Peers', value: '45', icon: <UserCheck />, bg: 'bg-green-50' },
-          { label: 'Nodes Active', value: '8', icon: <Users />, bg: 'bg-purple-50' },
-        ].map((m, i) => (
-          <div key={i} className={`${m.bg} p-6 rounded-3xl border border-transparent shadow-sm flex items-center space-x-4`}>
-            <div className="p-3 bg-white rounded-2xl text-gold shadow-sm">{m.icon}</div>
-            <div>
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">{m.label}</p>
-              <h3 className="text-xl font-black text-black uppercase">{m.value}</h3>
-            </div>
+          { label: 'UNREAD MSGS', value: '12', icon: <MessageSquare size={14} className="text-blue-400" /> },
+          { label: 'ACTIVE PEERS', value: '45', icon: <UserCheck size={14} className="text-green-400" /> },
+          { label: 'SECURE NODES', value: '8', icon: <ShieldCheck size={14} className="text-gold" /> },
+          { label: 'DATA RATE', value: '1GB/s', icon: <Activity size={14} className="text-purple-400" /> },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] w-36 flex flex-col items-start hover:bg-white/10 transition-colors group">
+             <div className="mb-4 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
+             <h4 className="text-2xl font-black text-white tracking-tighter leading-none mb-1.5">{stat.value}</h4>
+             <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest">{stat.label}</p>
           </div>
         ))}
       </div>
+    </div>
+  );
 
-      <div className="h-[calc(100vh-22rem)] bg-slate-100 p-2 rounded-[3rem] shadow-lg border border-transparent flex overflow-hidden">
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500 pb-12">
+      {isStudent && renderStudentHero()}
+
+      {!isStudent && (
+        <>
+          <div>
+            <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Peer-to-Peer Transmission</h2>
+            <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Secure encrypted messaging between POMNHS nodes.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
+            {[
+              { label: 'Unread Transmission', value: '12', icon: <MessageSquare />, bg: 'bg-blue-50' },
+              { label: 'Active Peers', value: '45', icon: <UserCheck />, bg: 'bg-green-50' },
+              { label: 'Nodes Active', value: '8', icon: <Users />, bg: 'bg-purple-50' },
+            ].map((m, i) => (
+              <div key={i} className={`${m.bg} p-6 rounded-3xl border border-transparent shadow-sm flex items-center space-x-4`}>
+                <div className="p-3 bg-white rounded-2xl text-gold shadow-sm">{m.icon}</div>
+                <div>
+                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">{m.label}</p>
+                  <h3 className="text-xl font-black text-black uppercase">{m.value}</h3>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <div className={`h-[calc(100vh-${isStudent ? '20rem' : '22rem'})] bg-slate-100 p-2 rounded-[3rem] shadow-lg border border-transparent flex overflow-hidden`}>
         <div className="w-80 bg-white border-r border-gray-100 flex flex-col rounded-l-[2.5rem]">
           <div className="p-6 border-b border-gray-100">
             <h2 className="text-xl font-black text-black uppercase tracking-tight mb-4">Contacts</h2>

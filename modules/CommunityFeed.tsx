@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
-import { User, Post } from '../types';
-import { Heart, MessageSquare, Share2, Search, Filter, ChevronRight } from 'lucide-react';
+import { User, Post, UserRole } from '../types';
+import { Heart, MessageSquare, Share2, Search, Filter, ChevronRight, Layout, ChevronDown, TrendingUp, Users2, Trophy, Activity, Award } from 'lucide-react';
 
 interface Props {
   user: User;
@@ -9,7 +8,10 @@ interface Props {
 
 const CommunityFeed: React.FC<Props> = ({ user }) => {
   const [composerText, setComposerText] = useState('');
+  const [viewMode, setViewMode] = useState<'FEED' | 'GROUPS'>('FEED');
   
+  const isStudent = user.role === UserRole.STUDENT;
+
   const communityCards = [
     { title: 'Class Community', subtitle: 'Class 12A', members: 42, posts: 8, active: 12, bg: 'bg-blue-50' },
     { title: 'Grade Community', subtitle: 'Grade 12', members: 93, posts: 15, active: 24, bg: 'bg-purple-50' },
@@ -37,43 +39,115 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
     }
   ];
 
-  return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-      <div>
-        <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Institutional Network</h2>
-        <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Broadcast transmissions to the POMNHS institutional community.</p>
+  const renderStudentHero = () => (
+    <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10 mb-10">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
+      
+      {/* Left Content */}
+      <div className="relative z-10 flex flex-col items-start mb-8 md:mb-0">
+        <div className="flex items-center space-x-3 mb-5">
+           <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
+              <Layout size={20} />
+           </div>
+           <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">Community Hub Registry</p>
+        </div>
+        
+        <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
+          Community<br/>
+          <span className="text-gold">Network</span>
+        </h2>
+
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+            <div className="relative inline-block group">
+              <select className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all">
+                <option className="bg-black">All Groups</option>
+                <option className="bg-black">Class 12A</option>
+                <option className="bg-black">Academic</option>
+              </select>
+              <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
+            </div>
+            <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
+              Discover Groups
+            </button>
+         </div>
+        
+        {/* Toggle Controls */}
+        <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+          {['FEED', 'GROUPS'].map(target => (
+            <button 
+              key={target}
+              onClick={() => setViewMode(target as any)}
+              className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                viewMode === target 
+                  ? 'bg-gold text-black shadow-lg shadow-gold/20' 
+                  : 'text-zinc-500 hover:text-white'
+              }`}
+            >
+              {target}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Community Options */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {communityCards.map((card, i) => (
-          <div key={i} className={`${card.bg} p-8 rounded-[3rem] border border-transparent shadow-sm flex flex-col group hover:border-gold transition-all`}>
-            <h3 className="text-2xl font-black text-black uppercase tracking-tighter mb-1">{card.title}</h3>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-8">{card.subtitle}</p>
-            
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="text-center">
-                <p className="text-[8px] font-black text-gray-400 uppercase">Members</p>
-                <p className="text-lg font-black text-black">{card.members}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-[8px] font-black text-gray-400 uppercase">Posts Today</p>
-                <p className="text-lg font-black text-black">{card.posts}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-[8px] font-black text-gray-400 uppercase">Active Now</p>
-                <p className="text-lg font-black text-gold">{card.active}</p>
-              </div>
-            </div>
-
-            <p className="text-[10px] text-gray-400 italic mb-6">Share and discuss with your classmates</p>
-            <button className="bg-black text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-gold hover:text-black transition-all shadow-lg">
-              <span>View Posts</span>
-              <ChevronRight size={14} />
-            </button>
+      {/* Right Content - Stat Grid */}
+      <div className="relative z-10 grid grid-cols-2 gap-3">
+        {[
+          { label: 'JOINED GROUPS', value: '4', icon: <Users2 size={14} className="text-blue-400" /> },
+          { label: 'NEW POSTS', value: '15', icon: <TrendingUp size={14} className="text-green-400" /> },
+          { label: 'INTERACTION', value: '89%', icon: <Activity size={14} className="text-gold" /> },
+          { label: 'REPUTATION', value: 'Top 5%', icon: <Award size={14} className="text-purple-400" /> },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] w-36 flex flex-col items-start hover:bg-white/10 transition-colors group">
+             <div className="mb-4 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
+             <h4 className="text-2xl font-black text-white tracking-tighter leading-none mb-1.5">{stat.value}</h4>
+             <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest">{stat.label}</p>
           </div>
         ))}
       </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+      {isStudent ? renderStudentHero() : (
+        <div>
+          <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Institutional Network</h2>
+          <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Broadcast transmissions to the POMNHS institutional community.</p>
+        </div>
+      )}
+
+      {/* Community Options */}
+      {!isStudent && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {communityCards.map((card, i) => (
+            <div key={i} className={`${card.bg} p-8 rounded-[3rem] border border-transparent shadow-sm flex flex-col group hover:border-gold transition-all`}>
+              <h3 className="text-2xl font-black text-black uppercase tracking-tighter mb-1">{card.title}</h3>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-8">{card.subtitle}</p>
+              
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="text-center">
+                  <p className="text-[8px] font-black text-gray-400 uppercase">Members</p>
+                  <p className="text-lg font-black text-black">{card.members}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[8px] font-black text-gray-400 uppercase">Posts Today</p>
+                  <p className="text-lg font-black text-black">{card.posts}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[8px] font-black text-gray-400 uppercase">Active Now</p>
+                  <p className="text-lg font-black text-gold">{card.active}</p>
+                </div>
+              </div>
+
+              <p className="text-[10px] text-gray-400 italic mb-6">Share and discuss with your classmates</p>
+              <button className="bg-black text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-gold hover:text-black transition-all shadow-lg">
+                <span>View Posts</span>
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-8">
