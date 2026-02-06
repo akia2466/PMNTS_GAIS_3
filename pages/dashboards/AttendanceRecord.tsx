@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { User, UserRole } from '../../types';
 import { 
@@ -23,9 +24,10 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
   const [selectedTerm, setSelectedTerm] = useState('Term 1');
   const [selectedYear, setSelectedYear] = useState('2026');
   const [auditTarget, setAuditTarget] = useState<'STUDENTS' | 'TEACHERS' | 'HOD'>('STUDENTS');
+  const [viewMode, setViewMode] = useState<'STUDENTS' | 'ME'>('STUDENTS');
 
   const isPrincipal = user.role === UserRole.PRINCIPAL;
-  const isTeacher = user.role === UserRole.TEACHER;
+  const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON;
   const isHOD = user.role === UserRole.HOD;
   const isStudent = user.role === UserRole.STUDENT;
 
@@ -58,83 +60,97 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
               <h2 className="text-5xl font-black uppercase tracking-tighter mb-4">Institutional <span className="text-gold">Presence</span></h2>
               <p className="text-gray-400 max-w-md">Comprehensive attendance audit logs for Students, Teachers, and Department Heads.</p>
            </div>
-           {(isPrincipal || isHOD) && (
+           {(isPrincipal || isHOD || isTeacher) && (
              <div className="flex bg-white/10 p-2 rounded-2xl backdrop-blur-md mt-8 md:mt-0">
-                {(['STUDENTS', 'TEACHERS', 'HOD'] as const).map(target => (
-                  <button 
-                    key={target}
-                    onClick={() => setAuditTarget(target)}
-                    className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${auditTarget === target ? 'bg-gold text-black shadow-lg shadow-gold/20' : 'text-gray-400 hover:text-white'}`}
-                  >
-                    {target}
-                  </button>
-                ))}
+                {isTeacher ? (
+                  (['STUDENTS', 'ME'] as const).map(target => (
+                    <button 
+                      key={target}
+                      onClick={() => setViewMode(target)}
+                      className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === target ? 'bg-gold text-black shadow-lg shadow-gold/20' : 'text-gray-400 hover:text-white'}`}
+                    >
+                      {target}
+                    </button>
+                  ))
+                ) : (
+                  (['STUDENTS', 'TEACHERS', 'HOD'] as const).map(target => (
+                    <button 
+                      key={target}
+                      onClick={() => setAuditTarget(target)}
+                      className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${auditTarget === target ? 'bg-gold text-black shadow-lg shadow-gold/20' : 'text-gray-400 hover:text-white'}`}
+                    >
+                      {target}
+                    </button>
+                  ))
+                )}
              </div>
            )}
         </div>
       </div>
 
-      <div className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-10 border-b border-gray-50 flex items-center justify-between bg-gray-50/20">
-          <h3 className="text-2xl font-black text-black uppercase tracking-tighter flex items-center">
-            <ShieldCheck size={24} className="mr-3 text-gold" /> Institutional Override Control
-          </h3>
-          <div className="relative">
-            <input type="text" placeholder="Search registry..." className="bg-white border border-gray-200 rounded-full py-2.5 pl-10 pr-4 text-[10px] font-black uppercase outline-none focus:ring-1 focus:ring-gold" />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+      {isTeacher && viewMode === 'ME' ? renderStudentView() : (
+        <div className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden">
+          <div className="p-10 border-b border-gray-50 flex items-center justify-between bg-gray-50/20">
+            <h3 className="text-2xl font-black text-black uppercase tracking-tighter flex items-center">
+              <ShieldCheck size={24} className="mr-3 text-gold" /> Institutional Override Control
+            </h3>
+            <div className="relative">
+              <input type="text" placeholder="Search registry..." className="bg-white border border-gray-200 rounded-full py-2.5 pl-10 pr-4 text-[10px] font-black uppercase outline-none focus:ring-1 focus:ring-gold" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-gray-50/50">
+                  <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Registry Profile</th>
+                  <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Current Status</th>
+                  <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Assignment/Room</th>
+                  <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Administrative Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {(isTeacher || auditTarget === 'STUDENTS' ? attendanceState : teacherAttendance).map((entry: any) => (
+                  <tr key={entry.id} className="hover:bg-gray-50/50 transition-all group">
+                    <td className="px-10 py-6">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-black text-gold rounded-xl flex items-center justify-center font-black text-xs">{entry.name.charAt(0)}</div>
+                        <div>
+                          <p className="font-black text-sm uppercase text-black">{entry.name}</p>
+                          <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">ID: {entry.id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-10 py-6">
+                      <div className="flex items-center space-x-3">
+                        {['present', 'absent', 'late'].map((s) => (
+                          <button 
+                            key={s} 
+                            onClick={() => handleStatusChange(entry.id, s)}
+                            className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
+                              entry.status === s 
+                                ? (s === 'present' ? 'bg-green-500 text-white shadow-lg' : s === 'absent' ? 'bg-red-500 text-white shadow-lg' : 'bg-orange-500 text-white shadow-lg') 
+                                : 'bg-white border border-gray-100 text-gray-400 hover:border-gold hover:text-black'
+                            }`}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-10 py-6 text-xs font-bold text-gray-600 uppercase">
+                      {entry.room || 'Grade 12A'}
+                    </td>
+                    <td className="px-10 py-6 text-right">
+                      <button className="text-[10px] font-black uppercase text-gold hover:text-black transition-colors underline underline-offset-4 decoration-gold decoration-2">Edit Audit Log</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-gray-50/50">
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Registry Profile</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Current Status</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Assignment/Room</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Administrative Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {(auditTarget === 'STUDENTS' ? attendanceState : teacherAttendance).map((entry: any) => (
-                <tr key={entry.id} className="hover:bg-gray-50/50 transition-all group">
-                  <td className="px-10 py-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-black text-gold rounded-xl flex items-center justify-center font-black text-xs">{entry.name.charAt(0)}</div>
-                      <div>
-                        <p className="font-black text-sm uppercase text-black">{entry.name}</p>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">ID: {entry.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-10 py-6">
-                    <div className="flex items-center space-x-3">
-                      {['present', 'absent', 'late'].map((s) => (
-                        <button 
-                          key={s} 
-                          onClick={() => handleStatusChange(entry.id, s)}
-                          className={`px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
-                            entry.status === s 
-                              ? (s === 'present' ? 'bg-green-500 text-white shadow-lg' : s === 'absent' ? 'bg-red-500 text-white shadow-lg' : 'bg-orange-500 text-white shadow-lg') 
-                              : 'bg-white border border-gray-100 text-gray-400 hover:border-gold hover:text-black'
-                          }`}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-10 py-6 text-xs font-bold text-gray-600 uppercase">
-                    {entry.room || 'Grade 12A'}
-                  </td>
-                  <td className="px-10 py-6 text-right">
-                    <button className="text-[10px] font-black uppercase text-gold hover:text-black transition-colors underline underline-offset-4 decoration-gold decoration-2">Edit Audit Log</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
     </div>
   );
 
@@ -295,7 +311,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
             </select>
             <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
-          <button className="bg-white text-black px-8 py-3 rounded-xl border border-gray-200 font-black text-[10px] uppercase tracking-widest shadow-sm hover:border-gold transition-colors">Audit Export</button>
+          <button className="bg-white text-black px-8 py-3 rounded-xl border border-gray-100 font-black text-[10px] uppercase tracking-widest shadow-sm hover:border-gold transition-colors">Audit Export</button>
         </div>
       </div>
       

@@ -29,9 +29,10 @@ const Vault: React.FC<Props> = ({ user }) => {
   const [selectedFolder, setSelectedFolder] = useState('General');
   const [recipientType, setRecipientType] = useState('Individual');
 
-  // Teacher functionality roles
+  // Teacher and patron functionality roles
   const isTeacher = [
     UserRole.TEACHER, 
+    UserRole.PATRON,
     UserRole.HOD, 
     UserRole.PRINCIPAL, 
     UserRole.ADMIN, 

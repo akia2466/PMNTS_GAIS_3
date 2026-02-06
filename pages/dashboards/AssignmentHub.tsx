@@ -52,9 +52,10 @@ const AssignmentHub: React.FC<Props> = ({ user }) => {
     class: string;
   } | null>(null);
 
-  // Expanded teacher access roles
+  // Expanded teacher and patron access roles
   const isTeacher = [
     UserRole.TEACHER, 
+    UserRole.PATRON,
     UserRole.HOD, 
     UserRole.PRINCIPAL, 
     UserRole.ADMIN, 

@@ -29,7 +29,9 @@ import {
   BarChart as ChartIcon,
   ZapOff,
   Cpu,
-  Globe
+  Globe,
+  ClipboardCheck,
+  ChevronRight
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -53,6 +55,7 @@ interface Props {
 const MainDashboard: React.FC<Props> = ({ user }) => {
   const [viewMode, setViewMode] = useState<'STUDENTS' | 'TEACHERS' | 'HOD'>('STUDENTS');
   const isPrincipal = user.role === UserRole.PRINCIPAL;
+  const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON;
 
   const financialData = [
     { month: 'Jan', revenue: 450000, expenses: 320000 },
@@ -213,7 +216,7 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
           <button className="w-full mt-10 py-5 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl hover:bg-gold hover:text-black transition-all">Download Audit Trail</button>
         </div>
 
-        {/* NEW SECTION 3: Performance Distribution */}
+        {/* SECTION 3: Performance Distribution */}
         <div className="bg-emerald-50 p-10 rounded-[3.5rem] border border-transparent shadow-sm">
           <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
             <ChartIcon size={24} className="mr-3 text-gold" /> {viewMode === 'STUDENTS' ? 'Academic Enrollment Mix' : viewMode === 'TEACHERS' ? 'Teacher Load Mix' : 'Budgetary Distribution'}
@@ -248,7 +251,7 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
           </div>
         </div>
 
-        {/* NEW SECTION 4: Operational Intelligence */}
+        {/* SECTION 4: Operational Intelligence */}
         <div className="bg-slate-100 p-10 rounded-[3.5rem] border border-transparent shadow-sm">
           <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
             <Scale size={24} className="mr-3 text-gold" /> Institutional Balance Scorecard
@@ -279,6 +282,144 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
             ))}
           </div>
           <button className="w-full mt-10 py-5 bg-black text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl hover:bg-gold hover:text-black transition-all">Strategic Review</button>
+        </div>
+      </div>
+      {renderRecentActivity('bg-slate-50')}
+    </div>
+  );
+
+  const renderTeacherDashboard = () => (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Classes Assigned', value: '5', icon: <Users2 size={16} />, bg: 'bg-indigo-50' },
+          { label: 'Instruction Hours', value: '18/wk', icon: <Clock size={16} />, bg: 'bg-green-50' },
+          { label: 'Avg Class GPA', value: '3.4', icon: <ChartIcon size={16} />, bg: 'bg-gold/10' },
+          { label: 'Pending Grading', value: '12', icon: <FileText size={16} />, bg: 'bg-orange-50' },
+          { label: 'Curriculum Coverage', value: '88%', icon: <BookOpen size={16} />, bg: 'bg-cyan-50' },
+          { label: 'Faculty Rank', value: 'Top 5', icon: <Award size={16} />, bg: 'bg-purple-50' },
+          { label: 'Engagement Rate', value: '92%', icon: <TrendingUp size={16} />, bg: 'bg-blue-50' },
+          { label: 'Protocol Compliance', value: '100%', icon: <ShieldCheck size={16} />, bg: 'bg-emerald-50' },
+        ].map((stat, i) => (
+          <div key={i} className={`${stat.bg} p-6 rounded-[2.5rem] border border-transparent shadow-sm hover:border-gold transition-colors text-center flex flex-col items-center group`}>
+            <div className="p-3 bg-white rounded-2xl text-gold mb-3 group-hover:scale-110 transition-transform shadow-sm">{stat.icon}</div>
+            <h3 className="text-2xl font-black text-black tracking-tight">{stat.value}</h3>
+            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest leading-tight">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Instructional Progress */}
+        <div className="bg-indigo-50 p-8 rounded-[3rem] border border-transparent shadow-sm">
+          <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
+            <BookOpen size={20} className="mr-3 text-gold" /> Instructional Progress
+          </h3>
+          <div className="space-y-4">
+            {[
+              { subject: 'Advanced Mathematics (12A)', progress: 92, status: 'On Track', color: 'bg-blue-500' },
+              { subject: 'Physics Lab (12B)', progress: 78, status: 'Delayed', color: 'bg-orange-500' },
+              { subject: 'Calculus Honors (11C)', progress: 85, status: 'On Track', color: 'bg-indigo-500' },
+              { subject: 'Computer Science (12A)', progress: 95, status: 'Advanced', color: 'bg-emerald-500' },
+            ].map((item, i) => (
+              <div key={i} className="p-4 bg-white rounded-[1.5rem] shadow-sm border border-transparent hover:border-gold transition-colors">
+                 <div className="flex justify-between items-center mb-2">
+                    <span className="font-bold text-xs uppercase text-black">{item.subject}</span>
+                    <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${item.status === 'Delayed' ? 'bg-red-50 text-red-500' : 'bg-green-50 text-green-600'}`}>{item.status}</span>
+                 </div>
+                 <div className="flex items-center space-x-4">
+                    <div className="flex-grow h-2 bg-gray-100 rounded-full overflow-hidden">
+                       <div className={`h-full ${item.color}`} style={{ width: `${item.progress}%` }} />
+                    </div>
+                    <span className="font-black text-[10px] text-black">{item.progress}%</span>
+                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Assessment Pipeline */}
+        <div className="bg-rose-50 p-8 rounded-[3rem] border border-transparent shadow-sm">
+          <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
+            <ClipboardCheck size={20} className="mr-3 text-gold" /> Assessment Pipeline
+          </h3>
+          <div className="space-y-4">
+            {[
+              { task: 'Mock Exam Grade 12A', pending: 8, total: 42, due: 'In 2 days' },
+              { task: 'Physics Lab Report 3', pending: 15, total: 39, due: 'Next week' },
+              { task: 'Mid-Term Essay Mark', pending: 0, total: 45, due: 'Completed' },
+            ].map((item, i) => (
+              <div key={i} className="p-4 bg-white rounded-[1.5rem] shadow-sm flex items-center justify-between border border-transparent hover:border-gold transition-colors">
+                <div className="flex items-center space-x-4">
+                  <div className={`w-10 h-10 ${item.pending > 0 ? 'bg-gold/10 text-gold' : 'bg-green-50 text-green-600'} rounded-xl flex items-center justify-center`}>
+                    {item.pending > 0 ? <Clock size={16} /> : <CheckCircle size={16} />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-black uppercase truncate w-32 md:w-auto">{item.task}</p>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase">{item.pending} Pending &bull; {item.due}</p>
+                  </div>
+                </div>
+                <button className="p-2 bg-gray-50 rounded-xl hover:bg-black hover:text-gold transition-colors">
+                   <ChevronRight size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <button className="w-full mt-6 py-4 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-gold hover:text-black transition-all">Launch Grading Hub</button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Performance Summary */}
+        <div className="bg-indigo-50 p-8 rounded-[3rem] border border-transparent shadow-sm">
+          <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
+            <TrendingUp size={20} className="mr-3 text-gold" /> Performance Summary
+          </h3>
+          <div className="space-y-4">
+            {[
+              { subject: 'Mathematics', grade: 'A-', percentage: '91%', color: 'bg-blue-500' },
+              { subject: 'Science', grade: 'B+', percentage: '85%', color: 'bg-green-500' },
+              { subject: 'Literature', grade: 'A', percentage: '92%', color: 'bg-purple-500' },
+              { subject: 'Social Science', grade: 'B', percentage: '81%', color: 'bg-orange-500' },
+            ].map((course, i) => (
+              <div key={i} className="flex items-center justify-between p-4 bg-white rounded-[1.5rem] shadow-sm">
+                <div className="flex items-center space-x-4">
+                  <div className={`w-10 h-10 ${course.color} text-white rounded-xl flex items-center justify-center font-black text-xs`}>{course.grade}</div>
+                  <span className="font-bold text-sm uppercase tracking-tight">{course.subject}</span>
+                </div>
+                <span className="font-black text-sm tracking-tight">{course.percentage}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Attendance Summary */}
+        <div className="bg-emerald-50 p-8 rounded-[3rem] border border-transparent shadow-sm">
+          <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
+            <UserCheck size={20} className="mr-3 text-gold" /> Attendance Summary
+          </h3>
+          <div className="space-y-4">
+            {[
+              { subject: 'Mathematics', absent: 0, tardy: 1, color: 'text-blue-600' },
+              { subject: 'Science', absent: 1, tardy: 2, color: 'text-green-600' },
+              { subject: 'Literature', absent: 0, tardy: 0, color: 'text-purple-600' },
+              { subject: 'Social Science', absent: 1, tardy: 0, color: 'text-orange-600' },
+            ].map((stat, i) => (
+              <div key={i} className="flex items-center justify-between p-4 bg-white rounded-[1.5rem] shadow-sm border border-transparent hover:border-gold transition-colors">
+                <span className={`font-bold text-sm uppercase tracking-tight ${stat.color}`}>{stat.subject}</span>
+                <div className="flex space-x-4">
+                  <div className="text-center">
+                    <p className="text-[8px] font-black text-gray-400 uppercase">Absent</p>
+                    <p className={`text-sm font-black ${stat.absent > 0 ? 'text-red-500' : 'text-gray-900'}`}>{stat.absent}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[8px] font-black text-gray-400 uppercase">Tardy</p>
+                    <p className={`text-sm font-black ${stat.tardy > 0 ? 'text-orange-500' : 'text-gray-900'}`}>{stat.tardy}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       {renderRecentActivity('bg-slate-50')}
@@ -367,6 +508,9 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
         return renderStudentDashboard();
       case UserRole.PRINCIPAL:
         return renderPrincipalDashboard();
+      case UserRole.TEACHER:
+      case UserRole.PATRON:
+        return renderTeacherDashboard();
       default:
         return renderStudentDashboard();
     }

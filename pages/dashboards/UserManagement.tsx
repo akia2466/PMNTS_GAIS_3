@@ -155,8 +155,8 @@ const UserManagement: React.FC<Props> = ({ user }) => {
         {[
           { label: 'Total Users', value: users.length.toString(), icon: <Users size={20} />, color: 'bg-blue-50' },
           { label: 'Student Users', value: users.filter(u => u.role === UserRole.STUDENT).length.toString(), icon: <GraduationCap size={20} />, color: 'bg-green-50' },
-          { label: 'Faculty Users', value: users.filter(u => u.role === UserRole.TEACHER || u.role === UserRole.HOD).length.toString(), icon: <Briefcase size={20} />, color: 'bg-purple-50' },
-          { label: 'Staff Users', value: users.filter(u => ![UserRole.STUDENT, UserRole.TEACHER, UserRole.HOD].includes(u.role)).length.toString(), icon: <Shield size={20} />, color: 'bg-gold/10' },
+          { label: 'Faculty Users', value: users.filter(u => u.role === UserRole.TEACHER || u.role === UserRole.PATRON || u.role === UserRole.HOD).length.toString(), icon: <Briefcase size={20} />, color: 'bg-purple-50' },
+          { label: 'Staff Users', value: users.filter(u => ![UserRole.STUDENT, UserRole.TEACHER, UserRole.PATRON, UserRole.HOD].includes(u.role)).length.toString(), icon: <Shield size={20} />, color: 'bg-gold/10' },
         ].map((m, i) => (
           <div key={i} className={`${m.color} p-8 rounded-[2.5rem] border border-transparent shadow-sm flex flex-col items-center text-center group`}>
             <div className="p-3 bg-white rounded-xl mb-4 shadow-sm">{m.icon}</div>
@@ -263,7 +263,6 @@ const UserManagement: React.FC<Props> = ({ user }) => {
                         ) : (
                           <button onClick={() => setEditingUserId(u.id)} className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-gold transition-colors"><Edit2 size={14}/></button>
                         )}
-                        {/* Fixed error: changed handleDeleteUser(id) to handleDeleteUser(u.id) */}
                         <button onClick={() => handleDeleteUser(u.id)} className="p-2 bg-white border border-gray-100 rounded-lg text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
                       </div>
                     </td>

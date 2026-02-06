@@ -39,7 +39,7 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
   const currentDayName = daysOfWeek[currentTime.getDay() - 1] || 'Monday';
 
   const isPrincipal = user.role === UserRole.PRINCIPAL;
-  const isTeacher = [UserRole.TEACHER, UserRole.HOD, UserRole.PRINCIPAL, UserRole.ADMIN, UserRole.SUPER_USER, UserRole.VENDOR].includes(user.role);
+  const isTeacher = [UserRole.TEACHER, UserRole.PATRON, UserRole.HOD, UserRole.PRINCIPAL, UserRole.ADMIN, UserRole.SUPER_USER, UserRole.VENDOR].includes(user.role);
 
   // Principal's Academic Leadership Schedule
   const principalSchedule = [

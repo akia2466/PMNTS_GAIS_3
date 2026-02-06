@@ -8,7 +8,8 @@ export enum UserRole {
   ADMISSIONS = 'ADMISSIONS',
   ADMIN = 'ADMIN',
   SUPER_USER = 'SUPER_USER',
-  VENDOR = 'VENDOR'
+  VENDOR = 'VENDOR',
+  PATRON = 'PATRON'
 }
 
 export interface User {
