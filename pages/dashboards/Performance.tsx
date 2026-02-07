@@ -126,6 +126,152 @@ const Performance: React.FC<Props> = ({ user }) => {
     ];
   };
 
+  const getStatsForHero = () => {
+    if (isStudent) {
+      return getTranscriptData().map(stat => ({
+        label: `${stat.students} STUDENTS`,
+        value: stat.avg,
+        title: stat.subject,
+        initial: stat.initial,
+        color: stat.color
+      }));
+    }
+    return [
+      { label: 'SYSTEM GPA', value: '3.42', icon: <Target size={14} className="text-blue-400" /> },
+      { label: 'PASS RATE', value: '96.2%', icon: <CheckCircle size={14} className="text-green-400" /> },
+      { label: 'ACTIVE HODS', value: '4/4', icon: <Users2 size={14} className="text-gold" /> },
+      { label: 'RANK', value: '#1 Nat', icon: <Trophy size={14} className="text-purple-400" /> },
+    ];
+  };
+
+  const renderInstitutionalHero = () => (
+    <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col xl:flex-row items-center justify-between border border-white/10">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
+      
+      {/* Column 1: Control Panel */}
+      <div className="relative z-10 flex flex-col items-start mb-8 xl:mb-0 xl:max-w-xl">
+        <div className="flex items-center space-x-3 mb-5">
+           <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
+              <Layout size={20} />
+           </div>
+           <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">
+             {isStudent ? 'My Academic Performance' : 'Performance Registry Oversight'}
+           </p>
+        </div>
+        
+        <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
+          {isStudent ? 'Student' : 'Master'}<br/>
+          <span className="text-gold">Analytics</span>
+        </h2>
+
+        <div className="flex flex-wrap items-center gap-3 mb-8">
+            <div className="relative inline-block group">
+              <select 
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
+              >
+                {years.map(y => <option key={y} value={y} className="bg-black">{y}</option>)}
+              </select>
+              <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
+            </div>
+            <div className="relative inline-block group">
+              <select 
+                value={selectedTerm}
+                onChange={(e) => setSelectedTerm(e.target.value)}
+                className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
+              >
+                {terms.map(t => <option key={t} value={t} className="bg-black">{t.toUpperCase()}</option>)}
+              </select>
+              <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
+            </div>
+            <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
+              {isStudent ? 'EXPORT TRANSCRIPT' : 'AUDIT EXPORT'}
+            </button>
+        </div>
+        
+        <div className="flex items-center space-x-3">
+          {!isStudent && (
+            <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+              {['STUDENTS', 'ME'].map(target => (
+                <button 
+                  key={target}
+                  onClick={() => setViewMode(target as any)}
+                  className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                    viewMode === target 
+                      ? 'bg-gold text-black shadow-lg shadow-gold/20' 
+                      : 'text-zinc-500 hover:text-white'
+                  }`}
+                >
+                  {target}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+            {['TERM', 'CUMULATIVE'].map(target => (
+              <button 
+                key={target}
+                onClick={() => setTimePeriod(target as any)}
+                className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                  timePeriod === target 
+                    ? 'bg-gold text-black shadow-lg shadow-gold/20' 
+                    : 'text-zinc-500 hover:text-white'
+                }`}
+              >
+                {target}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Column 2: Large Summary Card */}
+      <div className="relative z-10 flex flex-col items-center justify-center px-4">
+         <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] w-full min-w-[276px] shadow-2xl transform hover:scale-105 transition-transform border border-white/10">
+            <p className="text-white/80 font-black text-[10px] uppercase tracking-widest mb-4">
+              {isStudent ? 'Your Overall Average %' : 'Institutional Average %'}
+            </p>
+            <div className="flex items-end space-x-3 mb-8">
+               <h3 className="text-7xl font-black text-white tracking-tighter leading-none">
+                 {timePeriod === 'TERM' ? (isStudent ? '89%' : '88%') : (isStudent ? '87%' : '86%')}
+               </h3>
+               <div className="bg-gold/20 px-3 py-1.5 rounded-xl flex items-center space-x-1 mb-1 border border-gold/30">
+                  <TrendingUp size={14} className="text-gold" />
+                  <span className="text-gold font-black text-xs">+1.2%</span>
+               </div>
+            </div>
+            <div className="pt-6 border-t border-white/10">
+               <p className="text-white/60 font-black text-[10px] uppercase tracking-widest mb-2">
+                 {isStudent ? 'Your Overall GPA' : 'System Mean GPA'}
+               </p>
+               <h4 className="text-4xl font-black text-gold">{timePeriod === 'TERM' ? '3.4' : '3.3'}</h4>
+            </div>
+         </div>
+      </div>
+
+      {/* Column 3: Stats Grid */}
+      <div className="relative z-10 grid grid-cols-2 gap-4">
+        {getStatsForHero().map((stat: any, i) => (
+          <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group">
+             {stat.icon ? (
+               <div className="mb-3 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
+             ) : (
+               <div className="flex items-center space-x-3 w-full justify-center mb-3">
+                 <div className={`w-8 h-8 ${stat.color} rounded-lg flex items-center justify-center text-white font-black text-[10px] shadow-lg shrink-0 group-hover:scale-110 transition-transform`}>
+                   {stat.initial}
+                 </div>
+                 <p className="text-gray-400 text-[6px] font-black uppercase tracking-widest leading-tight truncate">{stat.title}</p>
+               </div>
+             )}
+             <h4 className="text-xl xl:text-2xl font-black text-white tracking-tighter leading-none mb-1">{stat.value}</h4>
+             <p className="text-gray-500 text-[7px] font-black uppercase tracking-widest">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const renderDetailedTranscript = () => (
     <div className="mt-8 space-y-6 animate-in fade-in duration-700">
       <div className="flex items-center justify-between mb-2">
@@ -220,99 +366,7 @@ const Performance: React.FC<Props> = ({ user }) => {
 
     return (
       <div className="space-y-10 animate-in fade-in duration-500">
-        <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10">
-           <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
-           
-           <div className="relative z-10 flex flex-col items-start mb-8 md:mb-0">
-              <div className="flex items-center space-x-3 mb-5">
-                 <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
-                    <Layout size={20} />
-                 </div>
-                 <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">Performance Registry Oversight</p>
-              </div>
-              
-              <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
-                Master<br/>
-                <span className="text-gold">Analytics</span>
-              </h2>
-
-              <div className="flex flex-wrap items-center gap-3 mb-8">
-                 <div className="relative inline-block group">
-                    <select 
-                      value={selectedYear} 
-                      onChange={(e) => setSelectedYear(e.target.value)} 
-                      className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
-                    >
-                      {years.map(y => <option key={y} value={y} className="bg-black">{y}</option>)}
-                    </select>
-                    <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
-                 </div>
-
-                 <div className="relative inline-block group">
-                    <select 
-                      value={selectedTerm} 
-                      onChange={(e) => setSelectedTerm(e.target.value)} 
-                      className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
-                    >
-                      {terms.map(t => <option key={t} value={t} className="bg-black">{t.toUpperCase()}</option>)}
-                    </select>
-                    <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
-                 </div>
-
-                 <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
-                    Audit Export
-                 </button>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
-                  {['STUDENTS', 'ME'].map(target => (
-                    <button 
-                      key={target}
-                      onClick={() => setViewMode(target as any)}
-                      className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                        viewMode === target 
-                          ? 'bg-gold text-black shadow-lg shadow-gold/20' 
-                          : 'text-zinc-500 hover:text-white'
-                      }`}
-                    >
-                      {target}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
-                  {['TERM', 'CUMULATIVE'].map(target => (
-                    <button 
-                      key={target}
-                      onClick={() => setTimePeriod(target as any)}
-                      className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                        timePeriod === target 
-                          ? 'bg-gold text-black shadow-lg shadow-gold/20' 
-                          : 'text-zinc-500 hover:text-white'
-                      }`}
-                    >
-                      {target}
-                    </button>
-                  ))}
-                </div>
-              </div>
-           </div>
-
-           <div className="relative z-10 grid grid-cols-2 gap-3">
-              {[
-                { label: 'SYSTEM GPA', value: '3.42', icon: <Target size={14} className="text-blue-400" /> },
-                { label: 'PASS RATE', value: '96.2%', icon: <CheckCircle size={14} className="text-green-400" /> },
-                { label: 'ACTIVE HODS', value: '4/4', icon: <Users2 size={14} className="text-gold" /> },
-                { label: 'RANK', value: '#1 Nat', icon: <Trophy size={14} className="text-purple-400" /> },
-              ].map((stat, i) => (
-                <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] w-36 flex flex-col items-start hover:bg-white/10 transition-colors group">
-                   <div className="mb-4 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
-                   <h4 className="text-2xl font-black text-white tracking-tighter leading-none mb-1.5">{stat.value}</h4>
-                   <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest">{stat.label}</p>
-                </div>
-              ))}
-           </div>
-        </div>
+        {renderInstitutionalHero()}
 
         {viewMode === 'ME' ? (
           <div className="space-y-10 mt-10">
@@ -379,111 +433,14 @@ const Performance: React.FC<Props> = ({ user }) => {
 
   const renderStudentView = () => (
     <div className="space-y-10 animate-in fade-in duration-500 pb-12">
-      <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col xl:flex-row items-center justify-between border border-white/10">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
-        
-        <div className="relative z-10 flex flex-col items-start mb-8 xl:mb-0">
-          <div className="flex items-center space-x-3 mb-5">
-             <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
-                <Layout size={20} />
-             </div>
-             <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">My Academic Performance</p>
-          </div>
-          
-          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
-            STUDENT<br/>
-            <span className="text-gold">ANALYTICS</span>
-          </h2>
-
-          <div className="flex flex-wrap items-center gap-3 mb-8">
-              <div className="relative inline-block group">
-                <select 
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                  className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
-                >
-                  {years.map(y => <option key={y} value={y} className="bg-black">{y}</option>)}
-                </select>
-                <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
-              </div>
-              <div className="relative inline-block group">
-                <select 
-                  value={selectedTerm}
-                  onChange={(e) => setSelectedTerm(e.target.value)}
-                  className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
-                >
-                  {terms.map(t => <option key={t} value={t} className="bg-black">{t.toUpperCase()}</option>)}
-                </select>
-                <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
-              </div>
-              <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
-                EXPORT TRANSCRIPT
-              </button>
-           </div>
-          
-          <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
-            {['TERM', 'CUMULATIVE'].map(target => (
-              <button 
-                key={target}
-                onClick={() => setTimePeriod(target as any)}
-                className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                  timePeriod === target 
-                    ? 'bg-gold text-black shadow-lg shadow-gold/20' 
-                    : 'text-zinc-500 hover:text-white'
-                }`}
-              >
-                {target}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="relative z-10 flex flex-col items-center justify-center px-4">
-           <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] w-full min-w-[276px] shadow-2xl transform hover:scale-105 transition-transform border border-white/10">
-              <p className="text-white/80 font-black text-[10px] uppercase tracking-widest mb-4">Your Overall Average %</p>
-              <div className="flex items-end space-x-3 mb-8">
-                 <h3 className="text-7xl font-black text-white tracking-tighter leading-none">{timePeriod === 'TERM' ? '89%' : '87%'}</h3>
-                 <div className="bg-gold/20 px-3 py-1.5 rounded-xl flex items-center space-x-1 mb-1 border border-gold/30">
-                    <TrendingUp size={14} className="text-gold" />
-                    <span className="text-gold font-black text-xs">+1.2%</span>
-                 </div>
-              </div>
-              <div className="pt-6 border-t border-white/10">
-                 <p className="text-white/60 font-black text-[10px] uppercase tracking-widest mb-2">Your Overall GPA</p>
-                 <h4 className="text-4xl font-black text-gold">{timePeriod === 'TERM' ? '3.4' : '3.3'}</h4>
-              </div>
-           </div>
-        </div>
-
-        <div className="relative z-10 grid grid-cols-2 gap-4">
-          {getTranscriptData().map((stat, i) => (
-            <div 
-              key={i} 
-              className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group"
-            >
-              <p className="text-gray-400 text-[7px] font-black uppercase tracking-widest leading-tight mb-3 truncate w-full">{stat.subject}</p>
-              
-              <div className="flex items-center space-x-3 w-full justify-center">
-                <div className={`w-10 h-10 ${stat.color} rounded-xl flex items-center justify-center text-white font-black text-xs shadow-lg shrink-0 group-hover:scale-110 transition-transform`}>
-                  {stat.initial}
-                </div>
-                <div className="flex flex-col items-start overflow-hidden">
-                  <h4 className="text-xl font-black text-white tracking-tighter leading-none mb-0.5">{stat.avg}</h4>
-                  <p className="text-[7px] text-gray-500 font-bold uppercase tracking-tight truncate w-full">{stat.students} STUDENTS</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
+      {renderInstitutionalHero()}
       {renderDetailedTranscript()}
     </div>
   );
 
   return (
     <div className="pb-12">
-      {isStudent ? renderStudentView() : (isPrincipal || isTeacher || isHOD) ? renderPrincipalPerformanceHub() : (
+      {isStudent ? renderStudentView() : (isPrincipal || isTeacher || isHOD || [UserRole.BURSAR, UserRole.ADMISSIONS, UserRole.ADMIN, UserRole.SUPER_USER].includes(user.role)) ? renderPrincipalPerformanceHub() : (
         <div className="space-y-8 animate-in fade-in duration-500 text-center py-20">
            <p className="text-gray-400 uppercase font-black text-[12px] tracking-widest">Academic Records Locked by Institutional Protocol.</p>
         </div>

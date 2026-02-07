@@ -5,14 +5,14 @@ import {
   Search, 
   UserPlus, 
   MessageSquare, 
-  UserCheck,
-  Clock,
-  Check,
-  ShieldCheck,
-  Layout,
-  ChevronDown,
-  Activity,
-  Trophy
+  UserCheck, 
+  Clock, 
+  Check, 
+  ShieldCheck, 
+  Layout, 
+  ChevronDown, 
+  Activity, 
+  Trophy 
 } from 'lucide-react';
 
 interface Props {
@@ -23,15 +23,14 @@ const Connections: React.FC<Props> = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'NETWORK' | 'LOG'>('NETWORK');
 
-  const isStudent = user.role === UserRole.STUDENT;
-  const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON;
-
-  const metrics = [
-    { label: 'Total Friends/Peers', value: '24', icon: <Users />, bg: 'bg-blue-50' },
-    { label: 'Requests Received', value: '3', icon: <UserPlus />, bg: 'bg-gold/10' },
-    { label: 'Requests Sent', value: '2', icon: <UserCheck />, bg: 'bg-purple-50' },
-    { label: 'Pending Response', value: '5', icon: <Clock />, bg: 'bg-orange-50' },
-  ];
+  const isAdminRole = [
+    UserRole.PRINCIPAL, 
+    UserRole.HOD, 
+    UserRole.BURSAR, 
+    UserRole.ADMISSIONS, 
+    UserRole.ADMIN, 
+    UserRole.SUPER_USER
+  ].includes(user.role);
 
   const activeConnections = [
     { name: 'John Smith', grade: 'Grade 12 - Class A' },
@@ -43,17 +42,36 @@ const Connections: React.FC<Props> = ({ user }) => {
     { name: 'Sarah Gima', grade: 'Grade 12 - Class A', type: 'outgoing' },
   ];
 
+  const getHeroStats = () => {
+    if (isAdminRole) {
+      return [
+        { label: 'TOTAL NODES', value: '1,240', icon: <Users size={14} className="text-blue-400" /> },
+        { label: 'PENDING AUDITS', value: '14', icon: <Clock size={14} className="text-gold" /> },
+        { label: 'OUTGOING SYNC', value: '98%', icon: <UserPlus size={14} className="text-green-400" /> },
+        { label: 'SEC. INDEX', value: '9.8', icon: <ShieldCheck size={14} className="text-purple-400" /> },
+      ];
+    }
+    return [
+      { label: 'PEER NODES', value: '24', icon: <Users size={14} className="text-blue-400" /> },
+      { label: 'PENDING', value: '3', icon: <Clock size={14} className="text-green-400" /> },
+      { label: 'OUTGOING', value: '2', icon: <UserPlus size={14} className="text-gold" /> },
+      { label: 'SECURITY', value: '100%', icon: <ShieldCheck size={14} className="text-purple-400" /> },
+    ];
+  };
+
   const renderHero = () => (
     <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10 mb-10">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
       
       {/* Left Content */}
-      <div className="relative z-10 flex flex-col items-start mb-8 md:mb-0">
+      <div className="relative z-10 flex flex-col items-start mb-8 md:mb-0 xl:max-w-xl">
         <div className="flex items-center space-x-3 mb-5">
            <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
               <Layout size={20} />
            </div>
-           <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">Registry Node Registry</p>
+           <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">
+             {isAdminRole ? 'Institutional Node Management' : 'Registry Node Registry'}
+           </p>
         </div>
         
         <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
@@ -63,10 +81,10 @@ const Connections: React.FC<Props> = ({ user }) => {
 
         <div className="flex flex-wrap items-center gap-3 mb-8">
             <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
-              Search Directory
+              {isAdminRole ? 'Audit Directory' : 'Search Directory'}
             </button>
             <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
-              Security Audit
+              Security Protocol
             </button>
          </div>
         
@@ -76,7 +94,7 @@ const Connections: React.FC<Props> = ({ user }) => {
             <button 
               key={target}
               onClick={() => setViewMode(target as any)}
-              className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                 viewMode === target 
                   ? 'bg-gold text-black shadow-lg shadow-gold/20' 
                   : 'text-zinc-500 hover:text-white'
@@ -88,14 +106,27 @@ const Connections: React.FC<Props> = ({ user }) => {
         </div>
       </div>
 
+      {/* Column 2: Large Registry Status Card */}
+      <div className="relative z-10 flex flex-col items-center justify-center px-4">
+         <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] w-full min-w-[276px] shadow-2xl transform hover:scale-105 transition-transform border border-white/10">
+            <p className="text-white/80 font-black text-[10px] uppercase tracking-widest mb-4">Registry Integrity Index %</p>
+            <div className="flex items-end space-x-3 mb-8">
+               <h3 className="text-7xl font-black text-white tracking-tighter leading-none">99.8%</h3>
+               <div className="bg-gold/20 px-3 py-1.5 rounded-xl flex items-center space-x-1 mb-1 border border-gold/30">
+                  <Activity size={14} className="text-gold" />
+                  <span className="text-gold font-black text-xs">Stable</span>
+               </div>
+            </div>
+            <div className="pt-6 border-t border-white/10">
+               <p className="text-white/60 font-black text-[10px] uppercase tracking-widest mb-2">Total Verified Nodes</p>
+               <h4 className="text-4xl font-black text-gold">2,184</h4>
+            </div>
+         </div>
+      </div>
+
       {/* Right Content - Stat Grid */}
       <div className="relative z-10 grid grid-cols-2 gap-3">
-        {[
-          { label: 'PEER NODES', value: '24', icon: <Users size={14} className="text-blue-400" /> },
-          { label: 'PENDING', value: '3', icon: <Clock size={14} className="text-green-400" /> },
-          { label: 'OUTGOING', value: '2', icon: <UserPlus size={14} className="text-gold" /> },
-          { label: 'SECURITY', value: '100%', icon: <ShieldCheck size={14} className="text-purple-400" /> },
-        ].map((stat, i) => (
+        {getHeroStats().map((stat, i) => (
           <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] w-36 flex flex-col items-start hover:bg-white/10 transition-colors group">
              <div className="mb-4 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
              <h4 className="text-2xl font-black text-white tracking-tighter leading-none mb-1.5">{stat.value}</h4>
@@ -108,33 +139,19 @@ const Connections: React.FC<Props> = ({ user }) => {
 
   return (
     <div className="space-y-10 pb-20 animate-in fade-in duration-500">
-      {(isStudent || isTeacher) ? renderHero() : (
-        <div>
-          <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Registry Nodes</h2>
-          <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Authorized institutional directory management.</p>
-        </div>
-      )}
-
-      {(!isStudent && !isTeacher) && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {metrics.map((m, i) => (
-            <div key={i} className={`${m.bg} p-8 rounded-[2.5rem] border border-transparent shadow-sm flex flex-col items-center text-center group`}>
-              <h3 className="text-3xl font-black text-black mb-2 tracking-tighter">{m.value}</h3>
-              <p className="text-gray-400 text-[9px] font-black uppercase tracking-widest leading-tight">{m.label}</p>
-            </div>
-          ))}
-        </div>
-      )}
+      {renderHero()}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <section className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
           <div className="p-10 border-b border-gray-50 bg-gray-50/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="text-xl font-black text-black uppercase tracking-tighter">Your Connections</h3>
+            <h3 className="text-xl font-black text-black uppercase tracking-tighter">
+              {isAdminRole ? 'Institutional Directory' : 'Your Connections'}
+            </h3>
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input 
                 type="text" 
-                placeholder="Search students..." 
+                placeholder="Search registry..." 
                 className="bg-gray-50 border border-gray-200 rounded-xl py-2 pl-10 pr-4 text-[9px] font-black uppercase outline-none focus:ring-1 focus:ring-gold"
               />
             </div>
@@ -150,7 +167,7 @@ const Connections: React.FC<Props> = ({ user }) => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className="bg-green-50 text-green-600 px-4 py-1.5 rounded-full text-[8px] font-black uppercase border border-green-100">Connected</span>
+                  <span className="bg-green-50 text-green-600 px-4 py-1.5 rounded-full text-[8px] font-black uppercase border border-green-100">Verified Node</span>
                   <button className="p-3 bg-black text-gold rounded-xl hover:bg-gold hover:text-black transition-all shadow-md">
                     <MessageSquare size={16}/>
                   </button>
@@ -162,7 +179,9 @@ const Connections: React.FC<Props> = ({ user }) => {
 
         <section className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
           <div className="p-10 border-b border-gray-50 bg-gray-50/20">
-            <h3 className="text-xl font-black text-black uppercase tracking-tighter">Connection Requests</h3>
+            <h3 className="text-xl font-black text-black uppercase tracking-tighter">
+              {isAdminRole ? 'Recent Registry Requests' : 'Connection Requests'}
+            </h3>
           </div>
           <div className="divide-y divide-gray-50 flex-grow">
             {requests.map((r, i) => (
@@ -179,16 +198,16 @@ const Connections: React.FC<Props> = ({ user }) => {
                     <>
                       <button className="bg-black text-white px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-gold hover:text-black transition-all shadow-sm flex items-center space-x-2">
                         <Check size={12}/>
-                        <span>Accept</span>
+                        <span>Approve</span>
                       </button>
                       <button className="bg-gray-100 text-gray-400 px-5 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-red-50 hover:text-red-500 transition-all border border-gray-200">
-                        Decline
+                        Reject
                       </button>
                     </>
                   ) : (
                     <button className="bg-white border-2 border-gray-100 text-gray-400 px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:border-red-500 hover:text-red-500 transition-all group">
-                      <span className="group-hover:hidden">Pending</span>
-                      <span className="hidden group-hover:inline">Cancel Request</span>
+                      <span className="group-hover:hidden">Pending Admin Review</span>
+                      <span className="hidden group-hover:inline">Cancel Audit</span>
                     </button>
                   )}
                 </div>

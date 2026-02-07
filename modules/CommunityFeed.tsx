@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, Post, UserRole } from '../types';
-import { Heart, MessageSquare, Share2, Search, Filter, ChevronRight, Layout, ChevronDown, TrendingUp, Users2, Trophy, Activity, Award } from 'lucide-react';
+import { Heart, MessageSquare, Share2, Search, Filter, ChevronRight, Layout, ChevronDown, TrendingUp, Users2, Trophy, Activity, Award, ShieldCheck } from 'lucide-react';
 
 interface Props {
   user: User;
@@ -11,13 +11,14 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
   const [viewMode, setViewMode] = useState<'FEED' | 'GROUPS'>('FEED');
   
   const isStudent = user.role === UserRole.STUDENT;
-  const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON;
-
-  const communityCards = [
-    { title: 'Class Community', subtitle: 'Class 12A', members: 42, posts: 8, active: 12, bg: 'bg-blue-50' },
-    { title: 'Grade Community', subtitle: 'Grade 12', members: 93, posts: 15, active: 24, bg: 'bg-purple-50' },
-    { title: 'School Community', subtitle: 'All Students & Staff', members: 2184, posts: 47, active: 156, bg: 'bg-emerald-50' },
-  ];
+  const isAdminRole = [
+    UserRole.PRINCIPAL, 
+    UserRole.HOD, 
+    UserRole.BURSAR, 
+    UserRole.ADMISSIONS, 
+    UserRole.ADMIN, 
+    UserRole.SUPER_USER
+  ].includes(user.role);
 
   const posts: Post[] = [
     {
@@ -40,6 +41,23 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
     }
   ];
 
+  const getHeroStats = () => {
+    if (isAdminRole) {
+      return [
+        { label: 'ACTIVE GROUPS', value: '18', icon: <Users2 size={14} className="text-blue-400" /> },
+        { label: 'MOD ALERTS', value: '2', icon: <ShieldCheck size={14} className="text-gold" /> },
+        { label: 'INST. REACH', value: '94%', icon: <Activity size={14} className="text-purple-400" /> },
+        { label: 'BROADCASTS', value: '12', icon: <TrendingUp size={14} className="text-green-400" /> },
+      ];
+    }
+    return [
+      { label: 'JOINED GROUPS', value: '4', icon: <Users2 size={14} className="text-blue-400" /> },
+      { label: 'NEW POSTS', value: '15', icon: <TrendingUp size={14} className="text-green-400" /> },
+      { label: 'INTERACTION', value: '89%', icon: <Activity size={14} className="text-gold" /> },
+      { label: 'REPUTATION', value: 'Top 5%', icon: <Award size={14} className="text-purple-400" /> },
+    ];
+  };
+
   const renderHero = () => (
     <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10 mb-10">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
@@ -50,7 +68,9 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
            <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
               <Layout size={20} />
            </div>
-           <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">Community Hub Registry</p>
+           <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">
+             {isAdminRole ? 'Institutional Hub Registry' : 'Community Hub Registry'}
+           </p>
         </div>
         
         <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
@@ -68,7 +88,7 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
               <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
             </div>
             <button className="bg-white/10 text-white px-8 py-2.5 rounded-xl border border-white/20 font-black text-[9px] uppercase tracking-widest shadow-sm backdrop-blur-md hover:bg-gold hover:text-black transition-all">
-              Discover Groups
+              {isAdminRole ? 'Global Broadcast' : 'Discover Groups'}
             </button>
          </div>
         
@@ -78,7 +98,7 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
             <button 
               key={target}
               onClick={() => setViewMode(target as any)}
-              className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                 viewMode === target 
                   ? 'bg-gold text-black shadow-lg shadow-gold/20' 
                   : 'text-zinc-500 hover:text-white'
@@ -92,12 +112,7 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
 
       {/* Right Content - Stat Grid */}
       <div className="relative z-10 grid grid-cols-2 gap-3">
-        {[
-          { label: 'JOINED GROUPS', value: '4', icon: <Users2 size={14} className="text-blue-400" /> },
-          { label: 'NEW POSTS', value: '15', icon: <TrendingUp size={14} className="text-green-400" /> },
-          { label: 'INTERACTION', value: '89%', icon: <Activity size={14} className="text-gold" /> },
-          { label: 'REPUTATION', value: 'Top 5%', icon: <Award size={14} className="text-purple-400" /> },
-        ].map((stat, i) => (
+        {getHeroStats().map((stat, i) => (
           <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] w-36 flex flex-col items-start hover:bg-white/10 transition-colors group">
              <div className="mb-4 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
              <h4 className="text-2xl font-black text-white tracking-tighter leading-none mb-1.5">{stat.value}</h4>
@@ -110,45 +125,7 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-      {(isStudent || isTeacher) ? renderHero() : (
-        <div>
-          <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Institutional Network</h2>
-          <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Broadcast transmissions to the POMNHS institutional community.</p>
-        </div>
-      )}
-
-      {/* Community Options */}
-      {(!isStudent && !isTeacher) && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {communityCards.map((card, i) => (
-            <div key={i} className={`${card.bg} p-8 rounded-[3rem] border border-transparent shadow-sm flex flex-col group hover:border-gold transition-all`}>
-              <h3 className="text-2xl font-black text-black uppercase tracking-tighter mb-1">{card.title}</h3>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-8">{card.subtitle}</p>
-              
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="text-center">
-                  <p className="text-[8px] font-black text-gray-400 uppercase">Members</p>
-                  <p className="text-lg font-black text-black">{card.members}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[8px] font-black text-gray-400 uppercase">Posts Today</p>
-                  <p className="text-lg font-black text-black">{card.posts}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[8px] font-black text-gray-400 uppercase">Active Now</p>
-                  <p className="text-lg font-black text-gold">{card.active}</p>
-                </div>
-              </div>
-
-              <p className="text-[10px] text-gray-400 italic mb-6">Share and discuss with your classmates</p>
-              <button className="bg-black text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center space-x-2 hover:bg-gold hover:text-black transition-all shadow-lg">
-                <span>View Posts</span>
-                <ChevronRight size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+      {renderHero()}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 space-y-8">
@@ -163,19 +140,22 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
           {/* Posting Interface */}
           <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
             <div className="flex items-start space-x-6 mb-6">
-              <div className="w-14 h-14 bg-black text-gold rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shrink-0">YO</div>
+              <div className="w-14 h-14 bg-black text-gold rounded-2xl flex items-center justify-center font-black text-xl shadow-lg shrink-0">
+                {user.name.substring(0, 2).toUpperCase()}
+              </div>
               <div className="flex-grow">
                 <div className="mb-4">
                   <label className="text-[9px] font-black uppercase text-gray-400 block mb-2">Post to:</label>
                   <select className="bg-gray-50 border-0 rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none shadow-inner focus:ring-1 focus:ring-gold">
-                    <option>Student Community</option>
-                    <option>Class Community</option>
+                    <option>Institutional Broadcast</option>
+                    <option>Staff Community</option>
+                    <option>Faculty Community</option>
                   </select>
                 </div>
                 <textarea 
                   value={composerText}
                   onChange={(e) => setComposerText(e.target.value)}
-                  placeholder="Share your thoughts with the community..."
+                  placeholder="Broadcast institutional news..."
                   className="w-full bg-gray-50 border-0 rounded-2xl p-5 text-sm font-semibold focus:ring-2 focus:ring-gold outline-none min-h-[120px] resize-none shadow-inner"
                 />
               </div>
@@ -202,7 +182,7 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
                    </div>
                 </div>
                 <div className="bg-gray-50 p-6 rounded-2xl mb-6">
-                   <span className="text-[8px] font-black uppercase text-gold block mb-2">{post.id === '1' ? 'student Community' : 'class Community'}</span>
+                   <span className="text-[8px] font-black uppercase text-gold block mb-2">Institutional Node</span>
                    <p className="text-gray-800 leading-relaxed font-bold text-sm">{post.content}</p>
                 </div>
                 <div className="flex items-center space-x-8 pt-6 border-t border-gray-50">
@@ -218,33 +198,16 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
         {/* Sidebar */}
         <div className="space-y-8">
           <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
-            <h3 className="text-sm font-black text-black uppercase mb-6 tracking-widest border-l-4 border-gold pl-4">Your Communities</h3>
+            <h3 className="text-sm font-black text-black uppercase mb-6 tracking-widest border-l-4 border-gold pl-4">Institutional Nodes</h3>
             <div className="space-y-6">
               {[
-                { n: 'Class Community', s: '42 members • 8 new posts' },
-                { n: 'Grade Community', s: '93 members • 15 new posts' },
-                { n: 'School Community', s: '2184 members • 47 new posts' },
+                { n: 'Faculty Assembly', s: '82 members • 4 new posts' },
+                { n: 'Administrative Hub', s: '12 members • 2 new posts' },
+                { n: 'Student Support Services', s: '218 members • 15 new posts' },
               ].map((c, i) => (
                 <div key={i} className="group cursor-pointer">
                   <h4 className="text-[11px] font-black uppercase text-black group-hover:text-gold transition-colors">{c.n}</h4>
                   <p className="text-[9px] font-bold text-gray-400 uppercase mt-1">{c.s}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-black text-white p-8 rounded-[2.5rem] shadow-xl border border-gold">
-            <h3 className="text-sm font-black uppercase tracking-widest mb-6 border-l-4 border-gold pl-4">Community Guidelines</h3>
-            <div className="space-y-4">
-              {[
-                'Be respectful to all members',
-                'No spam or promotional content',
-                'Keep discussions relevant',
-                'Report inappropriate content'
-              ].map((rule, i) => (
-                <div key={i} className="flex items-start space-x-3">
-                  <div className="w-1.5 h-1.5 bg-gold rounded-full mt-1.5 shrink-0" />
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">{rule}</p>
                 </div>
               ))}
             </div>

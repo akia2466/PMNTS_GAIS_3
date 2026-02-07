@@ -79,11 +79,21 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
     ];
   };
 
+  const getInstitutionalGridStats = () => {
+    return [
+      { label: 'AVG PRESENCE', value: '94.2%', icon: <CheckCircle size={14} className="text-blue-400" /> },
+      { label: 'ABSENTEES', value: '5', icon: <UserMinus size={14} className="text-red-400" /> },
+      { label: 'LATES Today', value: '12', icon: <Clock size={14} className="text-gold" /> },
+      { label: 'SYNC RATE', value: '100%', icon: <ShieldCheck size={14} className="text-purple-400" /> },
+    ];
+  };
+
   const renderInstitutionalHero = () => (
     <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col xl:flex-row items-center justify-between border border-white/10 mb-10">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
       
-      <div className="relative z-10 flex flex-col items-start mb-8 xl:mb-0">
+      {/* Column 1: Info & Controls */}
+      <div className="relative z-10 flex flex-col items-start mb-8 xl:mb-0 xl:max-w-xl">
         <div className="flex items-center space-x-3 mb-5">
            <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
               <Layout size={20} />
@@ -161,62 +171,57 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
         </div>
       </div>
 
-      {isStudent || (isTeacher && targetView === 'ME') ? (
-        <div className="relative z-10 flex flex-col md:flex-row items-center space-y-8 md:space-y-0 md:space-x-12">
-           <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] w-full min-w-[276px] shadow-2xl transform hover:scale-105 transition-transform border border-white/10">
-              <p className="text-white/80 font-black text-[10px] uppercase tracking-widest mb-4">Overall Presence Rate %</p>
-              <div className="flex items-end space-x-3 mb-8">
-                 <h3 className="text-7xl font-black text-white tracking-tighter leading-none">{viewMode === 'TERM' ? '96%' : '94%'}</h3>
-                 <div className="bg-gold/20 px-3 py-1.5 rounded-xl flex items-center space-x-1 mb-1 border border-gold/30">
-                    <TrendingUp size={14} className="text-gold" />
-                    <span className="text-gold font-black text-xs">+0.8%</span>
-                 </div>
-              </div>
-              <div className="pt-6 border-t border-white/10">
-                 <p className="text-white/60 font-black text-[10px] uppercase tracking-widest mb-2">Institutional Target</p>
-                 <h4 className="text-4xl font-black text-gold">95%</h4>
-              </div>
-           </div>
+      {/* Column 2: Large Overall Card */}
+      <div className="relative z-10 flex flex-col items-center justify-center px-4">
+         <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] w-full min-w-[276px] shadow-2xl transform hover:scale-105 transition-transform border border-white/10">
+            <p className="text-white/80 font-black text-[10px] uppercase tracking-widest mb-4">
+              {(isStudent || (isTeacher && targetView === 'ME')) ? 'Overall Presence Rate %' : 'Institutional Presence Rate %'}
+            </p>
+            <div className="flex items-end space-x-3 mb-8">
+               <h3 className="text-7xl font-black text-white tracking-tighter leading-none">
+                 {viewMode === 'TERM' ? '96%' : '94%'}
+               </h3>
+               <div className="bg-gold/20 px-3 py-1.5 rounded-xl flex items-center space-x-1 mb-1 border border-gold/30">
+                  <TrendingUp size={14} className="text-gold" />
+                  <span className="text-gold font-black text-xs">+0.8%</span>
+               </div>
+            </div>
+            <div className="pt-6 border-t border-white/10">
+               <p className="text-white/60 font-black text-[10px] uppercase tracking-widest mb-2">Institutional Target</p>
+               <h4 className="text-4xl font-black text-gold">95%</h4>
+            </div>
+         </div>
+      </div>
 
-           <div className="grid grid-cols-2 gap-4">
-            {getStudentSubjectStats().map((stat, i) => (
-              <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-36 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group">
-                <p className="text-gray-400 text-[7px] font-black uppercase tracking-widest leading-tight mb-2 truncate w-full">{stat.subject}</p>
-                <h4 className={`text-xl xl:text-2xl font-black text-white tracking-tighter leading-none mb-3`}>{stat.percentage}</h4>
-                <div className="flex items-center justify-center space-x-4 w-full pt-3 border-t border-white/10">
-                  <div className="text-center">
-                    <p className="text-[6px] text-gray-500 font-black uppercase">Lates</p>
-                    <p className="text-[10px] text-orange-400 font-black">{stat.lates}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[6px] text-gray-500 font-black uppercase">Absnt</p>
-                    <p className="text-[10px] text-red-400 font-black">{stat.absence}</p>
-                  </div>
+      {/* Column 3: 2x2 Grid Metrics */}
+      <div className="relative z-10 grid grid-cols-2 gap-4">
+        {(isStudent || (isTeacher && targetView === 'ME')) ? (
+          getStudentSubjectStats().map((stat, i) => (
+            <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-36 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group">
+              <p className="text-gray-400 text-[7px] font-black uppercase tracking-widest leading-tight mb-2 truncate w-full">{stat.subject}</p>
+              <h4 className={`text-xl xl:text-2xl font-black text-white tracking-tighter leading-none mb-3`}>{stat.percentage}</h4>
+              <div className="flex items-center justify-center space-x-4 w-full pt-3 border-t border-white/10">
+                <div className="text-center">
+                  <p className="text-[6px] text-gray-500 font-black uppercase">Lates</p>
+                  <p className="text-[10px] text-orange-400 font-black">{stat.lates}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[6px] text-gray-500 font-black uppercase">Absnt</p>
+                  <p className="text-[10px] text-red-400 font-black">{stat.absence}</p>
                 </div>
               </div>
-            ))}
-           </div>
-        </div>
-      ) : (
-        <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
-          {[
-            { label: 'AVG PRESENCE', value: '94.2%', icon: <CheckCircle size={14} className="text-blue-400" /> },
-            { label: 'ABSENTEES', value: '5', icon: <UserMinus size={14} className="text-green-400" /> },
-            { label: 'LATES', value: '12', icon: <Clock size={14} className="text-gold" /> },
-            { label: 'TARGET', value: '95%', icon: <Trophy size={14} className="text-purple-400" /> },
-            { label: 'NODE SYNC', value: '100%', icon: <ShieldCheck size={14} className="text-cyan-400" /> },
-            { label: 'CLASSES', value: '5', icon: <Users2 size={14} className="text-orange-400" /> },
-            { label: 'SYSTEM AVG', value: '94%', icon: <Activity size={14} className="text-emerald-400" /> },
-            { label: 'ACTIVE ALERTS', value: '2', icon: <FileText size={14} className="text-red-400" /> },
-          ].map((stat, i) => (
-            <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group">
+            </div>
+          ))
+        ) : (
+          getInstitutionalGridStats().map((stat, i) => (
+            <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-36 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group">
                <div className="mb-3 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
                <h4 className="text-xl xl:text-2xl font-black text-white tracking-tighter leading-none mb-1">{stat.value}</h4>
-               <p className="text-gray-500 text-[7px] xl:text-[8px] font-black uppercase tracking-widest">{stat.label}</p>
+               <p className="text-gray-500 text-[7px] font-black uppercase tracking-widest leading-tight">{stat.label}</p>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 
@@ -300,7 +305,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
                                    onClick={() => handleStatusChange(s.id, st)}
                                    className={`px-5 py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
                                       s.status === st 
-                                      ? (st === 'present' ? 'bg-green-500 text-white shadow-lg' : st === 'absent' ? 'bg-red-500 text-white shadow-lg' : 'bg-orange-500 text-white shadow-lg')
+                                      ? (st === 'present' ? 'bg-green-50 text-white shadow-lg' : st === 'absent' ? 'bg-red-500 text-white shadow-lg' : 'bg-orange-500 text-white shadow-lg')
                                       : 'bg-white border border-gray-100 text-gray-300 hover:border-gold hover:text-black'
                                    }`}
                                 >

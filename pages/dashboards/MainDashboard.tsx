@@ -61,13 +61,6 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
   const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON || user.role === UserRole.HOD;
   const isStudent = user.role === UserRole.STUDENT;
 
-  const financialData = [
-    { month: 'Jan', revenue: 450000, expenses: 320000 },
-    { month: 'Feb', revenue: 520000, expenses: 340000 },
-    { month: 'Mar', revenue: 480000, expenses: 310000 },
-    { month: 'Apr', revenue: 610000, expenses: 380000 },
-  ];
-
   const recentActivities = [
     { id: 1, icon: <CheckCircle className="text-green-500" />, text: "Registry sync completed: Term 1 assessment data uploaded.", time: "12 mins ago" },
     { id: 2, icon: <MessageSquare className="text-blue-500" />, text: "Faculty notice: Staff meeting in Grand Hall at 15:00.", time: "1 hour ago" },
@@ -432,7 +425,6 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
     );
   };
 
-  // Fixed error: Added missing renderRecentActivity function
   const renderRecentActivity = (bgColor: string) => (
     <div className={`${bgColor} p-8 rounded-[3rem] border border-transparent shadow-sm mt-8`}>
       <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
