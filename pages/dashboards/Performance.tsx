@@ -13,7 +13,10 @@ import {
   UserCheck, 
   ChevronDown,
   Layout,
-  FileText
+  FileText,
+  Star,
+  Edit2,
+  Save
 } from 'lucide-react';
 
 interface Props {
@@ -54,18 +57,26 @@ const Performance: React.FC<Props> = ({ user }) => {
   const [selectedTerm, setSelectedTerm] = useState('Term 1');
   const [selectedYear, setSelectedYear] = useState('2026');
   const [selectedDept, setSelectedDept] = useState('MATHEMATICS');
-  const [viewMode, setViewMode] = useState<'STUDENTS' | 'ME'>('STUDENTS');
+  const [viewMode, setViewMode] = useState<string>('STUDENTS');
   const [timePeriod, setTimePeriod] = useState<'TERM' | 'CUMULATIVE'>('TERM');
   const [drilldownClassId, setDrilldownClassId] = useState<string | null>(null);
+  const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
   
   const isPrincipal = user.role === UserRole.PRINCIPAL;
   const isHOD = user.role === UserRole.HOD;
   const isStudent = user.role === UserRole.STUDENT;
-  const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON;
+  const isAdmin = [UserRole.ADMIN, UserRole.SUPER_USER, UserRole.PRINCIPAL].includes(user.role);
+  const isTeacher = [UserRole.TEACHER, UserRole.PATRON, UserRole.HOD].includes(user.role) || isAdmin;
 
   const departments = ['MATHEMATICS', 'SCIENCE', 'SOCIAL SCIENCE', 'ENGLISH'];
   const years = ['2026', '2025', '2024'];
   const terms = ['Term 1', 'Term 2', 'Term 3', 'Term 4'];
+
+  const getSwitcherOptions = () => {
+    if (isAdmin) return ['STUDENTS', 'TEACHERS', 'HOD', 'ME'];
+    if (isHOD) return ['STUDENTS', 'TEACHERS', 'ME'];
+    return ['STUDENTS', 'ME'];
+  };
 
   const [classes] = useState<ClassPerformance[]>([
     { id: 'c1', name: 'GRADE 12A', grade: 'B+', avg: '87%', studentCount: 43, color: 'bg-blue-500', sectionBg: 'bg-blue-50/50', icon: '12A', leadTeacher: 'DR. MICHAEL CHEN' },
@@ -98,33 +109,51 @@ const Performance: React.FC<Props> = ({ user }) => {
           { name: 'LAB PRACTICAL', date: 'JAN 18', score: '85/100', rate: '85%', grade: 'B+' },
           { name: 'QUIZ 2', date: 'JAN 12', score: '17/20', rate: '85%', grade: 'B+' },
         ]
-      },
-      {
-        subject: 'ENGLISH',
-        initial: 'E',
-        color: 'bg-orange-500',
-        avg: isTerm ? '88%' : '86%',
-        students: 41,
-        bg: 'bg-orange-50/30',
-        assessments: [
-          { name: 'LITERATURE ESSAY', date: 'JAN 20', score: '88/100', rate: '88%', grade: 'A-' },
-          { name: 'VOCABULARY TEST', date: 'JAN 14', score: '19/20', rate: '95%', grade: 'A' },
-        ]
-      },
-      {
-        subject: 'SOCIAL SCIENCE',
-        initial: 'SS',
-        color: 'bg-purple-500',
-        avg: isTerm ? '92%' : '90%',
-        students: 40,
-        bg: 'bg-purple-50/30',
-        assessments: [
-          { name: 'HISTORY PROJECT', date: 'JAN 22', score: '94/100', rate: '94%', grade: 'A' },
-          { name: 'GEOGRAPHY QUIZ', date: 'JAN 11', score: '18/20', rate: '90%', grade: 'A' },
-        ]
       }
     ];
   };
+
+  const renderDetailedTranscript = () => (
+    <div className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden mt-10">
+      <div className="p-10 border-b border-gray-50 flex items-center justify-between">
+         <h3 className="text-2xl font-black text-black uppercase tracking-tighter">Subject Transcripts</h3>
+         <div className="w-10 h-10 bg-gold/10 rounded-xl flex items-center justify-center text-gold">
+           <FileText size={20} />
+         </div>
+      </div>
+      <div className="p-8 space-y-6">
+        {getTranscriptData().map((subject, idx) => (
+          <div key={idx} className={`${subject.bg} p-8 rounded-[3rem] border border-gray-100`}>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-6">
+                <div className={`w-14 h-14 ${subject.color} text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg`}>
+                  {subject.initial}
+                </div>
+                <div>
+                  <h4 className="text-2xl font-black uppercase text-black tracking-tight">{subject.subject}</h4>
+                  <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Weighted Average: {subject.avg}</p>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {subject.assessments.map((asm, i) => (
+                <div key={i} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-50 flex items-center justify-between">
+                  <div>
+                    <h5 className="font-black text-xs uppercase text-black mb-1">{asm.name}</h5>
+                    <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{asm.date}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-black">{asm.score}</p>
+                    <p className="text-[9px] font-black text-gold uppercase">{asm.grade}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   const getStatsForHero = () => {
     if (isStudent) {
@@ -145,10 +174,9 @@ const Performance: React.FC<Props> = ({ user }) => {
   };
 
   const renderInstitutionalHero = () => (
-    <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col xl:flex-row items-center justify-between border border-white/10">
+    <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col xl:flex-row items-center justify-between border border-white/10 mb-10">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
       
-      {/* Column 1: Control Panel */}
       <div className="relative z-10 flex flex-col items-start mb-8 xl:mb-0 xl:max-w-xl">
         <div className="flex items-center space-x-3 mb-5">
            <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
@@ -166,21 +194,13 @@ const Performance: React.FC<Props> = ({ user }) => {
 
         <div className="flex flex-wrap items-center gap-3 mb-8">
             <div className="relative inline-block group">
-              <select 
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-                className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
-              >
+              <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all">
                 {years.map(y => <option key={y} value={y} className="bg-black">{y}</option>)}
               </select>
               <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
             </div>
             <div className="relative inline-block group">
-              <select 
-                value={selectedTerm}
-                onChange={(e) => setSelectedTerm(e.target.value)}
-                className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
-              >
+              <select value={selectedTerm} onChange={(e) => setSelectedTerm(e.target.value)} className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all">
                 {terms.map(t => <option key={t} value={t} className="bg-black">{t.toUpperCase()}</option>)}
               </select>
               <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
@@ -190,14 +210,14 @@ const Performance: React.FC<Props> = ({ user }) => {
             </button>
         </div>
         
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col space-y-4">
           {!isStudent && (
-            <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
-              {['STUDENTS', 'ME'].map(target => (
+            <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl w-fit">
+              {getSwitcherOptions().map(target => (
                 <button 
                   key={target}
-                  onClick={() => setViewMode(target as any)}
-                  className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                  onClick={() => setViewMode(target)}
+                  className={`px-[30px] py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                     viewMode === target 
                       ? 'bg-gold text-black shadow-lg shadow-gold/20' 
                       : 'text-zinc-500 hover:text-white'
@@ -208,12 +228,12 @@ const Performance: React.FC<Props> = ({ user }) => {
               ))}
             </div>
           )}
-          <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+          <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl w-fit">
             {['TERM', 'CUMULATIVE'].map(target => (
               <button 
                 key={target}
                 onClick={() => setTimePeriod(target as any)}
-                className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                className={`px-[30px] py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                   timePeriod === target 
                     ? 'bg-gold text-black shadow-lg shadow-gold/20' 
                     : 'text-zinc-500 hover:text-white'
@@ -226,7 +246,6 @@ const Performance: React.FC<Props> = ({ user }) => {
         </div>
       </div>
 
-      {/* Column 2: Large Summary Card */}
       <div className="relative z-10 flex flex-col items-center justify-center px-4">
          <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] w-full min-w-[276px] shadow-2xl transform hover:scale-105 transition-transform border border-white/10">
             <p className="text-white/80 font-black text-[10px] uppercase tracking-widest mb-4">
@@ -250,10 +269,9 @@ const Performance: React.FC<Props> = ({ user }) => {
          </div>
       </div>
 
-      {/* Column 3: Stats Grid */}
-      <div className="relative z-10 grid grid-cols-2 gap-4">
+      <div className="relative z-10 grid grid-cols-2 gap-4 xl:gap-6">
         {getStatsForHero().map((stat: any, i) => (
-          <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group">
+          <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group shadow-lg">
              {stat.icon ? (
                <div className="mb-3 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
              ) : (
@@ -272,64 +290,7 @@ const Performance: React.FC<Props> = ({ user }) => {
     </div>
   );
 
-  const renderDetailedTranscript = () => (
-    <div className="mt-8 space-y-6 animate-in fade-in duration-700">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-2xl font-black text-black uppercase tracking-tighter">Academic Transcript</h3>
-        <div className="h-1 flex-grow mx-8 bg-gray-100 rounded-full" />
-      </div>
-
-      {getTranscriptData().map((data, idx) => (
-        <div key={idx} className={`${data.bg} p-10 rounded-[3rem] border border-white shadow-sm`}>
-          <div className="flex items-center space-x-6 mb-10">
-            <div className={`w-16 h-16 ${data.color} rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg`}>
-              {data.initial}
-            </div>
-            <div>
-              <h4 className="text-3xl font-black text-black uppercase tracking-tight">{data.subject}</h4>
-              <p className="text-[10px] font-black uppercase tracking-widest mt-1">
-                <span className="text-gray-400">Current Avg: </span>
-                <span className="text-gold">{data.avg}</span>
-                <span className="text-gray-300 mx-3">•</span>
-                <span className="text-gold">{data.students} Students</span>
-              </p>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-black/5">
-                  <th className="px-6 py-4">Unit / Assignment</th>
-                  <th className="px-6 py-4">Date Issued</th>
-                  <th className="px-6 py-4">Your Score</th>
-                  <th className="px-6 py-4">Success Rate</th>
-                  <th className="px-6 py-4 text-right">Mean Grade</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black/5">
-                {data.assessments.map((asm, i) => (
-                  <tr key={i} className="group hover:bg-white/40 transition-colors">
-                    <td className="px-6 py-6 font-black text-xs text-black uppercase tracking-tight">{asm.name}</td>
-                    <td className="px-6 py-6 font-bold text-xs text-gray-400 uppercase tracking-widest">{asm.date}</td>
-                    <td className="px-6 py-6 font-black text-sm text-black">{asm.score}</td>
-                    <td className="px-6 py-6 font-black text-sm text-gold">{asm.rate}</td>
-                    <td className="px-6 py-6 text-right">
-                      <span className="inline-flex items-center justify-center w-10 h-8 bg-black text-white text-[10px] font-black rounded-lg shadow-md uppercase">
-                        {asm.grade}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderPrincipalPerformanceHub = () => {
+  const renderAdministrativePerformanceHub = () => {
     if (drilldownClassId) {
       const cls = classes.find(c => c.id === drilldownClassId);
       return (
@@ -343,20 +304,94 @@ const Performance: React.FC<Props> = ({ user }) => {
           </div>
           <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden p-8">
             <p className="text-gray-400 font-bold uppercase text-[9px] tracking-widest">Institutional Node Audit List</p>
-            <table className="w-full text-left mt-6">
+            <table className="w-full text-left mt-6 border-separate border-spacing-y-2">
               <thead>
                 <tr className="bg-gray-50/50">
                   <th className="px-8 py-4 text-[9px] font-black uppercase text-gray-400">Student Profile</th>
-                  <th className="px-8 py-4 text-[9px] font-black uppercase text-gray-400">Current Average</th>
+                  <th className="px-8 py-4 text-[9px] font-black uppercase text-gray-400 text-right">Current Average</th>
                 </tr>
               </thead>
-              <tbody>
-                {Array(5).fill(0).map((_, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50 transition-all">
-                    <td className="px-8 py-5 font-black text-xs uppercase">Student Node {idx + 100}</td>
-                    <td className="px-8 py-5 font-black text-gold text-xs">88%</td>
-                  </tr>
-                ))}
+              <tbody className="divide-y divide-gray-100">
+                {[1, 2, 3, 4, 5].map((idx) => {
+                  const studentId = `S${idx + 100}`;
+                  const isExpanded = expandedStudentId === studentId;
+                  return (
+                    <React.Fragment key={studentId}>
+                      <tr 
+                        onClick={() => setExpandedStudentId(isExpanded ? null : studentId)}
+                        className={`transition-all cursor-pointer group ${isExpanded ? 'bg-black text-white' : 'hover:bg-gray-50'}`}
+                      >
+                        <td className="px-8 py-6 rounded-l-2xl">
+                          <div className="flex items-center space-x-6">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm shadow-md transition-colors ${isExpanded ? 'bg-gold text-black' : 'bg-black text-gold'}`}>
+                              S
+                            </div>
+                            <div>
+                               <p className={`font-black text-sm uppercase tracking-tight ${isExpanded ? 'text-white' : 'text-black group-hover:text-gold'}`}>Student Node {studentId}</p>
+                               <p className={`text-[8px] font-bold uppercase tracking-widest mt-1 ${isExpanded ? 'text-gray-400' : 'text-gray-400'}`}>Registry ID: {studentId}990429</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-8 py-6 rounded-r-2xl text-right">
+                          <div className="flex items-center justify-end space-x-4">
+                             <span className={`font-black text-lg ${isExpanded ? 'text-gold' : 'text-black'}`}>88%</span>
+                             <ChevronDown size={18} className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-gold' : 'text-gray-300'}`} />
+                          </div>
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan={2} className="px-8 py-10 bg-slate-50/50 rounded-2xl">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in slide-in-from-top-2 duration-500">
+                               <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+                                  <div className="flex items-center justify-between mb-6">
+                                    <h4 className="text-[10px] font-black uppercase text-gold tracking-widest flex items-center">
+                                      <Star size={14} className="mr-2" fill="currentColor"/> ASSESSMENT LOG
+                                    </h4>
+                                    <span className="text-[8px] font-black text-gray-400 uppercase">Registry Verified</span>
+                                  </div>
+                                  <div className="space-y-4">
+                                     {[
+                                       { name: 'Calculus Mock', score: '92/100', status: 'Graded', date: 'Jan 15' },
+                                       { name: 'Physics Practical', score: '18/20', status: 'Graded', date: 'Jan 18' },
+                                       { name: 'Algebra Quiz 4', score: 'PND', status: 'Pending', date: 'Feb 02' },
+                                     ].map((asm, i) => (
+                                       <div key={i} className="flex justify-between items-center py-4 border-b border-gray-50 last:border-0">
+                                          <div>
+                                            <p className="text-xs font-black uppercase text-black">{asm.name}</p>
+                                            <p className="text-[8px] font-black text-gray-400 uppercase mt-1">{asm.date}</p>
+                                          </div>
+                                          <div className="flex items-center space-x-6">
+                                             <span className={`text-[8px] font-black px-3 py-1 rounded-lg uppercase tracking-widest ${asm.status === 'Graded' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'}`}>
+                                               {asm.status}
+                                             </span>
+                                             <span className="text-sm font-black text-black w-12 text-right">{asm.score}</span>
+                                          </div>
+                                       </div>
+                                     ))}
+                                  </div>
+                               </div>
+                               <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex flex-col justify-center text-center">
+                                  <p className="text-[9px] font-black uppercase text-gray-400 mb-4 tracking-widest">Mastery Progress Index</p>
+                                  <div className="flex items-center justify-center space-x-6 mb-8">
+                                     <h3 className="text-7xl font-black text-black tracking-tighter leading-none">88%</h3>
+                                     <div className="flex flex-col items-center">
+                                       <div className="bg-gold text-black w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg">A-</div>
+                                       <p className="text-[8px] font-black text-gold uppercase mt-2">Rank: #12</p>
+                                     </div>
+                                  </div>
+                                  <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden mb-4">
+                                     <div className="h-full bg-gold shadow-[0_0_10px_rgba(255,215,0,0.5)]" style={{ width: '88%' }} />
+                                  </div>
+                                  <p className="text-[8px] font-black text-gray-400 uppercase">Institutional Benchmark: 75% Mastery</p>
+                               </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -369,8 +404,10 @@ const Performance: React.FC<Props> = ({ user }) => {
         {renderInstitutionalHero()}
 
         {viewMode === 'ME' ? (
-          <div className="space-y-10 mt-10">
-            <p className="text-center text-gray-400 uppercase font-black text-[11px] tracking-widest">Administrative Detailed View Inactive</p>
+          <div className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm p-20 text-center animate-in slide-in-from-bottom-2 duration-500">
+            <Target size={48} className="mx-auto text-gold mb-6 opacity-20" />
+            <h3 className="text-2xl font-black uppercase tracking-tighter text-black mb-2">Individual Performance Matrix</h3>
+            <p className="text-gray-400 uppercase font-black text-[11px] tracking-widest">No individual logs available in administrative leadership mode.</p>
           </div>
         ) : (
           <div className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden p-10 mt-10">
@@ -440,7 +477,7 @@ const Performance: React.FC<Props> = ({ user }) => {
 
   return (
     <div className="pb-12">
-      {isStudent ? renderStudentView() : (isPrincipal || isTeacher || isHOD || [UserRole.BURSAR, UserRole.ADMISSIONS, UserRole.ADMIN, UserRole.SUPER_USER].includes(user.role)) ? renderPrincipalPerformanceHub() : (
+      {isStudent ? renderStudentView() : (isPrincipal || isTeacher || isHOD || isAdmin) ? renderAdministrativePerformanceHub() : (
         <div className="space-y-8 animate-in fade-in duration-500 text-center py-20">
            <p className="text-gray-400 uppercase font-black text-[12px] tracking-widest">Academic Records Locked by Institutional Protocol.</p>
         </div>

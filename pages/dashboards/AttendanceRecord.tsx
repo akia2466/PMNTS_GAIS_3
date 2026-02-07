@@ -28,16 +28,23 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
   const [selectedTerm, setSelectedTerm] = useState('Term 1');
   const [selectedYear, setSelectedYear] = useState('2026');
   const [viewMode, setViewMode] = useState<'TERM' | 'CUMULATIVE'>('TERM');
-  const [targetView, setTargetView] = useState<'STUDENTS' | 'ME'>('STUDENTS');
+  const [targetView, setTargetView] = useState<string>('STUDENTS');
   const [expandedClass, setExpandedClass] = useState<string | null>('12A');
 
   const isPrincipal = user.role === UserRole.PRINCIPAL;
-  const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON;
   const isHOD = user.role === UserRole.HOD;
+  const isAdmin = [UserRole.PRINCIPAL, UserRole.ADMIN, UserRole.SUPER_USER].includes(user.role);
+  const isTeacher = [UserRole.TEACHER, UserRole.PATRON, UserRole.HOD].includes(user.role) || isAdmin;
   const isStudent = user.role === UserRole.STUDENT;
 
   const terms = ['Term 1', 'Term 2', 'Term 3', 'Term 4'];
   const years = ['2026', '2025', '2024'];
+
+  const getSwitcherOptions = () => {
+    if (isAdmin) return ['STUDENTS', 'TEACHERS', 'HOD', 'ME'];
+    if (isHOD) return ['STUDENTS', 'TEACHERS', 'ME'];
+    return ['STUDENTS', 'ME'];
+  };
 
   const [attendanceState, setAttendanceState] = useState([
     { id: 'S101', name: 'JOSHUA KILA', initials: 'J', status: 'present', punc: 'ON TIME', lateMinutes: 0 },
@@ -92,7 +99,6 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
     <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col xl:flex-row items-center justify-between border border-white/10 mb-10">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
       
-      {/* Column 1: Info & Controls */}
       <div className="relative z-10 flex flex-col items-start mb-8 xl:mb-0 xl:max-w-xl">
         <div className="flex items-center space-x-3 mb-5">
            <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
@@ -110,21 +116,13 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
 
         <div className="flex flex-wrap items-center gap-3 mb-8">
            <div className="relative inline-block group">
-             <select 
-               value={selectedYear}
-               onChange={(e) => setSelectedYear(e.target.value)}
-               className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
-             >
+             <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all">
                {years.map(y => <option key={y} value={y} className="bg-black">{y}</option>)}
              </select>
              <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
            </div>
            <div className="relative inline-block group">
-             <select 
-               value={selectedTerm}
-               onChange={(e) => setSelectedTerm(e.target.value)}
-               className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
-             >
+             <select value={selectedTerm} onChange={(e) => setSelectedTerm(e.target.value)} className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all">
                {terms.map(t => <option key={t} value={t} className="bg-black">{t.toUpperCase()}</option>)}
              </select>
              <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
@@ -134,36 +132,20 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
            </button>
         </div>
         
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col space-y-4">
           {(!isStudent) && (
-            <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
-              {['STUDENTS', 'ME'].map(target => (
-                <button 
-                  key={target}
-                  onClick={() => setTargetView(target as any)}
-                  className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                    targetView === target 
-                      ? 'bg-gold text-black shadow-lg shadow-gold/20' 
-                      : 'text-zinc-500 hover:text-white'
-                  }`}
-                >
+            <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl w-fit">
+              {getSwitcherOptions().map(target => (
+                <button key={target} onClick={() => setTargetView(target)} className={`px-[30px] py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${targetView === target ? 'bg-gold text-black shadow-lg shadow-gold/20' : 'text-zinc-500 hover:text-white'}`}>
                   {target}
                 </button>
               ))}
             </div>
           )}
 
-          <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+          <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl w-fit">
             {['TERM', 'CUMULATIVE'].map(target => (
-              <button 
-                key={target}
-                onClick={() => setViewMode(target as any)}
-                className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                  viewMode === target 
-                    ? 'bg-gold text-black shadow-lg shadow-gold/20' 
-                    : 'text-zinc-500 hover:text-white'
-                }`}
-              >
+              <button key={target} onClick={() => setViewMode(target as any)} className={`px-[30px] py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === target ? 'bg-gold text-black shadow-lg shadow-gold/20' : 'text-zinc-500 hover:text-white'}`}>
                 {target}
               </button>
             ))}
@@ -171,7 +153,6 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
         </div>
       </div>
 
-      {/* Column 2: Large Overall Card */}
       <div className="relative z-10 flex flex-col items-center justify-center px-4">
          <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] w-full min-w-[276px] shadow-2xl transform hover:scale-105 transition-transform border border-white/10">
             <p className="text-white/80 font-black text-[10px] uppercase tracking-widest mb-4">
@@ -193,11 +174,10 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
          </div>
       </div>
 
-      {/* Column 3: 2x2 Grid Metrics */}
-      <div className="relative z-10 grid grid-cols-2 gap-4">
+      <div className="relative z-10 grid grid-cols-2 gap-4 xl:gap-6">
         {(isStudent || (isTeacher && targetView === 'ME')) ? (
           getStudentSubjectStats().map((stat, i) => (
-            <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-36 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group">
+            <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-36 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group shadow-lg">
               <p className="text-gray-400 text-[7px] font-black uppercase tracking-widest leading-tight mb-2 truncate w-full">{stat.subject}</p>
               <h4 className={`text-xl xl:text-2xl font-black text-white tracking-tighter leading-none mb-3`}>{stat.percentage}</h4>
               <div className="flex items-center justify-center space-x-4 w-full pt-3 border-t border-white/10">
@@ -214,7 +194,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
           ))
         ) : (
           getInstitutionalGridStats().map((stat, i) => (
-            <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-36 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group">
+            <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-36 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group shadow-lg">
                <div className="mb-3 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
                <h4 className="text-xl xl:text-2xl font-black text-white tracking-tighter leading-none mb-1">{stat.value}</h4>
                <p className="text-gray-500 text-[7px] font-black uppercase tracking-widest leading-tight">{stat.label}</p>
@@ -229,10 +209,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
     const isExpanded = expandedClass === className;
     return (
       <div key={className} className="mb-8 animate-in slide-in-from-bottom-2 duration-300">
-        <div 
-          onClick={() => setExpandedClass(isExpanded ? null : className)}
-          className={`p-10 rounded-t-[3.5rem] flex items-center justify-between cursor-pointer transition-all ${isExpanded ? 'bg-black text-white shadow-2xl' : 'bg-white text-black rounded-b-[3.5rem] shadow-sm hover:shadow-md'}`}
-        >
+        <div onClick={() => setExpandedClass(isExpanded ? null : className)} className={`p-10 rounded-t-[3.5rem] flex items-center justify-between cursor-pointer transition-all ${isExpanded ? 'bg-black text-white shadow-2xl' : 'bg-white text-black rounded-b-[3.5rem] shadow-sm hover:shadow-md'}`}>
           <div className="flex items-center space-x-10">
             <div className={`w-20 h-20 rounded-full flex items-center justify-center font-black text-2xl shadow-xl ${isExpanded ? 'bg-gold text-black' : 'bg-black text-gold'}`}>
               {className}
@@ -300,15 +277,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
                         <div className="flex flex-col items-center justify-center space-y-3">
                            <div className="flex items-center justify-center space-x-3">
                               {['present', 'absent', 'late'].map(st => (
-                                <button 
-                                   key={st}
-                                   onClick={() => handleStatusChange(s.id, st)}
-                                   className={`px-5 py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
-                                      s.status === st 
-                                      ? (st === 'present' ? 'bg-green-50 text-white shadow-lg' : st === 'absent' ? 'bg-red-500 text-white shadow-lg' : 'bg-orange-500 text-white shadow-lg')
-                                      : 'bg-white border border-gray-100 text-gray-300 hover:border-gold hover:text-black'
-                                   }`}
-                                >
+                                <button key={st} onClick={() => handleStatusChange(s.id, st)} className={`px-5 py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${s.status === st ? (st === 'present' ? 'bg-green-500 text-white shadow-lg' : st === 'absent' ? 'bg-red-500 text-white shadow-lg' : 'bg-orange-500 text-white shadow-lg') : 'bg-white border border-gray-100 text-gray-300 hover:border-gold hover:text-black'}`}>
                                    {st}
                                 </button>
                               ))}
@@ -317,12 +286,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
                              <div className="flex items-center space-x-3 bg-orange-50 border border-orange-200 px-4 py-1.5 rounded-xl animate-in zoom-in-95 duration-200">
                                 <span className="text-[8px] font-black text-orange-400 uppercase">Input Mins:</span>
                                 <div className="relative">
-                                   <input 
-                                     type="number" 
-                                     value={s.lateMinutes}
-                                     onChange={(e) => handleLateMinutesChange(s.id, e.target.value)}
-                                     className="w-12 bg-white border border-orange-100 rounded-lg p-1 text-center text-[10px] font-black text-orange-500 outline-none focus:ring-1 focus:ring-orange-400 shadow-inner"
-                                   />
+                                   <input type="number" value={s.lateMinutes} onChange={(e) => handleLateMinutesChange(s.id, e.target.value)} className="w-12 bg-white border border-orange-100 rounded-lg p-1 text-center text-[10px] font-black text-orange-500 outline-none focus:ring-1 focus:ring-orange-400 shadow-inner" />
                                    <Edit2 size={10} className="absolute -top-1 -right-1 text-orange-300" />
                                 </div>
                                 <span className="text-[7px] font-black text-orange-300 uppercase tracking-widest">MIN</span>

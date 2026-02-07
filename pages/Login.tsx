@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { User, UserRole, ViewState } from '../types';
 import { 
@@ -54,9 +53,9 @@ const Login: React.FC<Props> = ({ onLoginSuccess, setView }) => {
   };
 
   return (
-    <div className="min-h-[90vh] flex flex-col lg:flex-row bg-[#F8F8F8]">
-      {/* Branding Side */}
-      <div className="lg:w-1/2 bg-black text-white p-20 flex flex-col justify-between relative overflow-hidden">
+    <div className="min-h-[90vh] flex flex-col lg:flex-row bg-[#F8F8F8] overflow-y-auto">
+      {/* Branding Side - Hidden on Mobile/Tablet to avoid obstruction */}
+      <div className="hidden lg:flex lg:w-1/2 bg-black text-white p-20 flex-col justify-between relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-gold opacity-10 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px]" />
         
         <div className="relative z-10">
@@ -78,26 +77,26 @@ const Login: React.FC<Props> = ({ onLoginSuccess, setView }) => {
       </div>
 
       {/* Role Selection Side */}
-      <div className="lg:w-1/2 flex items-center justify-center p-8 lg:p-24 overflow-y-auto max-h-screen">
-        <div className="w-full max-w-2xl bg-white p-12 rounded-[3rem] shadow-xl border border-gray-100 my-10">
-          <div className="mb-10">
-            <h3 className="text-3xl font-black text-black uppercase tracking-tight mb-2">Portal Sign In</h3>
-            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Select a demo profile to enter the dashboard</p>
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-24 bg-[#F8F8F8]">
+        <div className="w-full max-w-2xl bg-white p-8 lg:p-12 rounded-[2rem] lg:rounded-[3rem] shadow-xl border border-gray-100">
+          <div className="mb-10 text-center lg:text-left">
+            <h3 className="text-2xl lg:text-3xl font-black text-black uppercase tracking-tight mb-2">Portal Sign In</h3>
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-[9px] lg:text-[10px]">Select a demo profile to enter the dashboard</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {demoAccounts.map((acc) => (
               <button
                 key={acc.role}
                 onClick={() => handleQuickLogin(acc.role, acc.name, acc.email)}
                 disabled={isLoading}
-                className={`p-8 rounded-3xl border transition-all text-center flex flex-col items-center group relative overflow-hidden ${acc.color} ${isLoading && selectedRole === acc.role ? 'ring-4 ring-gold' : 'hover:scale-105 active:scale-95'}`}
+                className={`p-6 lg:p-8 rounded-2xl lg:rounded-3xl border transition-all text-center flex flex-col items-center group relative overflow-hidden ${acc.color} ${isLoading && selectedRole === acc.role ? 'ring-4 ring-gold' : 'hover:scale-105 active:scale-95'}`}
               >
                 <div className="mb-4 transform group-hover:scale-110 transition-transform">
                   {isLoading && selectedRole === acc.role ? <Loader2 className="animate-spin" size={24} /> : acc.icon}
                 </div>
-                <h4 className="font-black text-xs uppercase tracking-[0.2em] mb-1 leading-tight">{acc.label}</h4>
-                <p className="text-[9px] opacity-60 font-bold uppercase truncate w-full">{acc.name}</p>
+                <h4 className="font-black text-[10px] lg:text-xs uppercase tracking-widest mb-1 leading-tight">{acc.label}</h4>
+                <p className="text-[8px] lg:text-[9px] opacity-60 font-bold uppercase truncate w-full">{acc.name}</p>
                 
                 {isLoading && selectedRole === acc.role && (
                   <div className="absolute inset-0 bg-white/40 flex items-center justify-center">
@@ -112,7 +111,7 @@ const Login: React.FC<Props> = ({ onLoginSuccess, setView }) => {
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">First time accessing the new portal?</p>
             <button 
               onClick={() => setView('REGISTER')}
-              className="bg-zinc-100 text-black px-10 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-gold transition-all shadow-sm flex items-center mx-auto space-x-3"
+              className="bg-zinc-100 text-black px-8 lg:px-10 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-gold transition-all shadow-sm flex items-center mx-auto space-x-3"
             >
               <UserPlus size={16} />
               <span>Register Institutional ID</span>

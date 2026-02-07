@@ -26,26 +26,16 @@ import {
   Star,
   HardDrive
 } from 'lucide-react';
-import { 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis
-} from 'recharts';
 
 interface Props {
   user: User;
 }
 
 const MainDashboard: React.FC<Props> = ({ user }) => {
-  const [viewMode, setViewMode] = useState<'STUDENTS' | 'ME'>('ME'); 
+  const [viewMode, setViewMode] = useState<string>('ME'); 
   const [studentPeriod, setStudentPeriod] = useState<'TERM' | 'CUMULATIVE'>('TERM');
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
 
-  // Mock data for student assessments (editable by teacher)
   const [studentAssessments, setStudentAssessments] = useState<Record<string, any>>({
     'S101': [
       { id: 1, name: 'CALCULUS MOCK', score: 82, max: 100, date: 'JAN 15' },
@@ -58,8 +48,16 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
   });
 
   const isPrincipal = user.role === UserRole.PRINCIPAL;
-  const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON || user.role === UserRole.HOD;
+  const isHOD = user.role === UserRole.HOD;
+  const isAdmin = [UserRole.ADMIN, UserRole.SUPER_USER, UserRole.PRINCIPAL].includes(user.role);
+  const isTeacher = [UserRole.TEACHER, UserRole.PATRON, UserRole.HOD].includes(user.role) || isAdmin;
   const isStudent = user.role === UserRole.STUDENT;
+
+  const getSwitcherOptions = () => {
+    if (isAdmin) return ['STUDENTS', 'TEACHERS', 'HOD', 'ME'];
+    if (isHOD) return ['STUDENTS', 'TEACHERS', 'ME'];
+    return ['STUDENTS', 'ME'];
+  };
 
   const recentActivities = [
     { id: 1, icon: <CheckCircle className="text-green-500" />, text: "Registry sync completed: Term 1 assessment data uploaded.", time: "12 mins ago" },
@@ -84,35 +82,58 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
         { label: 'ATTENDANCE', value: isTerm ? '96%' : '94%', icon: <UserCheck size={14} className="text-green-400" /> },
         { label: 'CLASS RANK', value: isTerm ? '12/42' : '15/42', icon: <Users2 size={14} className="text-gold" /> },
         { label: 'GRADE RANK', value: isTerm ? '20/93' : '28/93', icon: <Trophy size={14} className="text-purple-400" /> },
-        { label: 'PENDING ASGN', value: isTerm ? '4' : '6', icon: <Briefcase size={14} className="text-orange-400" /> },
-        { label: 'PENDING TESTS', value: isTerm ? '2' : '3', icon: <FileText size={14} className="text-red-400" /> },
-        { label: 'NEW MSGS', value: '12', icon: <MessageSquare size={14} className="text-cyan-400" /> },
-        { label: 'NEW POSTS', value: '8', icon: <Layout size={14} className="text-emerald-400" /> },
-      ];
-    }
-    if (isTeacher) {
-      return [
-        { label: 'CLASSES', value: '5', icon: <Users2 size={14} className="text-blue-400" /> },
-        { label: 'LOAD', value: '18/wk', icon: <Clock size={14} className="text-green-400" /> },
-        { label: 'AVG GPA', value: isTerm ? '3.4' : '3.2', icon: <ChartIcon size={14} className="text-gold" /> },
-        { label: 'PENDING', value: isTerm ? '12' : '45', icon: <FileText size={14} className="text-purple-400" /> },
-        { label: 'RECEIVED', value: '312', icon: <Zap size={14} className="text-orange-400" /> },
-        { label: 'SYNC RATE', value: '100%', icon: <ShieldCheck size={14} className="text-emerald-400" /> },
-        { label: 'NEW MSGS', value: '28', icon: <MessageSquare size={14} className="text-cyan-400" /> },
-        { label: 'ALERTS', value: '2', icon: <AlertCircle size={14} className="text-red-400" /> },
       ];
     }
     return [
       { label: 'ENROLLED', value: '1,240', icon: <Users2 size={14} className="text-blue-400" /> },
       { label: 'ATTENDANCE', value: isTerm ? '94.2%' : '92.1%', icon: <Clock size={14} className="text-green-400" /> },
       { label: 'STANDING', value: isTerm ? '89%' : '86%', icon: <Trophy size={14} className="text-gold" /> },
-      { label: 'ALERTS', value: isTerm ? '5' : '18', icon: <AlertCircle size={14} className="text-red-400" /> },
-      { label: 'FACULTY', value: '82', icon: <Users2 size={14} className="text-purple-400" /> },
-      { label: 'BUDGET', value: '94%', icon: <Target size={14} className="text-emerald-400" /> },
-      { label: 'REVENUE', value: '1.2M', icon: <Zap size={14} className="text-orange-400" /> },
       { label: 'U-SYNC', value: '98%', icon: <CheckCircle size={14} className="text-cyan-400" /> },
     ];
   };
+
+  const renderRecentActivity = (bgColor: string) => (
+    <div className={`p-8 rounded-[3rem] ${bgColor} border border-transparent shadow-sm mt-8`}>
+      <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
+        <History size={20} className="mr-3 text-gold" /> Recent Activity
+      </h3>
+      <div className="space-y-4">
+        {recentActivities.map((activity) => (
+          <div key={activity.id} className="flex items-center space-x-4 p-4 bg-white rounded-[1.5rem] shadow-sm">
+            <div className="shrink-0">{activity.icon}</div>
+            <div className="flex-grow">
+              <p className="text-xs font-bold text-gray-800 leading-snug">{activity.text}</p>
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{activity.time}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderPersonalizedSections = () => (
+    <div className="bg-amber-50 p-8 rounded-[3rem] border border-transparent shadow-sm mt-8">
+      <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
+        <HardDrive size={20} className="mr-3 text-gold" /> System Status
+      </h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
+          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Registry Sync</p>
+          <div className="flex items-center space-x-2">
+            <ShieldCheck size={16} className="text-green-500" />
+            <p className="text-sm font-black text-black uppercase">Database Healthy</p>
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
+          <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Portal Load</p>
+          <div className="flex items-center space-x-2">
+            <Activity size={16} className="text-blue-500" />
+            <p className="text-sm font-black text-black uppercase">Minimal Latency</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const renderInstitutionalHero = () => (
     <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col xl:flex-row items-center justify-between border border-white/10 mb-10">
@@ -150,14 +171,14 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
             </div>
         </div>
         
-        <div className="flex items-center space-x-3">
-          {(!isStudent) && (
-            <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
-              {['STUDENTS', 'ME'].map(target => (
+        <div className="flex flex-col space-y-4">
+          {!isStudent && (
+            <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl w-fit">
+              {getSwitcherOptions().map(target => (
                 <button 
                   key={target}
-                  onClick={() => setViewMode(target as any)}
-                  className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                  onClick={() => setViewMode(target)}
+                  className={`px-[30px] py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                     viewMode === target 
                       ? 'bg-gold text-black shadow-lg shadow-gold/20' 
                       : 'text-zinc-500 hover:text-white'
@@ -169,12 +190,12 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
             </div>
           )}
 
-          <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+          <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl w-fit">
             {['TERM', 'CUMULATIVE'].map(target => (
               <button 
                 key={target}
                 onClick={() => setStudentPeriod(target as any)}
-                className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                className={`px-[30px] py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                   studentPeriod === target 
                     ? 'bg-gold text-black shadow-lg shadow-gold/20' 
                     : 'text-zinc-500 hover:text-white'
@@ -187,9 +208,9 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
         </div>
       </div>
 
-      <div className={`relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6`}>
+      <div className={`relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4 xl:gap-6`}>
         {getStatsForHero().map((stat, i) => (
-          <div key={i} className={`bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group`}>
+          <div key={i} className={`bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group shadow-lg`}>
              <div className="mb-3 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{(stat as any).icon}</div>
              <h4 className="text-xl xl:text-2xl font-black text-white tracking-tighter leading-none mb-1">{stat.value}</h4>
              <p className="text-gray-500 text-[7px] xl:text-[8px] font-black uppercase tracking-widest leading-tight">{stat.label}</p>
@@ -277,178 +298,6 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
     );
   };
 
-  const renderPersonalizedSections = () => {
-    if (isTeacher) {
-      return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-          <div className="bg-orange-50 p-8 rounded-[3rem] border border-transparent shadow-sm">
-            <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
-              <History size={20} className="mr-3 text-gold" /> Recent Faculty Communications
-            </h3>
-            <div className="space-y-4">
-              {[
-                { title: 'New Science Lab Protocols', sender: 'Dept Head', time: '2h ago', urgent: true },
-                { title: 'Mid-Term Grading Window', sender: 'Registry', time: '5h ago', urgent: false },
-              ].map((msg, i) => (
-                <div key={i} className="p-5 bg-white rounded-3xl shadow-sm flex items-center justify-between border border-transparent hover:border-gold transition-colors">
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-2 h-2 rounded-full ${msg.urgent ? 'bg-red-500 animate-pulse' : 'bg-blue-500'}`} />
-                    <div>
-                      <p className="text-xs font-black text-black uppercase tracking-tight">{msg.title}</p>
-                      <p className="text-[8px] font-black text-gray-400 uppercase mt-1">From: {msg.sender} &bull; {msg.time}</p>
-                    </div>
-                  </div>
-                  <ChevronRight size={16} className="text-gray-300" />
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="bg-purple-50 p-8 rounded-[3rem] border border-transparent shadow-sm">
-            <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
-              <Star size={20} className="mr-3 text-gold" /> Instructional Milestones
-            </h3>
-            <div className="space-y-4">
-              {[
-                { unit: 'Calculus Unit 4', progress: 85, color: 'bg-gold' },
-                { unit: 'Physics Wave Theory', progress: 62, color: 'bg-blue-500' },
-              ].map((m, i) => (
-                <div key={i} className="bg-white p-5 rounded-3xl shadow-sm">
-                   <div className="flex justify-between items-center mb-2">
-                      <span className="text-[10px] font-black uppercase text-black">{m.unit}</span>
-                      <span className="text-[9px] font-black text-gray-400">{m.progress}% Completed</span>
-                   </div>
-                   <div className="h-2 w-full bg-gray-50 rounded-full overflow-hidden">
-                      <div className={`h-full ${m.color} transition-all duration-1000`} style={{ width: `${m.progress}%` }} />
-                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
-    }
-    if (isStudent) {
-      return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-          <div className="bg-amber-50 p-8 rounded-[3rem] border border-transparent shadow-sm">
-            <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
-              <Zap size={20} className="mr-3 text-gold" /> Extracurricular Credits
-            </h3>
-            <div className="space-y-4">
-              {[
-                { activity: 'Math Olympiad Prep', points: 45, level: 'Advanced' },
-                { activity: 'Community Literacy', points: 30, level: 'Active' },
-              ].map((act, i) => (
-                <div key={i} className="flex items-center justify-between p-5 bg-white rounded-3xl shadow-sm border border-transparent hover:border-gold transition-colors">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-gold/10 text-gold rounded-xl flex items-center justify-center"><Star size={16}/></div>
-                    <div>
-                      <p className="text-xs font-black text-black uppercase">{act.activity}</p>
-                      <p className="text-[8px] font-black text-gray-400 uppercase mt-0.5">{act.level}</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-black text-black">+{act.points} pts</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="bg-sky-50 p-8 rounded-[3rem] border border-transparent shadow-sm">
-            <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
-              <HardDrive size={20} className="mr-3 text-gold" /> My Vault Repository Usage
-            </h3>
-            <div className="space-y-6">
-               <div className="bg-white p-6 rounded-3xl shadow-sm">
-                  <div className="flex justify-between items-center mb-3">
-                     <span className="text-[10px] font-black uppercase text-gray-400">Personal Storage</span>
-                     <span className="text-xs font-black text-black">20.9MB / 100MB</span>
-                  </div>
-                  <div className="h-3 w-full bg-gray-50 rounded-full overflow-hidden mb-4">
-                     <div className="h-full bg-blue-500" style={{ width: '21%' }} />
-                  </div>
-                  <div className="flex items-center space-x-4">
-                     <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                        <span className="text-[8px] font-black uppercase text-gray-400">PDFs (15MB)</span>
-                     </div>
-                     <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full" />
-                        <span className="text-[8px] font-black uppercase text-gray-400">IMGs (5.9MB)</span>
-                     </div>
-                  </div>
-               </div>
-               <button className="w-full py-4 bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gold hover:text-black transition-all">Optimize Storage Assets</button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-        <div className="bg-zinc-50 p-8 rounded-[3rem] border border-transparent shadow-sm">
-          <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
-            <Zap size={20} className="mr-3 text-gold" /> Financial Pipeline Audit
-          </h3>
-          <div className="h-48 bg-white rounded-3xl shadow-sm p-6 flex flex-col justify-center">
-             <div className="flex items-end space-x-2 mb-2">
-                <span className="text-3xl font-black text-black">K1,240,000</span>
-                <span className="text-[10px] font-black text-green-500 uppercase mb-1">+12% vs LY</span>
-             </div>
-             <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Total Institutional Revenue Index</p>
-             <div className="mt-6 flex space-x-2">
-                <div className="flex-grow h-1.5 bg-gold rounded-full" />
-                <div className="flex-grow h-1.5 bg-blue-500 rounded-full" />
-                <div className="flex-grow h-1.5 bg-gray-100 rounded-full" />
-             </div>
-          </div>
-        </div>
-        <div className="bg-emerald-50 p-8 rounded-[3rem] border border-transparent shadow-sm">
-          <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
-            <Activity size={20} className="mr-3 text-gold" /> System Infrastructure Health
-          </h3>
-          <div className="space-y-4">
-             {[
-               { node: 'Core Cloud Registry', health: 100 },
-               { node: 'Local Network Node 2', health: 94 },
-               { node: 'Attendance Sync Pipeline', health: 100 }
-             ].map((n, i) => (
-               <div key={i} className="bg-white p-5 rounded-3xl shadow-sm flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase text-black">{n.node}</span>
-                  <div className="flex items-center space-x-2">
-                     <span className="text-[10px] font-black text-green-500 uppercase">Operational</span>
-                     <CheckCircle size={14} className="text-green-500" />
-                  </div>
-               </div>
-             ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderRecentActivity = (bgColor: string) => (
-    <div className={`${bgColor} p-8 rounded-[3rem] border border-transparent shadow-sm mt-8`}>
-      <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
-        <Activity size={20} className="mr-3 text-gold" /> Institutional Activity Log
-      </h3>
-      <div className="space-y-4">
-        {recentActivities.map((activity) => (
-          <div key={activity.id} className="p-5 bg-white rounded-3xl shadow-sm flex items-center justify-between border border-transparent hover:border-gold transition-colors group">
-            <div className="flex items-center space-x-4">
-              <div className="p-2 bg-gray-50 rounded-xl group-hover:scale-110 transition-transform">
-                {activity.icon}
-              </div>
-              <div>
-                <p className="text-xs font-black text-black uppercase tracking-tight">{activity.text}</p>
-                <p className="text-[8px] font-black text-gray-400 uppercase mt-1">{activity.time}</p>
-              </div>
-            </div>
-            <ChevronRight size={16} className="text-gray-300" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
   const renderDashboardByRole = () => {
     return (
       <div className="space-y-8 animate-in fade-in duration-500">
@@ -511,14 +360,13 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
         </div>
 
         {renderPersonalizedSections()}
-
         {renderRecentActivity('bg-slate-50')}
       </div>
     );
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+    <div className="pb-12">
       {renderDashboardByRole()}
     </div>
   );
