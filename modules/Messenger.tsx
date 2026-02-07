@@ -18,6 +18,7 @@ const Messenger: React.FC<Props> = ({ user }) => {
   const [viewMode, setViewMode] = useState<'PEERS' | 'ARCHIVE'>('PEERS');
 
   const isStudent = user.role === UserRole.STUDENT;
+  const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON;
 
   const getAvatarUrl = (name: string) => {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&bold=true&format=svg`;
@@ -35,7 +36,7 @@ const Messenger: React.FC<Props> = ({ user }) => {
     setInputText('');
   };
 
-  const renderStudentHero = () => (
+  const renderHero = () => (
     <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10 mb-10">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
       
@@ -100,9 +101,9 @@ const Messenger: React.FC<Props> = ({ user }) => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-12">
-      {isStudent && renderStudentHero()}
+      {(isStudent || isTeacher) && renderHero()}
 
-      {!isStudent && (
+      {(!isStudent && !isTeacher) && (
         <>
           <div>
             <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Peer-to-Peer Transmission</h2>
@@ -127,7 +128,7 @@ const Messenger: React.FC<Props> = ({ user }) => {
         </>
       )}
 
-      <div className={`h-[calc(100vh-${isStudent ? '20rem' : '22rem'})] bg-slate-100 p-2 rounded-[3rem] shadow-lg border border-transparent flex overflow-hidden`}>
+      <div className={`h-[calc(100vh-${(isStudent || isTeacher) ? '20rem' : '22rem'})] bg-slate-100 p-2 rounded-[3rem] shadow-lg border border-transparent flex overflow-hidden`}>
         <div className="w-80 bg-white border-r border-gray-100 flex flex-col rounded-l-[2.5rem]">
           <div className="p-6 border-b border-gray-100">
             <h2 className="text-xl font-black text-black uppercase tracking-tight mb-4">Contacts</h2>

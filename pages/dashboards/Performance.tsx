@@ -54,15 +54,16 @@ const Performance: React.FC<Props> = ({ user }) => {
   const [selectedTerm, setSelectedTerm] = useState('Term 1');
   const [selectedYear, setSelectedYear] = useState('2026');
   const [selectedDept, setSelectedDept] = useState('MATHEMATICS');
-  const [viewMode, setViewMode] = useState<'TERM' | 'CUMULATIVE' | 'ME'>('TERM');
+  const [viewMode, setViewMode] = useState<'STUDENTS' | 'ME'>('STUDENTS');
+  const [timePeriod, setTimePeriod] = useState<'TERM' | 'CUMULATIVE'>('TERM');
   const [drilldownClassId, setDrilldownClassId] = useState<string | null>(null);
   
   const isPrincipal = user.role === UserRole.PRINCIPAL;
   const isHOD = user.role === UserRole.HOD;
   const isStudent = user.role === UserRole.STUDENT;
-  const isTeacherOrPatron = user.role === UserRole.TEACHER || user.role === UserRole.PATRON;
+  const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON;
 
-  const departments = ['MATHEMATICS', 'NATURAL SCIENCE', 'HUMANITIES', 'FINE ARTS'];
+  const departments = ['MATHEMATICS', 'SCIENCE', 'SOCIAL SCIENCE', 'ENGLISH'];
   const years = ['2026', '2025', '2024'];
   const terms = ['Term 1', 'Term 2', 'Term 3', 'Term 4'];
 
@@ -71,56 +72,59 @@ const Performance: React.FC<Props> = ({ user }) => {
     { id: 'c2', name: 'GRADE 12B', grade: 'B', avg: '82%', studentCount: 39, color: 'bg-indigo-500', sectionBg: 'bg-indigo-50/50', icon: '12B', leadTeacher: 'MS. SARAH SMITH' },
   ]);
 
-  const transcriptData: SubjectTranscript[] = [
-    {
-      subject: 'MATHEMATICS',
-      initial: 'M',
-      color: 'bg-blue-500',
-      avg: '91%',
-      students: 43,
-      bg: 'bg-blue-50/30',
-      assessments: [
-        { name: 'MIDTERM EXAM', date: 'JAN 15', score: '92/100', rate: '92%', grade: 'A' },
-        { name: 'PROBLEM SET 5', date: 'JAN 10', score: '18/20', rate: '90%', grade: 'A' },
-      ]
-    },
-    {
-      subject: 'SCIENCE',
-      initial: 'S',
-      color: 'bg-green-500',
-      avg: '85%',
-      students: 39,
-      bg: 'bg-green-50/30',
-      assessments: [
-        { name: 'LAB PRACTICAL', date: 'JAN 18', score: '85/100', rate: '85%', grade: 'B+' },
-        { name: 'QUIZ 2', date: 'JAN 12', score: '17/20', rate: '85%', grade: 'B+' },
-      ]
-    },
-    {
-      subject: 'ENGLISH',
-      initial: 'E',
-      color: 'bg-orange-500',
-      avg: '88%',
-      students: 41,
-      bg: 'bg-orange-50/30',
-      assessments: [
-        { name: 'LITERATURE ESSAY', date: 'JAN 20', score: '88/100', rate: '88%', grade: 'A-' },
-        { name: 'VOCABULARY TEST', date: 'JAN 14', score: '19/20', rate: '95%', grade: 'A' },
-      ]
-    },
-    {
-      subject: 'SOCIAL SCIENCE',
-      initial: 'SS',
-      color: 'bg-purple-500',
-      avg: '92%',
-      students: 40,
-      bg: 'bg-purple-50/30',
-      assessments: [
-        { name: 'HISTORY PROJECT', date: 'JAN 22', score: '94/100', rate: '94%', grade: 'A' },
-        { name: 'GEOGRAPHY QUIZ', date: 'JAN 11', score: '18/20', rate: '90%', grade: 'A' },
-      ]
-    }
-  ];
+  const getTranscriptData = (): SubjectTranscript[] => {
+    const isTerm = timePeriod === 'TERM';
+    return [
+      {
+        subject: 'MATHEMATICS',
+        initial: 'M',
+        color: 'bg-blue-500',
+        avg: isTerm ? '91%' : '88%',
+        students: 43,
+        bg: 'bg-blue-50/30',
+        assessments: [
+          { name: 'MIDTERM EXAM', date: 'JAN 15', score: '92/100', rate: '92%', grade: 'A' },
+          { name: 'PROBLEM SET 5', date: 'JAN 10', score: '18/20', rate: '90%', grade: 'A' },
+        ]
+      },
+      {
+        subject: 'SCIENCE',
+        initial: 'S',
+        color: 'bg-green-500',
+        avg: isTerm ? '85%' : '82%',
+        students: 39,
+        bg: 'bg-green-50/30',
+        assessments: [
+          { name: 'LAB PRACTICAL', date: 'JAN 18', score: '85/100', rate: '85%', grade: 'B+' },
+          { name: 'QUIZ 2', date: 'JAN 12', score: '17/20', rate: '85%', grade: 'B+' },
+        ]
+      },
+      {
+        subject: 'ENGLISH',
+        initial: 'E',
+        color: 'bg-orange-500',
+        avg: isTerm ? '88%' : '86%',
+        students: 41,
+        bg: 'bg-orange-50/30',
+        assessments: [
+          { name: 'LITERATURE ESSAY', date: 'JAN 20', score: '88/100', rate: '88%', grade: 'A-' },
+          { name: 'VOCABULARY TEST', date: 'JAN 14', score: '19/20', rate: '95%', grade: 'A' },
+        ]
+      },
+      {
+        subject: 'SOCIAL SCIENCE',
+        initial: 'SS',
+        color: 'bg-purple-500',
+        avg: isTerm ? '92%' : '90%',
+        students: 40,
+        bg: 'bg-purple-50/30',
+        assessments: [
+          { name: 'HISTORY PROJECT', date: 'JAN 22', score: '94/100', rate: '94%', grade: 'A' },
+          { name: 'GEOGRAPHY QUIZ', date: 'JAN 11', score: '18/20', rate: '90%', grade: 'A' },
+        ]
+      }
+    ];
+  };
 
   const renderDetailedTranscript = () => (
     <div className="mt-8 space-y-6 animate-in fade-in duration-700">
@@ -129,7 +133,7 @@ const Performance: React.FC<Props> = ({ user }) => {
         <div className="h-1 flex-grow mx-8 bg-gray-100 rounded-full" />
       </div>
 
-      {transcriptData.map((data, idx) => (
+      {getTranscriptData().map((data, idx) => (
         <div key={idx} className={`${data.bg} p-10 rounded-[3rem] border border-white shadow-sm`}>
           <div className="flex items-center space-x-6 mb-10">
             <div className={`w-16 h-16 ${data.color} rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg`}>
@@ -260,20 +264,37 @@ const Performance: React.FC<Props> = ({ user }) => {
                  </button>
               </div>
               
-              <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
-                {(['STUDENTS', 'ME'] as const).map(target => (
-                  <button 
-                    key={target}
-                    onClick={() => setViewMode(target as any)}
-                    className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                      viewMode === target 
-                        ? 'bg-gold text-black shadow-lg shadow-gold/20' 
-                        : 'text-zinc-500 hover:text-white'
-                    }`}
-                  >
-                    {target}
-                  </button>
-                ))}
+              <div className="flex items-center space-x-3">
+                <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+                  {['STUDENTS', 'ME'].map(target => (
+                    <button 
+                      key={target}
+                      onClick={() => setViewMode(target as any)}
+                      className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                        viewMode === target 
+                          ? 'bg-gold text-black shadow-lg shadow-gold/20' 
+                          : 'text-zinc-500 hover:text-white'
+                      }`}
+                    >
+                      {target}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
+                  {['TERM', 'CUMULATIVE'].map(target => (
+                    <button 
+                      key={target}
+                      onClick={() => setTimePeriod(target as any)}
+                      className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                        timePeriod === target 
+                          ? 'bg-gold text-black shadow-lg shadow-gold/20' 
+                          : 'text-zinc-500 hover:text-white'
+                      }`}
+                    >
+                      {target}
+                    </button>
+                  ))}
+                </div>
               </div>
            </div>
 
@@ -376,16 +397,22 @@ const Performance: React.FC<Props> = ({ user }) => {
 
           <div className="flex flex-wrap items-center gap-3 mb-8">
               <div className="relative inline-block group">
-                <select className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all">
-                  <option className="bg-black">2026</option>
-                  <option className="bg-black">2025</option>
+                <select 
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
+                >
+                  {years.map(y => <option key={y} value={y} className="bg-black">{y}</option>)}
                 </select>
                 <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
               </div>
               <div className="relative inline-block group">
-                <select className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all">
-                  <option className="bg-black">TERM 1</option>
-                  <option className="bg-black">TERM 2</option>
+                <select 
+                  value={selectedTerm}
+                  onChange={(e) => setSelectedTerm(e.target.value)}
+                  className="appearance-none bg-white/10 border border-white/20 text-white rounded-xl px-5 py-2.5 pr-10 text-[9px] font-black uppercase outline-none cursor-pointer focus:ring-1 focus:ring-gold shadow-sm backdrop-blur-md hover:bg-white/20 transition-all"
+                >
+                  {terms.map(t => <option key={t} value={t} className="bg-black">{t.toUpperCase()}</option>)}
                 </select>
                 <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-gold" />
               </div>
@@ -398,9 +425,9 @@ const Performance: React.FC<Props> = ({ user }) => {
             {['TERM', 'CUMULATIVE'].map(target => (
               <button 
                 key={target}
-                onClick={() => setViewMode(target as any)}
+                onClick={() => setTimePeriod(target as any)}
                 className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                  viewMode === target || (viewMode === 'ME' && target === 'TERM')
+                  timePeriod === target 
                     ? 'bg-gold text-black shadow-lg shadow-gold/20' 
                     : 'text-zinc-500 hover:text-white'
                 }`}
@@ -415,7 +442,7 @@ const Performance: React.FC<Props> = ({ user }) => {
            <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] w-full min-w-[276px] shadow-2xl transform hover:scale-105 transition-transform border border-white/10">
               <p className="text-white/80 font-black text-[10px] uppercase tracking-widest mb-4">Your Overall Average %</p>
               <div className="flex items-end space-x-3 mb-8">
-                 <h3 className="text-7xl font-black text-white tracking-tighter leading-none">89%</h3>
+                 <h3 className="text-7xl font-black text-white tracking-tighter leading-none">{timePeriod === 'TERM' ? '89%' : '87%'}</h3>
                  <div className="bg-gold/20 px-3 py-1.5 rounded-xl flex items-center space-x-1 mb-1 border border-gold/30">
                     <TrendingUp size={14} className="text-gold" />
                     <span className="text-gold font-black text-xs">+1.2%</span>
@@ -423,31 +450,26 @@ const Performance: React.FC<Props> = ({ user }) => {
               </div>
               <div className="pt-6 border-t border-white/10">
                  <p className="text-white/60 font-black text-[10px] uppercase tracking-widest mb-2">Your Overall GPA</p>
-                 <h4 className="text-4xl font-black text-gold">3.4</h4>
+                 <h4 className="text-4xl font-black text-gold">{timePeriod === 'TERM' ? '3.4' : '3.3'}</h4>
               </div>
            </div>
         </div>
 
         <div className="relative z-10 grid grid-cols-2 gap-4">
-          {[
-            { label: 'MATHEMATICS', value: '91%', subLabel: '43 STUDENTS', char: 'M', color: 'bg-blue-500' },
-            { label: 'SCIENCE', value: '85%', subLabel: '39 STUDENTS', char: 'S', color: 'bg-green-500' },
-            { label: 'ENGLISH', value: '88%', subLabel: '41 STUDENTS', char: 'E', color: 'bg-orange-500' },
-            { label: 'SOCIAL SCIENCE', value: '92%', subLabel: '40 STUDENTS', char: 'SS', color: 'bg-purple-500' },
-          ].map((stat, i) => (
+          {getTranscriptData().map((stat, i) => (
             <div 
               key={i} 
-              className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-start hover:bg-white/10 transition-colors group"
+              className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group"
             >
-              <p className="text-gray-400 text-[7px] font-black uppercase tracking-widest leading-tight mb-3 truncate w-full text-center">{stat.label}</p>
+              <p className="text-gray-400 text-[7px] font-black uppercase tracking-widest leading-tight mb-3 truncate w-full">{stat.subject}</p>
               
-              <div className="flex items-center space-x-3 w-full">
+              <div className="flex items-center space-x-3 w-full justify-center">
                 <div className={`w-10 h-10 ${stat.color} rounded-xl flex items-center justify-center text-white font-black text-xs shadow-lg shrink-0 group-hover:scale-110 transition-transform`}>
-                  {stat.char}
+                  {stat.initial}
                 </div>
                 <div className="flex flex-col items-start overflow-hidden">
-                  <h4 className="text-xl font-black text-white tracking-tighter leading-none mb-0.5">{stat.value}</h4>
-                  <p className="text-[7px] text-gray-500 font-bold uppercase tracking-tight truncate w-full">{stat.subLabel}</p>
+                  <h4 className="text-xl font-black text-white tracking-tighter leading-none mb-0.5">{stat.avg}</h4>
+                  <p className="text-[7px] text-gray-500 font-bold uppercase tracking-tight truncate w-full">{stat.students} STUDENTS</p>
                 </div>
               </div>
             </div>
@@ -461,7 +483,7 @@ const Performance: React.FC<Props> = ({ user }) => {
 
   return (
     <div className="pb-12">
-      {isStudent ? renderStudentView() : (isPrincipal || isTeacherOrPatron || isHOD) ? renderPrincipalPerformanceHub() : (
+      {isStudent ? renderStudentView() : (isPrincipal || isTeacher || isHOD) ? renderPrincipalPerformanceHub() : (
         <div className="space-y-8 animate-in fade-in duration-500 text-center py-20">
            <p className="text-gray-400 uppercase font-black text-[12px] tracking-widest">Academic Records Locked by Institutional Protocol.</p>
         </div>

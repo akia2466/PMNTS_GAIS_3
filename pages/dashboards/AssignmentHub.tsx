@@ -33,26 +33,10 @@ interface Props {
   user: User;
 }
 
-interface StudentSubmission {
-  id: string;
-  studentName: string;
-  studentId: string;
-  className: string;
-  fileName: string;
-  fileSize: string;
-  submittedAt: string;
-  status: 'graded' | 'pending';
-}
-
 const AssignmentHub: React.FC<Props> = ({ user }) => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [isCreating, setIsCreating] = useState(false);
-  const [viewMode, setViewMode] = useState<'STUDENTS' | 'ME'>('ME'); // Default to ME for student
-  const [viewingSubmissions, setViewingSubmissions] = useState<{
-    id: number;
-    title: string;
-    class: string;
-  } | null>(null);
+  const [viewMode, setViewMode] = useState<'STUDENTS' | 'ME'>('STUDENTS'); 
 
   const isTeacher = [
     UserRole.TEACHER, 
@@ -66,9 +50,15 @@ const AssignmentHub: React.FC<Props> = ({ user }) => {
   const isStudent = user.role === UserRole.STUDENT;
 
   const teacherSubmissionsMonitor = [
-    { id: 1, title: 'Calculus Mock Exam Paper 2', class: 'Grade 12A', pending: 8, graded: 34, total: 42 },
-    { id: 2, title: 'Algebra Systems Research', class: 'Grade 12B', pending: 15, graded: 20, total: 35 },
-    { id: 3, title: 'Geometry Proofs', class: 'Grade 11C', pending: 3, graded: 42, total: 45 },
+    { id: 1, title: 'Calculus Mock Exam Paper 2', class: 'GRADE 12A', folders: 42, pending: 8, graded: 34 },
+    { id: 2, title: 'Algebra Systems Research', class: 'GRADE 12B', folders: 35, pending: 15, graded: 20 },
+    { id: 3, title: 'Geometry Proofs', class: 'GRADE 11C', folders: 45, pending: 3, graded: 42 },
+  ];
+
+  const recentSubmissions = [
+    { name: 'SAMUEL KAPU', status: 'SUBMITTED', subject: 'LINEAR ALGEBRA', time: '12 MINS AGO' },
+    { name: 'SARAH GIMA', status: 'SUBMITTED', subject: 'LINEAR ALGEBRA', time: '1 HOUR AGO' },
+    { name: 'JOHN DOE', status: 'SUBMITTED', subject: 'CALCULUS MOCK', time: '3 HOURS AGO' },
   ];
 
   const getStatsForHero = () => {
@@ -92,7 +82,6 @@ const AssignmentHub: React.FC<Props> = ({ user }) => {
     <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10 mb-10">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
       
-      {/* Left Content */}
       <div className="relative z-10 flex flex-col items-start mb-8 md:mb-0">
         <div className="flex items-center space-x-3 mb-5">
            <div className="w-10 h-10 bg-gold rounded-xl flex items-center justify-center text-black shadow-lg">
@@ -141,7 +130,6 @@ const AssignmentHub: React.FC<Props> = ({ user }) => {
         </div>
       </div>
 
-      {/* Right Content - Stat Grid */}
       <div className="relative z-10 grid grid-cols-2 gap-3">
         {getStatsForHero().map((stat, i) => (
           <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] w-36 flex flex-col items-start hover:bg-white/10 transition-colors group">
@@ -157,32 +145,93 @@ const AssignmentHub: React.FC<Props> = ({ user }) => {
   const renderTeacherView = () => (
     <div className="space-y-12 animate-in fade-in duration-500 pb-20">
       {renderInstitutionalHero()}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 space-y-10">
-           <div className="bg-white p-12 rounded-[3.5rem] border border-gray-100 shadow-sm">
-             <div className="flex items-center justify-between mb-10">
-               <h3 className="text-xl font-black text-black uppercase tracking-tighter border-l-4 border-gold pl-6">Submissions Monitor</h3>
-             </div>
-             <div className="space-y-4">
+      
+      {viewMode === 'STUDENTS' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2 space-y-10">
+            <div className="bg-white p-12 rounded-[3.5rem] border border-gray-100 shadow-sm relative">
+              <div className="flex items-center justify-between mb-12">
+                <h3 className="text-2xl font-black text-black uppercase tracking-tighter flex items-center">
+                  <span className="w-1 h-6 bg-gold mr-4 rounded-full" />
+                  SUBMISSIONS MONITOR
+                </h3>
+                <div className="flex items-center space-x-3">
+                  <button className="p-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-400 hover:text-gold transition-colors shadow-sm"><Search size={18}/></button>
+                  <button className="p-3 bg-gray-50 border border-gray-100 rounded-xl text-gray-400 hover:text-gold transition-colors shadow-sm"><Filter size={18}/></button>
+                </div>
+              </div>
+              
+              <div className="space-y-6">
                 {teacherSubmissionsMonitor.map((task) => (
-                   <div key={task.id} className="p-8 bg-gray-50 rounded-[2.5rem] border-2 border-transparent hover:border-gold hover:bg-white transition-all cursor-pointer group flex items-center justify-between">
-                      <div className="flex items-center space-x-6">
-                        <div className="w-16 h-16 bg-black text-gold rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                          <Folder size={24} fill="currentColor" />
+                   <div key={task.id} className="p-8 bg-gray-50/50 rounded-[2.5rem] border-2 border-transparent hover:border-gold hover:bg-white transition-all group flex items-center justify-between">
+                      <div className="flex items-center space-x-8">
+                        <div className="w-20 h-20 bg-black text-gold rounded-[1.5rem] flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
+                          <Folder size={32} fill="currentColor" />
                         </div>
                         <div>
-                          <h4 className="font-black text-base uppercase text-black">{task.title}</h4>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
-                            {task.class} &bull; <span className="text-gold">{task.total} Folders</span>
+                          <h4 className="font-black text-lg uppercase text-black tracking-tight">{task.title}</h4>
+                          <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mt-1.5">
+                            {task.class} &bull; <span className="text-gold">{task.folders} FOLDERS</span>
                           </p>
                         </div>
                       </div>
+                      
+                      <div className="flex items-center space-x-12">
+                        <div className="text-center">
+                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1.5">TO GRADE</p>
+                          <p className="text-2xl font-black text-red-500">{task.pending}</p>
+                        </div>
+                        <div className="text-center border-l border-gray-200 pl-12">
+                          <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1.5">COMPLETED</p>
+                          <p className="text-2xl font-black text-green-500">{task.graded}</p>
+                        </div>
+                        <button className="p-5 bg-white border border-gray-200 rounded-2xl text-gray-400 group-hover:bg-gold group-hover:text-black group-hover:border-transparent transition-all shadow-md">
+                           <ChevronRight size={24} />
+                        </button>
+                      </div>
                    </div>
                 ))}
-             </div>
-           </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="space-y-8">
+            <div className="bg-gold p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden group border border-gold">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/20 rounded-bl-full blur-2xl group-hover:scale-110 transition-transform duration-700" />
+              <h3 className="text-3xl font-black text-black uppercase tracking-tighter mb-6 leading-none">PREPARE & ISSUE ASSESSMENT</h3>
+              <p className="text-black/70 text-sm font-bold leading-relaxed mb-10">Define criteria, set deadlines, and transmit instructions to your target grades without needing mandatory files.</p>
+              <button className="w-full bg-black text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl flex items-center justify-center space-x-4 hover:bg-white hover:text-black transition-all transform active:scale-95">
+                <Plus size={20} />
+                <span>CREATE ASSESSMENT</span>
+              </button>
+            </div>
+
+            <div className="bg-white p-12 rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden">
+               <h3 className="text-xl font-black text-black uppercase tracking-tighter mb-10">RECENT SUBMISSIONS</h3>
+               <div className="space-y-8">
+                 {recentSubmissions.map((sub, i) => (
+                   <div key={i} className="flex items-center space-x-6 group">
+                      <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center font-black text-xs text-black border border-gray-100 shadow-sm">{sub.name.charAt(0)}</div>
+                      <div className="flex-grow overflow-hidden">
+                         <div className="flex items-center space-x-3 mb-1">
+                            <h4 className="font-black text-[10px] text-black tracking-tight">{sub.name}</h4>
+                            <span className="text-[7px] font-black text-gray-300 uppercase tracking-widest">{sub.status}</span>
+                         </div>
+                         <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest flex items-center">
+                            {sub.subject} &bull; <span className="ml-2 font-black text-gray-300">{sub.time}</span>
+                         </p>
+                      </div>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="p-20 text-center bg-white rounded-[3.5rem] border border-gray-100">
+           <p className="text-gray-400 font-black uppercase tracking-widest text-xs">Viewing My Personal Task Logs</p>
+        </div>
+      )}
     </div>
   );
 

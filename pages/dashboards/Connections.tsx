@@ -24,6 +24,7 @@ const Connections: React.FC<Props> = ({ user }) => {
   const [viewMode, setViewMode] = useState<'NETWORK' | 'LOG'>('NETWORK');
 
   const isStudent = user.role === UserRole.STUDENT;
+  const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON;
 
   const metrics = [
     { label: 'Total Friends/Peers', value: '24', icon: <Users />, bg: 'bg-blue-50' },
@@ -42,7 +43,7 @@ const Connections: React.FC<Props> = ({ user }) => {
     { name: 'Sarah Gima', grade: 'Grade 12 - Class A', type: 'outgoing' },
   ];
 
-  const renderStudentHero = () => (
+  const renderHero = () => (
     <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10 mb-10">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
       
@@ -107,14 +108,14 @@ const Connections: React.FC<Props> = ({ user }) => {
 
   return (
     <div className="space-y-10 pb-20 animate-in fade-in duration-500">
-      {isStudent ? renderStudentHero() : (
+      {(isStudent || isTeacher) ? renderHero() : (
         <div>
           <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Registry Nodes</h2>
           <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Authorized institutional directory management.</p>
         </div>
       )}
 
-      {!isStudent && (
+      {(!isStudent && !isTeacher) && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {metrics.map((m, i) => (
             <div key={i} className={`${m.bg} p-8 rounded-[2.5rem] border border-transparent shadow-sm flex flex-col items-center text-center group`}>

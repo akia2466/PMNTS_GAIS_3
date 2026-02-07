@@ -67,15 +67,29 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
   ];
 
   const genericMocks = [
-    { day: 'Monday', classes: [{ time: '08:00 - 09:30', subject: 'Mathematics 12A', location: 'Room 101', teacher: 'Dr. Vele' }] },
-    { day: 'Tuesday', classes: [{ time: '10:00 - 11:30', subject: 'Science Lab', location: 'Lab 2', teacher: 'Mr. Tau' }] },
-    { day: 'Wednesday', classes: [] },
-    { day: 'Thursday', classes: [] },
-    { day: 'Friday', classes: [] },
+    { 
+      day: 'Monday', 
+      classes: [
+        { time: '08:00 - 09:30', subject: 'Mathematics 12A', location: 'Room 101', teacher: 'Dr. Vele' },
+        { time: '10:00 - 11:30', subject: 'Physics Lab', location: 'Lab B', teacher: 'Mr. Tau' },
+        { time: '13:00 - 14:30', subject: 'Literature', location: 'Room 204', teacher: 'Ms. Gere' }
+      ] 
+    },
+    { 
+      day: 'Tuesday', 
+      classes: [
+        { time: '10:00 - 11:30', subject: 'Science Lab', location: 'Lab 2', teacher: 'Mr. Tau' },
+        { time: '13:00 - 14:30', subject: 'History', location: 'Room 105', teacher: 'Dr. Vele' }
+      ] 
+    },
+    { day: 'Wednesday', classes: [{ time: '08:00 - 09:30', subject: 'Mathematics 12A', location: 'Room 101', teacher: 'Dr. Vele' }] },
+    { day: 'Thursday', classes: [{ time: '11:00 - 12:30', subject: 'Social Science', location: 'Grand Hall', teacher: 'Ms. Johnson' }] },
+    { day: 'Friday', classes: [{ time: '09:00 - 10:30', subject: 'Art & Design', location: 'Studio 1', teacher: 'Mr. DaVinci' }] },
   ];
 
   const getActiveSchedule = () => {
-    if (isStudent || viewMode === 'ME' || viewMode === 'TERM' || viewMode === 'DAILY') return isStudent ? genericMocks : principalSchedule;
+    if (isStudent) return genericMocks;
+    if (viewMode === 'ME' || viewType === 'SELF') return principalSchedule;
     return genericMocks;
   };
 
@@ -94,28 +108,13 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
     'Dept Head Review': 'bg-blue-50 text-blue-900 border-blue-200',
     'Mathematics 12A': 'bg-indigo-50 text-indigo-900 border-indigo-200',
     'Science Lab': 'bg-emerald-50 text-emerald-900 border-emerald-200',
-  };
-
-  const getSessionProgress = (startStr: string, endStr: string) => {
-    const [startH, startM] = startStr.split(':').map(Number);
-    const [endH, endM] = endStr.split(':').map(Number);
-    const nowH = currentTime.getHours();
-    const nowM = currentTime.getMinutes();
-    const startTime = startH * 60 + startM;
-    const endTime = endH * 60 + endM;
-    const nowTime = nowH * 60 + nowM;
-    if (nowTime < startTime) return 0;
-    if (nowTime > endTime) return 100;
-    return Math.round(((nowTime - startTime) / (endTime - startTime)) * 100);
+    'Physics Lab': 'bg-rose-50 text-rose-900 border-rose-200',
+    'Literature': 'bg-cyan-50 text-cyan-900 border-cyan-200',
   };
 
   const weeklySchedule = getActiveSchedule();
-  const currentSession = weeklySchedule.find(d => d.day === currentDayName)?.classes.find(c => {
-    const progress = getSessionProgress((c as any).start || '0', (c as any).end || '0');
-    return progress > 0 && progress < 100;
-  });
 
-  const renderStudentHero = () => (
+  const renderHero = () => (
     <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10 mb-10">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
       
@@ -160,12 +159,12 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
          </div>
         
         <div className="flex bg-zinc-900/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-xl">
-          {['TERM', 'CUMULATIVE'].map(target => (
+          {['TERM', 'DAILY'].map(target => (
             <button 
               key={target}
               onClick={() => setViewMode(target as any)}
               className={`px-10 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                (viewMode === target || (isStudent && viewMode === 'TERM' && target === 'TERM'))
+                viewMode === target || (target === 'TERM' && viewMode !== 'DAILY' && viewMode !== 'STUDENTS' && viewMode !== 'ME')
                   ? 'bg-gold text-black shadow-lg shadow-gold/20' 
                   : 'text-zinc-500 hover:text-white'
               }`}
@@ -176,10 +175,10 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
         </div>
       </div>
 
-      {/* Right Content - Stat Grid matching summary section style */}
+      {/* Right Content - Stat Grid */}
       <div className="relative z-10 grid grid-cols-2 gap-3">
         {getStatsForHero().map((stat, i) => (
-          <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-start hover:bg-white/10 transition-colors group">
+          <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group">
              <div className="mb-4 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
              <h4 className="text-xl xl:text-2xl font-black text-white tracking-tighter leading-none mb-1">{stat.value}</h4>
              <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest leading-tight">{stat.label}</p>
@@ -191,8 +190,8 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
 
   return (
     <div className="space-y-8 pb-20 animate-in fade-in duration-500">
-      {isStudent ? (
-        renderStudentHero()
+      {(isStudent || isTeacher) ? (
+        renderHero()
       ) : (
         <>
           <div className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
@@ -231,7 +230,7 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
                   <div>
                      <p className="text-black/50 font-black uppercase tracking-widest text-[10px] mb-1">Administrative Focus</p>
                      <h3 className="text-4xl font-black uppercase tracking-tighter text-black leading-none">
-                        {viewType === 'SELF' ? (currentSession ? currentSession.subject : 'Leadership Mode Active') : `Managing ${viewType} Timetable`}
+                        Leadership Mode Active
                      </h3>
                      <p className="text-black/60 font-bold uppercase tracking-widest text-[10px] mt-2">Institutional Master Access • Multi-Node Oversight</p>
                   </div>
@@ -263,7 +262,7 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
               </div>
               
               <div className="space-y-6">
-                {dayData.classes.map((item: any, idx) => {
+                {dayData.classes.map((item: any, idx: number) => {
                   const colorClass = subjectColors[item.subject] || 'bg-white border-gray-100 text-gray-900';
                   return (
                     <div key={idx} className={`p-8 rounded-[3rem] border-2 ${colorClass} transition-all group relative overflow-hidden shadow-lg hover:shadow-2xl`}>
@@ -290,12 +289,6 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
                     </div>
                   );
                 })}
-                {isEditing && !isStudent && (
-                  <button className="w-full py-8 border-2 border-dashed border-gray-300 rounded-[3rem] text-gray-400 hover:border-gold hover:text-gold flex flex-col items-center justify-center transition-all bg-white/50">
-                    <Plus size={20} />
-                    <span className="text-[9px] font-black uppercase tracking-widest mt-2">New Node Entry</span>
-                  </button>
-                )}
               </div>
             </div>
           );

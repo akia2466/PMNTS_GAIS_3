@@ -11,6 +11,7 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
   const [viewMode, setViewMode] = useState<'FEED' | 'GROUPS'>('FEED');
   
   const isStudent = user.role === UserRole.STUDENT;
+  const isTeacher = user.role === UserRole.TEACHER || user.role === UserRole.PATRON;
 
   const communityCards = [
     { title: 'Class Community', subtitle: 'Class 12A', members: 42, posts: 8, active: 12, bg: 'bg-blue-50' },
@@ -39,7 +40,7 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
     }
   ];
 
-  const renderStudentHero = () => (
+  const renderHero = () => (
     <div className="bg-black p-10 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between border border-white/10 mb-10">
       <div className="absolute top-0 right-0 w-64 h-64 bg-gold opacity-5 rounded-bl-[12rem]" />
       
@@ -109,7 +110,7 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-      {isStudent ? renderStudentHero() : (
+      {(isStudent || isTeacher) ? renderHero() : (
         <div>
           <h2 className="text-3xl font-black text-black uppercase tracking-tighter leading-none">Institutional Network</h2>
           <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-2">Broadcast transmissions to the POMNHS institutional community.</p>
@@ -117,7 +118,7 @@ const CommunityFeed: React.FC<Props> = ({ user }) => {
       )}
 
       {/* Community Options */}
-      {!isStudent && (
+      {(!isStudent && !isTeacher) && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {communityCards.map((card, i) => (
             <div key={i} className={`${card.bg} p-8 rounded-[3rem] border border-transparent shadow-sm flex flex-col group hover:border-gold transition-all`}>
