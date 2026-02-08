@@ -16,7 +16,8 @@ import {
   UserPlus,
   Users2,
   Menu,
-  X
+  X,
+  UserCheck
 } from 'lucide-react';
 
 interface Props {
@@ -30,31 +31,46 @@ interface Props {
 const DashboardLayout: React.FC<Props> = ({ user, activeTab, setActiveTab, logout, children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Roles permitted to see User Management
-  const hasUserManagement = [
+  // Roles permitted to see Administrative modules (User Mgt & Registration)
+  const isAdministrative = [
     UserRole.PRINCIPAL, 
     UserRole.ADMISSIONS, 
     UserRole.ADMIN, 
     UserRole.SUPER_USER
   ].includes(user.role);
 
-  const baseMenuItems = [
-    { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+  // Define Menu Items based on role and order requirements
+  const menuItems: { id: string; label: string; icon: React.ReactNode }[] = [
+    { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> }
+  ];
+
+  if (isAdministrative) {
+    // For admins: User Management and Registration come first next to Dashboard
+    menuItems.push(
+      { id: 'users', label: 'User Management', icon: <Users2 size={20} /> },
+      { id: 'assignments', label: 'Registration', icon: <UserPlus size={20} /> }
+    );
+  }
+
+  // Add the rest of the institutional items
+  const standardItems = [
     { id: 'performance', label: 'Performance', icon: <BarChart3 size={20} /> },
     { id: 'attendance', label: 'Attendance', icon: <ClipboardCheck size={20} /> },
     { id: 'schedule', label: 'Schedule', icon: <Calendar size={20} /> },
-    { id: 'assignments', label: 'Assignments', icon: <Briefcase size={20} /> },
+  ];
+
+  // For non-admins, assignments is in the standard list labeled "Assignments"
+  if (!isAdministrative) {
+    standardItems.push({ id: 'assignments', label: 'Assignments', icon: <Briefcase size={20} /> });
+  }
+
+  menuItems.push(
+    ...standardItems,
     { id: 'files', label: 'Files', icon: <Files size={20} /> },
     { id: 'messenger', label: 'Messenger', icon: <MessageSquare size={20} /> },
     { id: 'community', label: 'Community', icon: <Rss size={20} /> },
-    { id: 'connections', label: 'Connections', icon: <UserPlus size={20} /> },
-  ];
-
-  // Logic to inject User Management
-  let menuItems = [...baseMenuItems];
-  if (hasUserManagement) {
-    menuItems.splice(1, 0, { id: 'users', label: 'User Management', icon: <Users2 size={20} /> });
-  }
+    { id: 'connections', label: 'Connections', icon: <UserCheck size={20} /> },
+  );
 
   const NavItems = () => (
     <>
