@@ -21,7 +21,11 @@ import {
   ShieldCheck,
   Target,
   Trophy,
-  CheckCircle
+  CheckCircle,
+  BarChart3,
+  Zap,
+  ShieldAlert,
+  Wallet
 } from 'lucide-react';
 
 interface Props {
@@ -44,14 +48,17 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   const currentDayName = daysOfWeek[currentTime.getDay() - 1] || 'Monday';
 
+  const isAdmin = [UserRole.PRINCIPAL, UserRole.ADMIN, UserRole.SUPER_USER].includes(user.role);
   const isPrincipal = user.role === UserRole.PRINCIPAL;
+  const isBursar = user.role === UserRole.BURSAR;
+  const isAdmissions = user.role === UserRole.ADMISSIONS;
+  const isSuperUser = user.role === UserRole.SUPER_USER;
   const isHOD = user.role === UserRole.HOD;
-  const isAdmin = [UserRole.ADMIN, UserRole.SUPER_USER, UserRole.PRINCIPAL].includes(user.role);
-  const isTeacher = [UserRole.TEACHER, UserRole.PATRON, UserRole.HOD].includes(user.role) || isAdmin;
+  const isTeacher = [UserRole.TEACHER, UserRole.PATRON].includes(user.role);
   const isStudent = user.role === UserRole.STUDENT;
 
   const getSwitcherOptions = () => {
-    if (isAdmin) return ['STUDENTS', 'TEACHERS', 'HOD', 'ME'];
+    if (isAdmin) return ['STUDENTS', 'STAFF', 'ME'];
     if (isHOD) return ['STUDENTS', 'TEACHERS', 'ME'];
     return ['STUDENTS', 'ME'];
   };
@@ -59,57 +66,76 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
   const years = ['2026', '2025', '2024'];
   const terms = ['Term 1', 'Term 2', 'Term 3', 'Term 4'];
 
-  const principalSchedule = [
-    {
-      day: 'Monday',
-      classes: [
-        { time: '08:00 - 09:30', start: '08:00', end: '09:30', subject: 'General Assembly', location: 'Grand Hall', type: 'leadership' },
-        { time: '10:00 - 11:30', start: '10:00', end: '11:30', subject: 'Board of Governors', location: 'Council Room', type: 'meeting' },
-        { time: '13:00 - 14:30', start: '13:00', end: '14:30', subject: 'Dept Head Review', location: 'Principal Office', type: 'review' },
-      ]
-    },
-    { day: 'Tuesday', classes: [{ time: '09:00 - 10:30', start: '09:00', end: '10:30', subject: 'Govt. Liaison Meet', location: 'Registry Office', type: 'admin' }] },
-    { day: 'Wednesday', classes: [{ time: '14:00 - 15:30', start: '14:00', end: '15:30', subject: 'Curriculum Audit', location: 'Academic Office', type: 'audit' }] },
-    { day: 'Thursday', classes: [{ time: '10:00 - 11:30', start: '10:00', end: '11:30', subject: 'Faculty Briefing', location: 'Staff Lounge', type: 'meeting' }] },
-    { day: 'Friday', classes: [{ time: '08:00 - 09:30', start: '08:00', end: '09:30', subject: 'Parent Association', location: 'Boardroom', type: 'leadership' }] }
-  ];
-
-  const genericMocks = [
-    { 
-      day: 'Monday', 
-      classes: [
-        { time: '08:00 - 09:30', subject: 'Mathematics 12A', location: 'Room 101', teacher: 'Dr. Vele' },
-        { time: '10:00 - 11:30', subject: 'Physics Lab', location: 'Lab B', teacher: 'Mr. Tau' },
-        { time: '13:00 - 14:30', subject: 'Literature', location: 'Room 204', teacher: 'Ms. Gere' }
-      ] 
-    },
-    { 
-      day: 'Tuesday', 
-      classes: [
-        { time: '10:00 - 11:30', subject: 'Science Lab', location: 'Lab 2', teacher: 'Mr. Tau' },
-        { time: '13:00 - 14:30', subject: 'History', location: 'Room 105', teacher: 'Dr. Vele' }
-      ] 
-    },
-    { day: 'Wednesday', classes: [{ time: '08:00 - 09:30', subject: 'Mathematics 12A', location: 'Room 101', teacher: 'Dr. Vele' }] },
-    { day: 'Thursday', classes: [{ time: '11:00 - 12:30', subject: 'Social Science', location: 'Grand Hall', teacher: 'Ms. Johnson' }] },
-    { day: 'Friday', classes: [{ time: '09:00 - 10:30', subject: 'Art & Design', location: 'Studio 1', teacher: 'Mr. DaVinci' }] },
-  ];
-
   const getActiveSchedule = () => {
-    if (isStudent) return genericMocks;
-    if (viewType === 'ME' || viewType === 'SELF') return principalSchedule;
-    return genericMocks;
+    // Principal/Admin/Bursar/Admissions see leadership schedules or master registry
+    const leadershipSchedule = [
+      {
+        day: 'Monday',
+        classes: [
+          { time: '08:00 - 09:30', start: '08:00', end: '09:30', subject: 'General Assembly', location: 'Grand Hall', teacher: 'Admin Node' },
+          { time: '10:00 - 11:30', start: '10:00', end: '11:30', subject: 'Board of Governors', location: 'Council Room', teacher: 'Executive' },
+          { time: '13:00 - 14:30', start: '13:00', end: '14:30', subject: 'Budget Review', location: 'Finance Wing', teacher: 'Dept Heads' },
+        ]
+      },
+      { day: 'Tuesday', classes: [{ time: '09:00 - 10:30', start: '09:00', end: '10:30', subject: 'Govt. Liaison', location: 'Registry Office', teacher: 'Principal' }] },
+      { day: 'Wednesday', classes: [{ time: '14:00 - 15:30', start: '14:00', end: '15:30', subject: 'Curriculum Audit', location: 'Academic Office', teacher: 'VP Academic' }] },
+      { day: 'Thursday', classes: [{ time: '10:00 - 11:30', start: '10:00', end: '11:30', subject: 'Faculty Briefing', location: 'Staff Lounge', teacher: 'All Staff' }] },
+      { day: 'Friday', classes: [{ time: '08:00 - 09:30', start: '08:00', end: '09:30', subject: 'External Audit', location: 'Boardroom', teacher: 'Audit Team' }] }
+    ];
+
+    const teachingSchedule = [
+      { 
+        day: 'Monday', 
+        classes: [
+          { time: '08:00 - 09:30', subject: 'Mathematics 12A', location: 'Room 101', teacher: 'Dr. Vele' },
+          { time: '10:00 - 11:30', subject: 'Physics Lab', location: 'Lab B', teacher: 'Mr. Tau' },
+          { time: '13:00 - 14:30', subject: 'Literature', location: 'Room 204', teacher: 'Ms. Gere' }
+        ] 
+      },
+      { day: 'Tuesday', classes: [{ time: '10:00 - 11:30', subject: 'Science Lab', location: 'Lab 2', teacher: 'Mr. Tau' }] },
+      { day: 'Wednesday', classes: [{ time: '08:00 - 09:30', subject: 'Mathematics 12A', location: 'Room 101', teacher: 'Dr. Vele' }] },
+      { day: 'Thursday', classes: [{ time: '11:00 - 12:30', subject: 'Social Science', location: 'Grand Hall', teacher: 'Ms. Johnson' }] },
+      { day: 'Friday', classes: [{ time: '09:00 - 10:30', subject: 'Art & Design', location: 'Studio 1', teacher: 'Mr. DaVinci' }] },
+    ];
+
+    if (isStudent || isTeacher || isHOD) return teachingSchedule;
+    return leadershipSchedule;
   };
 
   const getStatsForHero = () => {
     if (isPrincipal) {
       return [
-        { label: 'WEEKLY LOAD', value: '420h', icon: <Clock size={14} className="text-blue-400" /> },
-        { label: 'ROOM UTIL.', value: '92%', icon: <MapPin size={14} className="text-green-400" /> },
-        { label: 'FREE FACULTY', value: '12', icon: <Users size={14} className="text-gold" /> },
-        { label: 'SYNC RATE', value: '100%', icon: <ShieldCheck size={14} className="text-purple-400" /> },
+        { label: 'INST. LOAD', value: '420h', icon: <Clock size={14} className="text-blue-400" /> },
+        { label: 'ROOM UTIL.', value: '94%', icon: <MapPin size={14} className="text-green-400" /> },
+        { label: 'STAFF SYNC', value: '100%', icon: <ShieldCheck size={14} className="text-gold" /> },
+        { label: 'ACTIVE NOTICES', value: '5', icon: <ShieldAlert size={14} className="text-purple-400" /> },
       ];
     }
+    if (isBursar) {
+      return [
+        { label: 'FINANCE LOGS', value: '12', icon: <Wallet size={14} className="text-blue-400" /> },
+        { label: 'ASSET SYNC', value: 'Active', icon: <Activity size={14} className="text-green-400" /> },
+        { label: 'PAYROLL HRS', value: '160h', icon: <Clock size={14} className="text-gold" /> },
+        { label: 'AUDIT STATUS', value: 'Verified', icon: <CheckCircle size={14} className="text-purple-400" /> },
+      ];
+    }
+    if (isAdmissions) {
+      return [
+        { label: 'ENROLLMENT %', value: '92%', icon: <Target size={14} className="text-blue-400" /> },
+        { label: 'INTAKE NODES', value: '450', icon: <Users size={14} className="text-green-400" /> },
+        { label: 'ROOM CAP.', value: '1,240', icon: <LayoutGrid size={14} className="text-gold" /> },
+        { label: 'REGISTRY SYNC', value: '100%', icon: <ShieldCheck size={14} className="text-purple-400" /> },
+      ];
+    }
+    if (isSuperUser) {
+      return [
+        { label: 'SYS INTEGRITY', value: '99.9%', icon: <ShieldCheck size={14} className="text-blue-400" /> },
+        { label: 'ADMIN NODES', value: '12', icon: <Zap size={14} className="text-green-400" /> },
+        { label: 'GLOBAL LOAD', value: 'Low', icon: <BarChart3 size={14} className="text-gold" /> },
+        { label: 'UPTIME', value: '365d', icon: <Activity size={14} className="text-purple-400" /> },
+      ];
+    }
+    // Default/Teacher/Patron/HOD
     return [
       { label: 'WEEKLY LOAD', value: isStudent ? '32h' : '18h', icon: <Clock size={14} className="text-blue-400" /> },
       { label: 'FREE SLOTS', value: isStudent ? '6' : '4', icon: <CalendarIcon size={14} className="text-green-400" /> },
@@ -121,11 +147,10 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
   const subjectColors: {[key: string]: string} = {
     'General Assembly': 'bg-black text-gold border-gold/30',
     'Board of Governors': 'bg-gold/10 text-black border-gold/30',
-    'Dept Head Review': 'bg-blue-50 text-blue-900 border-blue-200',
+    'Budget Review': 'bg-blue-50 text-blue-900 border-blue-200',
     'Mathematics 12A': 'bg-indigo-50 text-indigo-900 border-indigo-200',
-    'Science Lab': 'bg-emerald-50 text-emerald-900 border-emerald-200',
     'Physics Lab': 'bg-rose-50 text-rose-900 border-rose-200',
-    'Literature': 'bg-cyan-50 text-cyan-900 border-cyan-200',
+    'Social Science': 'bg-emerald-50 text-emerald-900 border-emerald-200',
   };
 
   const weeklySchedule = getActiveSchedule();
@@ -140,13 +165,13 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
               <CalendarIcon size={20} />
            </div>
            <p className="text-gold font-black uppercase tracking-[0.2em] text-[9px]">
-             {isPrincipal ? 'Institutional Master Schedule' : 'Individual Schedule Audit'}
+             {(isAdmin || isBursar || isAdmissions) ? 'Institutional Master Schedule' : 'Individual Schedule Audit'}
            </p>
         </div>
         
         <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-8">
           SCHEDULE<br/>
-          <span className="text-gold">{isPrincipal ? 'MASTER' : 'LOG'}</span>
+          <span className="text-gold">{(isAdmin || isBursar || isAdmissions) ? 'MASTER' : 'LOG'}</span>
         </h2>
 
         <div className="flex flex-wrap items-center gap-3 mb-8">
@@ -208,9 +233,9 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
       <div className="relative z-10 grid grid-cols-2 gap-4 xl:gap-6">
         {getStatsForHero().map((stat, i) => (
           <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group shadow-lg">
-             <div className="mb-4 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
-             <h4 className="text-xl xl:text-2xl font-black text-white tracking-tighter leading-none mb-1">{stat.value}</h4>
-             <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest leading-tight">{stat.label}</p>
+             <div className="mb-4 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{(stat as any).icon}</div>
+             <h4 className="text-xl xl:text-2xl font-black text-white tracking-tighter leading-none mb-1">{(stat as any).value}</h4>
+             <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest leading-tight">{(stat as any).label}</p>
           </div>
         ))}
       </div>
@@ -221,28 +246,13 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
     <div className="space-y-8 pb-20 animate-in fade-in duration-500">
       {renderHero()}
 
-      {isPrincipal && (
-        <section className="bg-gold p-8 rounded-[3.5rem] shadow-2xl relative overflow-hidden group mb-10">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-black/5 rounded-bl-[10rem] transition-transform group-hover:scale-110 duration-700" />
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-             <div className="flex items-center space-x-8">
-                <div className="w-20 h-20 bg-black text-gold rounded-[2rem] flex items-center justify-center shadow-xl">
-                   <Briefcase size={32} />
-                </div>
-                <div>
-                   <p className="text-black/50 font-black uppercase tracking-widest text-[10px] mb-1">Administrative Focus</p>
-                   <h3 className="text-4xl font-black uppercase tracking-tighter text-black leading-none">
-                      {viewType === 'ME' ? 'Leadership Mode Active' : `Managing ${viewType} Timetable`}
-                   </h3>
-                   <p className="text-black/60 font-bold uppercase tracking-widest text-[10px] mt-2">Institutional Master Access • Multi-Node Oversight</p>
-                </div>
-             </div>
-             <button onClick={() => setIsEditing(!isEditing)} className={`px-10 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all shadow-xl flex items-center space-x-3 ${isEditing ? 'bg-black text-gold ring-4 ring-gold/20' : 'bg-white text-black hover:bg-black hover:text-gold'}`}>
-               {isEditing ? <Save size={18}/> : <Edit2 size={18}/>}
-               <span>{isEditing ? 'Commit Master Changes' : 'Enter Master Edit Mode'}</span>
-             </button>
-          </div>
-        </section>
+      {(isAdmin || isBursar || isAdmissions) && (
+        <div className="flex justify-end mb-10">
+          <button onClick={() => setIsEditing(!isEditing)} className={`px-10 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all shadow-xl flex items-center space-x-3 ${isEditing ? 'bg-black text-gold ring-4 ring-gold/20' : 'bg-white text-black hover:bg-black hover:text-gold'}`}>
+            {isEditing ? <Save size={18}/> : <Edit2 size={18}/>}
+            <span>{isEditing ? 'Commit Master Changes' : 'Enter Master Edit Mode'}</span>
+          </button>
+        </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -280,7 +290,7 @@ const ScheduleModule: React.FC<Props> = ({ user }) => {
                             <UserIcon size={14} className="mr-3 opacity-40" />
                             {item.teacher || 'Lead Node'}
                          </p>
-                         <p className="text-[9px] font-black uppercase tracking-widest opacity-60 flex items-center"><MapPin size={14} className="mr-3 opacity-40" /> {item.location}</p>
+                         <p className="text-[9px] font-black uppercase tracking-widest opacity-60 flex items-center"><MapPin size={14} className="mr-3 opacity-40" /> {item.location || 'Main Campus'}</p>
                       </div>
                     </div>
                   );

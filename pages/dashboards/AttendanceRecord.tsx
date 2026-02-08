@@ -41,7 +41,7 @@ const AttendanceRecord: React.FC<Props> = ({ user }) => {
   const years = ['2026', '2025', '2024'];
 
   const getSwitcherOptions = () => {
-    if (isAdmin) return ['STUDENTS', 'TEACHERS', 'HOD', 'ME'];
+    if (isAdmin) return ['STUDENTS', 'STAFF', 'ME'];
     if (isHOD) return ['STUDENTS', 'TEACHERS', 'ME'];
     return ['STUDENTS', 'ME'];
   };

@@ -63,10 +63,15 @@ const UserManagement: React.FC<Props> = ({ user }) => {
 
   const isPrincipal = user.role === UserRole.PRINCIPAL;
   const isHOD = user.role === UserRole.HOD;
-  const isAdmin = [UserRole.ADMIN, UserRole.SUPER_USER, UserRole.PRINCIPAL].includes(user.role);
+  const isAdminOrSpecial = [
+    UserRole.PRINCIPAL, 
+    UserRole.ADMIN, 
+    UserRole.SUPER_USER, 
+    UserRole.ADMISSIONS
+  ].includes(user.role);
 
   const getSwitcherOptions = () => {
-    if (isAdmin) return ['STUDENTS', 'TEACHERS', 'HOD', 'ME'];
+    if (isAdminOrSpecial) return ['STUDENTS', 'STAFF', 'ME'];
     if (isHOD) return ['STUDENTS', 'TEACHERS', 'ME'];
     return ['STUDENTS', 'ME'];
   };
@@ -172,7 +177,7 @@ const UserManagement: React.FC<Props> = ({ user }) => {
           <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-[2rem] w-full sm:w-36 xl:w-44 flex flex-col items-center justify-center text-center hover:bg-white/10 transition-colors group shadow-lg">
              <div className="mb-3 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
              <h4 className="text-xl xl:text-2xl font-black text-white tracking-tighter leading-none mb-1">{stat.value}</h4>
-             <p className="text-gray-500 text-[7px] font-black uppercase tracking-widest leading-tight">{stat.label}</p>
+             <p className="text-gray-500 text-[7px] xl:text-[8px] font-black uppercase tracking-widest leading-tight">{stat.label}</p>
           </div>
         ))}
       </div>

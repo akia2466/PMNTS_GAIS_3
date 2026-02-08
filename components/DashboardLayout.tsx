@@ -29,7 +29,14 @@ interface Props {
 
 const DashboardLayout: React.FC<Props> = ({ user, activeTab, setActiveTab, logout, children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const isPrincipal = user.role === UserRole.PRINCIPAL;
+  
+  // Roles permitted to see User Management
+  const hasUserManagement = [
+    UserRole.PRINCIPAL, 
+    UserRole.ADMISSIONS, 
+    UserRole.ADMIN, 
+    UserRole.SUPER_USER
+  ].includes(user.role);
 
   const baseMenuItems = [
     { id: 'overview', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -43,10 +50,9 @@ const DashboardLayout: React.FC<Props> = ({ user, activeTab, setActiveTab, logou
     { id: 'connections', label: 'Connections', icon: <UserPlus size={20} /> },
   ];
 
-  // Filtering logic for Principal
-  let menuItems = baseMenuItems;
-  if (isPrincipal) {
-    menuItems = baseMenuItems.filter(item => item.id !== 'assignments');
+  // Logic to inject User Management
+  let menuItems = [...baseMenuItems];
+  if (hasUserManagement) {
     menuItems.splice(1, 0, { id: 'users', label: 'User Management', icon: <Users2 size={20} /> });
   }
 

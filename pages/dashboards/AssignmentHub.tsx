@@ -25,7 +25,9 @@ import {
   Trash2,
   Eye,
   FileIcon,
-  BookOpen
+  BookOpen,
+  ChevronDown,
+  BarChart3
 } from 'lucide-react';
 
 interface Props {
@@ -53,13 +55,14 @@ const AssignmentHub: React.FC<Props> = ({ user }) => {
   const [isCreating, setIsCreating] = useState(false);
 
   // Role Checks
-  const isTeacher = [UserRole.TEACHER, UserRole.PATRON, UserRole.HOD].includes(user.role);
-  const isHOD = user.role === UserRole.HOD;
+  const isPrincipal = user.role === UserRole.PRINCIPAL;
   const isAdmin = [UserRole.PRINCIPAL, UserRole.ADMIN, UserRole.SUPER_USER].includes(user.role);
+  const isTeacher = [UserRole.TEACHER, UserRole.PATRON, UserRole.HOD].includes(user.role) || isAdmin;
+  const isHOD = user.role === UserRole.HOD;
   const isStudent = user.role === UserRole.STUDENT;
 
   const getSwitcherOptions = () => {
-    if (isAdmin) return ['STUDENTS', 'TEACHERS', 'HOD', 'ME'];
+    if (isAdmin) return ['STUDENTS', 'STAFF', 'ME'];
     if (isHOD) return ['STUDENTS', 'TEACHERS', 'ME'];
     return ['STUDENTS', 'ME'];
   };
@@ -102,6 +105,12 @@ const AssignmentHub: React.FC<Props> = ({ user }) => {
       { label: 'DONE', value: '12', icon: <CheckCircle size={14} className="text-green-400" /> },
       { label: 'AVG GRADE', value: 'A-', icon: <Trophy size={14} className="text-gold" /> },
       { label: 'URGENT', value: '1', icon: <AlertCircle size={14} className="text-red-400" /> },
+    ];
+    if (isPrincipal) return [
+      { label: 'INSTITUTIONAL NODES', value: '1,240', icon: <FileText size={14} className="text-blue-400" /> },
+      { label: 'COMPLETION INDEX', value: '92%', icon: <CheckCircle size={14} className="text-green-400" /> },
+      { label: 'AUDIT COMPLIANCE', value: '100%', icon: <Clock size={14} className="text-gold" /> },
+      { label: 'AVG SYSTEM SCORE', value: 'B+', icon: <BarChart3 size={14} className="text-purple-400" /> },
     ];
     return [
       { label: 'TOTAL NODES', value: '412', icon: <FileText size={14} className="text-blue-400" /> },

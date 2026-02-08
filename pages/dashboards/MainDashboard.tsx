@@ -4,12 +4,10 @@ import {
   TrendingUp, 
   Clock, 
   CheckCircle, 
-  BookOpen, 
   FileText,
   MessageSquare, 
   AlertCircle,
   Trophy,
-  History,
   Activity,
   Briefcase,
   UserCheck,
@@ -18,13 +16,15 @@ import {
   Layout,
   ChevronDown,
   BarChart as ChartIcon,
-  ChevronRight,
   ShieldCheck,
-  Edit2,
-  Save,
   Zap,
   Star,
-  HardDrive
+  HardDrive,
+  Wallet,
+  UserPlus,
+  Search,
+  FileSearch,
+  ClipboardList
 } from 'lucide-react';
 
 interface Props {
@@ -36,69 +36,107 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
   const [studentPeriod, setStudentPeriod] = useState<'TERM' | 'CUMULATIVE'>('TERM');
   const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
 
-  const [studentAssessments, setStudentAssessments] = useState<Record<string, any>>({
+  const [studentAssessments] = useState<Record<string, any>>({
     'S101': [
       { id: 1, name: 'CALCULUS MOCK', score: 82, max: 100, date: 'JAN 15' },
       { id: 2, name: 'ALGEBRA QUIZ', score: 18, max: 20, date: 'JAN 10' }
-    ],
-    'S102': [
-      { id: 3, name: 'CALCULUS MOCK', score: 75, max: 100, date: 'JAN 15' },
-      { id: 4, name: 'ALGEBRA QUIZ', score: 15, max: 20, date: 'JAN 10' }
     ]
   });
 
   const isPrincipal = user.role === UserRole.PRINCIPAL;
   const isHOD = user.role === UserRole.HOD;
-  const isAdmin = [UserRole.ADMIN, UserRole.SUPER_USER, UserRole.PRINCIPAL].includes(user.role);
-  const isTeacher = [UserRole.TEACHER, UserRole.PATRON, UserRole.HOD].includes(user.role) || isAdmin;
+  const isAdmin = [UserRole.PRINCIPAL, UserRole.ADMIN, UserRole.SUPER_USER].includes(user.role);
+  const isFaculty = [UserRole.TEACHER, UserRole.PATRON, UserRole.HOD].includes(user.role);
   const isStudent = user.role === UserRole.STUDENT;
+  const isFinance = [UserRole.BURSAR, UserRole.VENDOR].includes(user.role);
+  const isRegistrar = user.role === UserRole.ADMISSIONS;
 
   const getSwitcherOptions = () => {
-    if (isAdmin) return ['STUDENTS', 'TEACHERS', 'HOD', 'ME'];
+    if (isAdmin) return ['STUDENTS', 'STAFF', 'ME'];
     if (isHOD) return ['STUDENTS', 'TEACHERS', 'ME'];
     return ['STUDENTS', 'ME'];
   };
 
-  const recentActivities = [
-    { id: 1, icon: <CheckCircle className="text-green-500" />, text: "Registry sync completed: Term 1 assessment data uploaded.", time: "12 mins ago" },
-    { id: 2, icon: <MessageSquare className="text-blue-500" />, text: "Faculty notice: Staff meeting in Grand Hall at 15:00.", time: "1 hour ago" },
-    { id: 3, icon: <FileText className="text-gold" />, text: "Curriculum update: Grade 12 Mock Exam Syllabus released.", time: "3 hours ago" },
-    { id: 4, icon: <AlertCircle className="text-red-500" />, text: "Infrastructure alert: Server maintenance scheduled for 02:00 AM.", time: "5 hours ago" },
-  ];
-
-  const handleScoreChange = (studentId: string, assessmentId: number, newScore: string) => {
-    const scoreNum = parseInt(newScore) || 0;
-    setStudentAssessments(prev => ({
-      ...prev,
-      [studentId]: prev[studentId].map((asm: any) => asm.id === assessmentId ? { ...asm, score: scoreNum } : asm)
-    }));
-  };
-
   const getStatsForHero = () => {
     const isTerm = studentPeriod === 'TERM';
+
     if (isStudent) {
       return [
         { label: 'MY GPA', value: isTerm ? '3.72' : '3.65', icon: <Target size={14} className="text-blue-400" /> },
         { label: 'ATTENDANCE', value: isTerm ? '96%' : '94%', icon: <UserCheck size={14} className="text-green-400" /> },
         { label: 'CLASS RANK', value: isTerm ? '12/42' : '15/42', icon: <Users2 size={14} className="text-gold" /> },
         { label: 'GRADE RANK', value: isTerm ? '20/93' : '28/93', icon: <Trophy size={14} className="text-purple-400" /> },
+        { label: 'PENDING ASGN', value: isTerm ? '4' : '6', icon: <Briefcase size={14} className="text-orange-400" /> },
+        { label: 'PENDING TESTS', value: isTerm ? '2' : '3', icon: <FileText size={14} className="text-red-400" /> },
+        { label: 'NEW MSGS', value: '12', icon: <MessageSquare size={14} className="text-cyan-400" /> },
+        { label: 'NEW POSTS', value: '8', icon: <Layout size={14} className="text-emerald-400" /> },
       ];
     }
+
+    if (isFaculty) {
+      return [
+        { label: 'CLASS LOAD', value: '18h', icon: <Clock size={14} className="text-blue-400" /> },
+        { label: 'AVG MASTERY', value: isTerm ? '84%' : '81%', icon: <ChartIcon size={14} className="text-green-400" /> },
+        { label: 'PENDING GRADES', value: isTerm ? '24' : '52', icon: <ClipboardList size={14} className="text-gold" /> },
+        { label: 'ATTENDANCE SYNC', value: '100%', icon: <ShieldCheck size={14} className="text-purple-400" /> },
+        { label: 'DEPT MSGS', value: '15', icon: <MessageSquare size={14} className="text-orange-400" /> },
+        { label: 'SYSTEM ALERTS', value: '1', icon: <AlertCircle size={14} className="text-red-400" /> },
+        { label: 'COURSE NODES', value: '12', icon: <Zap size={14} className="text-cyan-400" /> },
+        { label: 'PEER SYNC', value: 'Active', icon: <Activity size={14} className="text-emerald-400" /> },
+      ];
+    }
+
+    if (isFinance) {
+      return [
+        { label: 'REVENUE', value: '1.2M', icon: <Wallet size={14} className="text-blue-400" /> },
+        { label: 'OUTSTANDING', value: '45k', icon: <AlertCircle size={14} className="text-red-400" /> },
+        { label: 'VENDOR NODES', value: '14', icon: <Users2 size={14} className="text-gold" /> },
+        { label: 'BUDGET UTIL.', value: '62%', icon: <ChartIcon size={14} className="text-purple-400" /> },
+        { label: 'TRANS. VOLUME', value: '312', icon: <Activity size={14} className="text-orange-400" /> },
+        { label: 'AUDIT INDEX', value: '9.8', icon: <ShieldCheck size={14} className="text-emerald-400" /> },
+        { label: 'PAYROLL SYNC', value: 'Active', icon: <CheckCircle size={14} className="text-cyan-400" /> },
+        { label: 'SYSTEM LOAD', value: 'Low', icon: <Zap size={14} className="text-blue-400" /> },
+      ];
+    }
+
+    if (isRegistrar) {
+      return [
+        { label: 'APPLICATIONS', value: '840', icon: <UserPlus size={14} className="text-blue-400" /> },
+        { label: 'VERIFIED', value: '210', icon: <CheckCircle size={14} className="text-green-400" /> },
+        { label: 'QUEUE SIZE', value: '142', icon: <Clock size={14} className="text-gold" /> },
+        { label: 'TARGET REACH', value: '92%', icon: <Target size={14} className="text-purple-400" /> },
+        { label: 'DOC AUDITS', value: '45', icon: <FileSearch size={14} className="text-orange-400" /> },
+        { label: 'INTERVIEWS', value: '12', icon: <Users2 size={14} className="text-cyan-400" /> },
+        { label: 'ENQUIRIES', value: '28', icon: <MessageSquare size={14} className="text-emerald-400" /> },
+        { label: 'PROCESS SPEED', value: '2.4d', icon: <Zap size={14} className="text-red-400" /> },
+      ];
+    }
+
+    // Default for Leadership/Admin roles
     return [
-      { label: 'ENROLLED', value: '1,240', icon: <Users2 size={14} className="text-blue-400" /> },
-      { label: 'ATTENDANCE', value: isTerm ? '94.2%' : '92.1%', icon: <Clock size={14} className="text-green-400" /> },
-      { label: 'STANDING', value: isTerm ? '89%' : '86%', icon: <Trophy size={14} className="text-gold" /> },
-      { label: 'U-SYNC', value: '98%', icon: <CheckCircle size={14} className="text-cyan-400" /> },
+      { label: 'TOTAL ENROLLED', value: '1,240', icon: <Users2 size={14} className="text-blue-400" /> },
+      { label: 'SYSTEM GPA', value: '3.42', icon: <ChartIcon size={14} className="text-green-400" /> },
+      { label: 'FACULTY NODES', value: '82', icon: <UserCheck size={14} className="text-gold" /> },
+      { label: 'BUDGET HEALTH', value: '94%', icon: <Wallet size={14} className="text-purple-400" /> },
+      { label: 'ATTENDANCE AVG', value: '96.2%', icon: <CheckCircle size={14} className="text-orange-400" /> },
+      { label: 'REGISTRY SYNC', value: 'Active', icon: <ShieldCheck size={14} className="text-emerald-400" /> },
+      { label: 'ACTIVE NOTICES', value: '5', icon: <AlertCircle size={14} className="text-red-400" /> },
+      { label: 'SYSTEM LOAD', value: '14%', icon: <Zap size={14} className="text-cyan-400" /> },
     ];
   };
 
   const renderRecentActivity = (bgColor: string) => (
     <div className={`p-8 rounded-[3rem] ${bgColor} border border-transparent shadow-sm mt-8`}>
       <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">
-        <History size={20} className="mr-3 text-gold" /> Recent Activity
+        <Activity size={20} className="mr-3 text-gold" /> Recent Activity
       </h3>
       <div className="space-y-4">
-        {recentActivities.map((activity) => (
+        {[
+          { id: 1, icon: <CheckCircle size={16} className="text-green-500" />, text: "Registry sync completed: Term 1 assessment data uploaded.", time: "12 mins ago" },
+          { id: 2, icon: <MessageSquare size={16} className="text-blue-500" />, text: "Faculty notice: Staff meeting in Grand Hall at 15:00.", time: "1 hour ago" },
+          { id: 3, icon: <FileText size={16} className="text-gold" />, text: "Curriculum update: Grade 12 Mock Exam Syllabus released.", time: "3 hours ago" },
+          { id: 4, icon: <AlertCircle size={16} className="text-red-500" />, text: "Infrastructure alert: Server maintenance scheduled for 02:00 AM.", time: "5 hours ago" },
+        ].map((activity) => (
           <div key={activity.id} className="flex items-center space-x-4 p-4 bg-white rounded-[1.5rem] shadow-sm">
             <div className="shrink-0">{activity.icon}</div>
             <div className="flex-grow">
@@ -220,91 +258,11 @@ const MainDashboard: React.FC<Props> = ({ user }) => {
     </div>
   );
 
-  const renderRegistry = () => {
-    const students = [
-      { id: 'S101', name: 'JOSHUA KILA', avg: '91%' },
-      { id: 'S102', name: 'ANNA VELE', avg: '84%' },
-      { id: 'S103', name: 'PETER GERE', avg: '88%' }
-    ];
-
-    return (
-      <section className="bg-white rounded-[3.5rem] border border-gray-100 shadow-sm overflow-hidden mb-12">
-        <div className="p-10 border-b border-gray-50 flex items-center justify-between">
-           <h3 className="text-2xl font-black text-black uppercase tracking-tighter">GRADE 12A Student Registry</h3>
-           <div className="flex items-center space-x-2 text-gold font-black uppercase text-[10px] tracking-widest">
-              <Star size={14} fill="currentColor" />
-              <span>ACTIVE SESSION MONITOR</span>
-           </div>
-        </div>
-        <div className="p-8 space-y-4">
-           {students.map(s => (
-             <div key={s.id} className="border border-gray-100 rounded-[2.5rem] overflow-hidden transition-all duration-500 group">
-                <div 
-                  onClick={() => setExpandedStudentId(expandedStudentId === s.id ? null : s.id)}
-                  className={`p-6 flex items-center justify-between cursor-pointer transition-colors ${expandedStudentId === s.id ? 'bg-black text-white' : 'hover:bg-gray-50'}`}
-                >
-                   <div className="flex items-center space-x-6">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm shadow-lg ${expandedStudentId === s.id ? 'bg-gold text-black' : 'bg-black text-gold'}`}>
-                         {s.name.charAt(0)}
-                      </div>
-                      <div>
-                         <p className="font-black text-sm uppercase tracking-tight">{s.name}</p>
-                         <p className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${expandedStudentId === s.id ? 'text-gray-400' : 'text-gray-400'}`}>Node ID: {s.id}</p>
-                      </div>
-                   </div>
-                   <div className="flex items-center space-x-8">
-                      <div className="text-right">
-                         <p className={`text-[8px] font-black uppercase ${expandedStudentId === s.id ? 'text-gray-500' : 'text-gray-400'}`}>Term Average</p>
-                         <p className={`text-xl font-black ${expandedStudentId === s.id ? 'text-gold' : 'text-black'}`}>{s.avg}</p>
-                      </div>
-                      <ChevronDown size={20} className={`transition-transform duration-500 ${expandedStudentId === s.id ? 'rotate-180 text-gold' : 'text-gray-300'}`} />
-                   </div>
-                </div>
-                {expandedStudentId === s.id && (
-                  <div className="p-10 bg-gray-50 border-t border-gray-100 animate-in slide-in-from-top duration-500">
-                     <p className="text-[10px] font-black uppercase text-gray-400 mb-6 tracking-widest">Active Assessment Registry Node</p>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {(studentAssessments[s.id] || []).map((asm: any) => (
-                           <div key={asm.id} className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center justify-between">
-                              <div>
-                                 <h4 className="font-black text-xs uppercase text-black mb-1">{asm.name}</h4>
-                                 <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{asm.date}</p>
-                              </div>
-                              <div className="flex items-center space-x-4">
-                                 <div className="relative">
-                                    <input 
-                                      type="number" 
-                                      value={asm.score}
-                                      onChange={(e) => handleScoreChange(s.id, asm.id, e.target.value)}
-                                      className="w-16 bg-gray-50 border border-gray-100 rounded-lg p-2 text-center text-sm font-black text-black outline-none focus:ring-1 focus:ring-gold"
-                                    />
-                                    <Edit2 size={10} className="absolute -top-1 -right-1 text-gold" />
-                                 </div>
-                                 <span className="text-gray-300 font-black">/</span>
-                                 <span className="text-xs font-black text-gray-400">{asm.max}</span>
-                                 <button className="p-2.5 bg-black text-gold rounded-xl shadow-lg hover:scale-110 transition-transform">
-                                    <Save size={14}/>
-                                 </button>
-                              </div>
-                           </div>
-                        ))}
-                     </div>
-                  </div>
-                )}
-             </div>
-           ))}
-        </div>
-      </section>
-    );
-  };
-
   const renderDashboardByRole = () => {
     return (
       <div className="space-y-8 animate-in fade-in duration-500">
         {renderInstitutionalHero()}
         
-        {isTeacher && viewMode === 'STUDENTS' && renderRegistry()}
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-indigo-50 p-8 rounded-[3rem] border border-transparent shadow-sm">
             <h3 className="text-xl font-black text-black uppercase tracking-tight mb-8 flex items-center">

@@ -106,28 +106,10 @@ const Connections: React.FC<Props> = ({ user }) => {
         </div>
       </div>
 
-      {/* Column 2: Large Registry Status Card */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-4">
-         <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] w-full min-w-[276px] shadow-2xl transform hover:scale-105 transition-transform border border-white/10">
-            <p className="text-white/80 font-black text-[10px] uppercase tracking-widest mb-4">Registry Integrity Index %</p>
-            <div className="flex items-end space-x-3 mb-8">
-               <h3 className="text-7xl font-black text-white tracking-tighter leading-none">99.8%</h3>
-               <div className="bg-gold/20 px-3 py-1.5 rounded-xl flex items-center space-x-1 mb-1 border border-gold/30">
-                  <Activity size={14} className="text-gold" />
-                  <span className="text-gold font-black text-xs">Stable</span>
-               </div>
-            </div>
-            <div className="pt-6 border-t border-white/10">
-               <p className="text-white/60 font-black text-[10px] uppercase tracking-widest mb-2">Total Verified Nodes</p>
-               <h4 className="text-4xl font-black text-gold">2,184</h4>
-            </div>
-         </div>
-      </div>
-
-      {/* Right Content - Stat Grid */}
-      <div className="relative z-10 grid grid-cols-2 gap-3">
+      {/* Right Content - Stat Grid - Adjusted for balance after removing Integrity card */}
+      <div className="relative z-10 grid grid-cols-2 gap-4 xl:gap-6">
         {getHeroStats().map((stat, i) => (
-          <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] w-36 flex flex-col items-start hover:bg-white/10 transition-colors group">
+          <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] w-40 flex flex-col items-start hover:bg-white/10 transition-colors group shadow-lg">
              <div className="mb-4 bg-white/5 p-2 rounded-lg group-hover:scale-110 transition-transform">{stat.icon}</div>
              <h4 className="text-2xl font-black text-white tracking-tighter leading-none mb-1.5">{stat.value}</h4>
              <p className="text-gray-500 text-[8px] font-black uppercase tracking-widest">{stat.label}</p>
